@@ -1,0 +1,88 @@
+
+/* fixes for Obsidian */
+
+.setting-item.is-disabled {
+    opacity: 0.3;
+}
+
+/* specifics */
+
+.block-language-psk {
+    padding: 1rem;
+}
+
+.block-language-psk table {
+    /* overriding `.markdown-rendered table` */
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+/* "components" */
+
+img.thumbnail {
+    height: 120px;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 2px solid lightblue;
+}
+
+.image-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.image-grid-4 img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.image-grid-4 .selected {
+    border: 1px solid lightblue;
+}
+
+.image-grid-4 .caption {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+}
+
+/* utils */
+
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.row-spacing-sm {
+    column-gap: 1rem;
+}
+
+.row-spacing-xs {
+    column-gap: 0.5rem;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.column-spacing-sm {
+    row-gap: 1rem;
+}
+
+.column-spacing-xs {
+    row-gap: 0.5rem;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}

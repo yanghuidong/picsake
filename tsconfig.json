@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"inlineSourceMap": true,
+		"inlineSources": true,
+		"moduleResolution": "bundler",
+		"module": "ESNext",
+		"target": "ES2024",
+		"lib": [
+			"DOM",
+			"DOM.Iterable",
+			"ES2024",
+		],
+		"allowJs": true,
+		"importHelpers": true,
+		"isolatedModules": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true, // You should.
+		// for SolidJS
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+	]
+}
