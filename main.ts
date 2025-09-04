@@ -7,7 +7,7 @@ import { ActivePics, ImageResults, ImageUpload, PicsExplorer } from 'views/image
 
 const NAME = 'Picsake';
 const LANG = 'psk';
-const ICON = 'image';
+const ICON = 'images';
 
 
 type MyStore = {
