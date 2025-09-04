@@ -1,9 +1,9 @@
 import { App, CachedMetadata, Editor, ItemView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
+import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
-import gjako, { GjakoConfig, ImageInfo } from './services/gjako';
-import { ActivePics, ImageResults, ImageUpload, PicsExplorer } from './views/images';
+import { ActivePics, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
 
 const NAME = 'Picsake';
 const LANG = 'psk';
@@ -265,7 +265,7 @@ export default class MyPlugin extends Plugin {
 		// As we add new fields to `GjakoConfig`, the `gjako` object from data.json, now with incomplete fields,
 		// will completely overwrite `DEFAULT_SETTINGS.gjako`, hence those new fields won't appear in the final settings;
 		// this is because `Object.assign` only does "shallow merge", so to speak.
-		if (data && data.gjako) {
+		if (data) {
 			data.gjako = data.gjako
 				? Object.assign({}, DEFAULT_SETTINGS.gjako, data.gjako)
 				: DEFAULT_SETTINGS.gjako;
@@ -399,7 +399,7 @@ class PicsExplorerView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return 'Notelets explorer';
+		return 'Pics explorer';
 	}
 
 	async onOpen() {
