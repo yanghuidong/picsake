@@ -58,6 +58,16 @@ export default class MyPlugin extends Plugin {
 		this.store = store;
 		this.setStore = setStore;
 
+		// Note: This is not called when a file is renamed for performance reasons. You must hook the vault rename event for those.
+		this.registerEvent(this.app.metadataCache.on('changed', this.onFileCacheChanged, this));
+
+		this.registerEvent(this.app.vault.on('rename', this.onFileRename, this));
+		this.registerEvent(this.app.vault.on('delete', this.onFileDelete, this));
+
+		this.registerEvent(this.app.workspace.on('file-open', this.onActivateFile, this));
+
+		this.registerEvent(this.app.workspace.on('editor-paste', this.onPaste, this));
+
 		// Critical importance: registerView must be done before `workspace.onLayoutReady`
 		// if we need to open a view leaf inside there,
 		// o/w `leaf.setViewState` can fail!
@@ -69,6 +79,14 @@ export default class MyPlugin extends Plugin {
 			VIEW_TYPE_PICS_EXPLORER,
 			(leaf) => new PicsExplorerView(leaf, this)
 		);
+
+		this.registerMarkdownCodeBlockProcessor(LANG, (blockText, container, ctx) => {
+			const info = JSON.parse(blockText);
+			if (Object.hasOwn(info, 'images')) {
+				const images: ImageInfo[] = info.images;
+				render(() => createComponent(ImageResults, { images }), container);
+			}
+		});
 
 		// Important: this is where we do stuff on startup, w/o slowing down Obsidian startup
 		this.app.workspace.onLayoutReady(async () => {
@@ -95,24 +113,6 @@ export default class MyPlugin extends Plugin {
 
 			const finish = performance.now();
 			console.log(`[${NAME}] onLayoutReady: ${(finish - start).toFixed(1)} ms`);
-		});
-
-		// Note: This is not called when a file is renamed for performance reasons. You must hook the vault rename event for those.
-		this.registerEvent(this.app.metadataCache.on('changed', this.onFileCacheChanged, this));
-
-		this.registerEvent(this.app.vault.on('rename', this.onFileRename, this));
-		this.registerEvent(this.app.vault.on('delete', this.onFileDelete, this));
-
-		this.registerEvent(this.app.workspace.on('file-open', this.onActivateFile, this));
-
-		this.registerEvent(this.app.workspace.on('editor-paste', this.onPaste, this));
-
-		this.registerMarkdownCodeBlockProcessor(LANG, (blockText, container, ctx) => {
-			const info = JSON.parse(blockText);
-			if (Object.hasOwn(info, 'images')) {
-				const images: ImageInfo[] = info.images;
-				render(() => createComponent(ImageResults, { images }), container);
-			}
 		});
 
 		await this.loadSettings();
