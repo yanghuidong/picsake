@@ -19,6 +19,10 @@ function getCodeSections(fileCache: CachedMetadata): SectionCache[] {
 	return fileCache.sections.filter(section => section.type === 'code');
 }
 
+function delay(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Remember to rename these classes and interfaces!
 
 interface MySettings {
@@ -54,6 +58,18 @@ export default class MyPlugin extends Plugin {
 		this.store = store;
 		this.setStore = setStore;
 
+		// Critical importance: registerView must be done before `workspace.onLayoutReady`
+		// if we need to open a view leaf inside there,
+		// o/w `leaf.setViewState` can fail!
+		this.registerView(
+			VIEW_TYPE_ACTIVE_PICS,
+			(leaf) => new ActivePicsView(leaf, this)
+		);
+		this.registerView(
+			VIEW_TYPE_PICS_EXPLORER,
+			(leaf) => new PicsExplorerView(leaf, this)
+		);
+
 		// Important: this is where we do stuff on startup, w/o slowing down Obsidian startup
 		this.app.workspace.onLayoutReady(async () => {
 			const start = performance.now();
@@ -72,6 +88,8 @@ export default class MyPlugin extends Plugin {
 
 				// const fileContent = await this.app.vault.cachedRead(mdFile);
 			}
+
+			// await delay(500);
 
 			this.openActivePicsView(false);
 
@@ -96,16 +114,6 @@ export default class MyPlugin extends Plugin {
 				render(() => createComponent(ImageResults, { images }), container);
 			}
 		});
-
-		this.registerView(
-			VIEW_TYPE_ACTIVE_PICS,
-			(leaf) => new ActivePicsView(leaf, this)
-		);
-
-		this.registerView(
-			VIEW_TYPE_PICS_EXPLORER,
-			(leaf) => new PicsExplorerView(leaf, this)
-		);
 
 		await this.loadSettings();
 
@@ -291,7 +299,14 @@ export default class MyPlugin extends Plugin {
 			// Our view could not be found in the workspace, create a new leaf
 			// in the right sidebar for it
 			leaf = workspace.getRightLeaf(false);
-			await leaf?.setViewState({ type: VIEW_TYPE_ACTIVE_PICS, active: show });
+			if (leaf) {
+				// console.log(`leaf: ${leaf.getViewState().type}`);
+				await leaf.setViewState({ type: VIEW_TYPE_ACTIVE_PICS, active: show });
+				// console.log(`leaf: ${leaf.getViewState().type}`);
+			} else {
+				// shouldn't happen!
+				new Notice('getRightLeaf failed');
+			}
 		}
 
 		// Reveal the leaf in case it is in a collapsed sidebar
