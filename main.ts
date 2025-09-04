@@ -265,9 +265,11 @@ export default class MyPlugin extends Plugin {
 		// As we add new fields to `GjakoConfig`, the `gjako` object from data.json, now with incomplete fields,
 		// will completely overwrite `DEFAULT_SETTINGS.gjako`, hence those new fields won't appear in the final settings;
 		// this is because `Object.assign` only does "shallow merge", so to speak.
-		data.gjako = data.gjako
-			? Object.assign({}, DEFAULT_SETTINGS.gjako, data.gjako)
-			: DEFAULT_SETTINGS.gjako;
+		if (data && data.gjako) {
+			data.gjako = data.gjako
+				? Object.assign({}, DEFAULT_SETTINGS.gjako, data.gjako)
+				: DEFAULT_SETTINGS.gjako;
+		}
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 		// console.log(`settings: ${JSON.stringify(this.settings, null, '\t')}`);
 	}
