@@ -106,6 +106,13 @@ export default class MyPlugin extends Plugin {
 
 		this.registerEvent(this.app.workspace.on('editor-paste', this.onPaste, this));
 
+		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
+		// Using this function will automatically remove the event listener when this plugin is disabled.
+		this.registerDomEvent(document, 'click', this.onClickDocument);
+
+		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
+		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
 		// Critical importance: registerView must be done before `workspace.onLayoutReady`
 		// if we need to open a view leaf inside there,
 		// o/w `leaf.setViewState` can fail!
@@ -210,15 +217,6 @@ export default class MyPlugin extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new MyPluginSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		// this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-		// 	console.log('click', evt);
-		// });
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-
 		const finish = performance.now();
 		console.log(`[${NAME}] onload: ${(finish - start).toFixed(1)} ms`);
 	}
@@ -306,6 +304,22 @@ export default class MyPlugin extends Plugin {
 					onCancel: () => { new Notice('No action is taken'); }
 				}
 			).open();
+		}
+	}
+
+	onClickDocument(evt: PointerEvent) {
+		if (evt.target) {
+			const targetEl = evt.target as HTMLElement;
+			if (targetEl instanceof HTMLImageElement) {
+				const cmContent = targetEl.closest('.cm-content');
+				if (cmContent) {
+					console.log('img within note');
+				}
+				const activePicsView = targetEl.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
+				if (activePicsView) {
+					console.log('img within custom view');
+				}
+			}
 		}
 	}
 
