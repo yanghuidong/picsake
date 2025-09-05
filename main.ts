@@ -3,7 +3,7 @@ import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
-import { Picture, PicturesByPath } from 'types/picture';
+import { isImageUrl, Picture, PicturesByPath } from 'types/picture';
 import { ActivePics, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
 
 const NAME = 'Picsake';
@@ -21,6 +21,14 @@ function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata
 	return fileCache.sections.filter(section => section.type === type);
 }
 
+/**
+ * Currently naive parsing:
+ * - only allows a single image per line
+ * - only checks common image extensions
+ * - doesn't validate URL / path
+ * - doesn't support URL query string
+ * - doesn't support data: blobs
+ */
 function extractPicturesFromFile(file: TFile, fileContent: string, sections: SectionCache[]): Picture[] {
 	const fileLines = fileContent.split('\n');
 
@@ -28,22 +36,20 @@ function extractPicturesFromFile(file: TFile, fileContent: string, sections: Sec
 	for (const section of sections) {
 		const { start, end } = section.position;
 
-		const startLine = fileLines[start.line];
-		if (!startLine) continue; // shouldn't happen!
+		const sectionLines = fileLines.slice(start.line, end.line + 1);
 
-		// TODO handle consecutive lines of images w/o a blank line in between
-		// TODO short-circuit regex by checking startsWith
-
-		const matches = startLine.trim().match(/^!\[(.*)\]\((.+)\)$/);
-		if (matches) {
-			const [, description, url] = matches;
-			if (description && url) {
-				const picture: Picture = {
-					url,
-					description,
-					file,
-				};
-				pictures.push(picture);
+		for (const line of sectionLines) {
+			const matches = line.trim().match(/^!\[(.*)\]\((.+)\)$/);
+			if (matches) {
+				const [, description, url] = matches;
+				if (description && url && isImageUrl(url)) {
+					const picture: Picture = {
+						url,
+						description,
+						file,
+					};
+					pictures.push(picture);
+				}
 			}
 		}
 	}
