@@ -1,5 +1,6 @@
 import { ImageInfo } from 'services/gjako';
 import { Accessor, For, Setter } from 'solid-js';
+import { Picture } from 'types/picture';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -63,9 +64,18 @@ export function ImageResults(props: {
 	);
 }
 
-export function ActivePics() {
+export function ActivePics(props: {
+	activePictures: Accessor<Picture[]>,
+}) {
 	return (
-		<></>
+		<>
+			<div>{props.activePictures().length} pictures</div>
+			<For each={props.activePictures()}>
+				{picture => (
+					<img src={picture.url} alt={picture.description} />
+				)}
+			</For>
+		</>
 	);
 }
 

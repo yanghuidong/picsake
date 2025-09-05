@@ -1,8 +1,9 @@
 import { App, CachedMetadata, Editor, ItemView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
-import { Accessor, createEffect, createRoot, createSignal, Setter } from 'solid-js';
-import { createStore, SetStoreFunction } from 'solid-js/store';
+import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
+import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
+import { Picture, PicturesByPath } from 'types/picture';
 import { ActivePics, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
 
 const NAME = 'Picsake';
@@ -12,16 +13,46 @@ const ICON = 'images';
 
 type MyStore = {
 	activeFile: TFile | null,
+	pictures: PicturesByPath,
 };
 
-function getCodeSections(fileCache: CachedMetadata): SectionCache[] {
+function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata): SectionCache[] {
 	if (!fileCache.sections) return [];
-	return fileCache.sections.filter(section => section.type === 'code');
+	return fileCache.sections.filter(section => section.type === type);
 }
 
-function delay(ms: number): Promise<void> {
-	return new Promise(resolve => setTimeout(resolve, ms));
+function extractPicturesFromFile(file: TFile, fileContent: string, sections: SectionCache[]): Picture[] {
+	const fileLines = fileContent.split('\n');
+
+	const pictures = [];
+	for (const section of sections) {
+		const { start, end } = section.position;
+
+		const startLine = fileLines[start.line];
+		if (!startLine) continue; // shouldn't happen!
+
+		// TODO handle consecutive lines of images w/o a blank line in between
+		// TODO short-circuit regex by checking startsWith
+
+		const matches = startLine.trim().match(/^!\[(.*)\]\((.+)\)$/);
+		if (matches) {
+			const [, description, url] = matches;
+			if (description && url) {
+				const picture: Picture = {
+					url,
+					description,
+					file,
+				};
+				pictures.push(picture);
+			}
+		}
+	}
+	return pictures;
 }
+
+// function delay(ms: number): Promise<void> {
+// 	return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
 // Remember to rename these classes and interfaces!
 
@@ -53,6 +84,7 @@ export default class MyPlugin extends Plugin {
 
 		const [store, setStore] = createStore<MyStore>({
 			activeFile: null,
+			pictures: {},
 		});
 		// eslint-disable-next-line solid/reactivity
 		this.store = store;
@@ -101,10 +133,15 @@ export default class MyPlugin extends Plugin {
 				const fileCache = this.app.metadataCache.getFileCache(mdFile);
 				if (!fileCache) continue;
 
-				// const codeSections = getCodeSections(fileCache);
-				// if (codeSections.length === 0) continue; // avoid `cachedRead` of the file if we know it contains no code blocks!
+				const paragraphs = getSectionsOfType('paragraph', fileCache);
+				if (paragraphs.length === 0) continue; // avoid `cachedRead` of the file if we know it contains no code blocks!
 
-				// const fileContent = await this.app.vault.cachedRead(mdFile);
+				const fileContent = await this.app.vault.cachedRead(mdFile);
+
+				const pictures = extractPicturesFromFile(mdFile, fileContent, paragraphs);
+				if (pictures.length === 0) continue;
+
+				this.setStore('pictures', mdFile.path, pictures);
 			}
 
 			// await delay(500);
@@ -133,12 +170,10 @@ export default class MyPlugin extends Plugin {
 			// this.register(dispose); // do it in `onunload` is more explicit
 			this.disposeEffect = dispose;
 
-			// const noteletsCount = createMemo(() => Object.values(this.store.notelets).map(l => l.length).reduce((acc, n) => acc + n, 0));
-			// createEffect(() => {
-			// 	statusBarItemEl.setText(`${noteletsCount()} notelets`);
-			// });
-			const picsCount = 0;
-			statusBarItemEl.setText(`${picsCount} pics`);
+			const picsCount = createMemo(() => Object.values(this.store.pictures).map(l => l.length).reduce((acc, n) => acc + n, 0));
+			createEffect(() => {
+				statusBarItemEl.setText(`${picsCount()} pics`);
+			});
 		});
 
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
@@ -198,37 +233,38 @@ export default class MyPlugin extends Plugin {
 
 	// Note: this is also called on file creation!
 	onFileCacheChanged(file: TFile, newContent: string, cache: CachedMetadata) {
-		// const notelets = extractNoteletsFromFile(file, newContent, cache);
-		// if (notelets.length > 0) {
-		// 	this.setStore('notelets', file.path, notelets);
-		// } else {
-		// 	this.setStore('notelets', produce(notelets => {
-		// 		delete notelets[file.path];
-		// 	}));
-		// }
+		const paragraphs = getSectionsOfType('paragraph', cache);
+		const pictures = extractPicturesFromFile(file, newContent, paragraphs);
+		if (pictures.length > 0) {
+			this.setStore('pictures', file.path, pictures);
+		} else {
+			this.setStore('pictures', produce(pictures => {
+				delete pictures[file.path];
+			}));
+		}
 	}
 
 	onFileRename(file: TAbstractFile, oldPath: string) {
-		// const oldNotelets = this.store.notelets[oldPath];
-		// if (!oldNotelets || oldNotelets.length === 0) return;
+		const oldPictures = this.store.pictures[oldPath];
+		if (!oldPictures || oldPictures.length === 0) return;
 
-		// this.setStore('notelets', produce(notelets => {
-		// 	delete notelets[oldPath];
-		// 	notelets[file.path] = oldNotelets;
-		// }));
+		this.setStore('pictures', produce(pictures => {
+			delete pictures[oldPath];
+			pictures[file.path] = oldPictures;
+		}));
 
-		// new Notice(`${oldNotelets.length} notelets moved from ${oldPath} to ${file.path}`);
+		new Notice(`${oldPictures.length} pictures moved from ${oldPath} to ${file.path}`);
 	}
 
 	onFileDelete(file: TAbstractFile) {
-		// const oldNotelets = this.store.notelets[file.path];
-		// if (!oldNotelets) return;
+		const oldPictures = this.store.pictures[file.path];
+		if (!oldPictures) return;
 
-		// this.setStore('notelets', produce(notelets => {
-		// 	delete notelets[file.path];
-		// }));
+		this.setStore('pictures', produce(pictures => {
+			delete pictures[file.path];
+		}));
 
-		// new Notice(`${oldNotelets.length} notelets deleted from ${file.path}`);
+		new Notice(`${oldPictures.length} pictures deleted from ${file.path}`);
 	}
 
 	onActivateFile(file: TFile | null) {
@@ -371,21 +407,13 @@ class ActivePicsView extends ItemView {
 		});
 
 		this.dispose = render(() => {
-			// const activeNotelets = createMemo(() => {
-			// 	const activeFile = this.plugin.store.activeFile;
-			// 	return activeFile
-			// 		? this.plugin.store.notelets[activeFile.path] ?? []
-			// 		: []
-			// });
-			// return createComponent(MarkdownContextProvider, {
-			// 	app: this.plugin.app,
-			// 	component: this,
-			// 	sourcePath: this.plugin.store.activeFile?.path ?? '',
-			// 	get children() {
-			// 		return createComponent(ActiveNotelets, { activeNotelets });
-			// 	}
-			// });
-			return createComponent(ActivePics, {});
+			const activePictures = createMemo(() => {
+				const activeFile = this.plugin.store.activeFile;
+				return activeFile
+					? this.plugin.store.pictures[activeFile.path] ?? []
+					: []
+			});
+			return createComponent(ActivePics, { activePictures });
 		}, contentEl);
 	}
 
