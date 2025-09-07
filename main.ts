@@ -339,21 +339,6 @@ export default class MyPlugin extends Plugin {
 				this.setStore('pictures', mdFile.path, pictures);
 			}
 
-			// insert modal UI
-			const appContainer = document.querySelector('.app-container');
-			if (appContainer) {
-				const galleryContainer = document.createElement('div');
-				galleryContainer.id = GALLERY_ID;
-				appContainer.appendChild(galleryContainer);
-				render(() => createComponent(Gallery, {
-					gallery: this.gallery,
-					galleryFocus: this.galleryFocus,
-					setGalleryFocus: this.setGalleryFocus,
-				}), galleryContainer);
-			}
-
-			this.openActivePicsView(false);
-
 			const finish = performance.now();
 			console.log(`[${NAME}] onLayoutReady: ${(finish - start).toFixed(1)} ms`);
 		});
@@ -414,6 +399,29 @@ export default class MyPlugin extends Plugin {
 		console.log(`[${NAME}] onload: ${(finish - start).toFixed(1)} ms`);
 	}
 
+	// This happens after workspace.onLayoutReady!
+	// Officially recommended place to open custom views!
+	onUserEnable() {
+		// new Notice('onUserEnable');
+
+		// insert modal UI
+		const appContainer = document.querySelector('.app-container');
+		if (appContainer) {
+			const galleryContainer = document.createElement('div');
+			galleryContainer.id = GALLERY_ID;
+			appContainer.appendChild(galleryContainer);
+			render(() => createComponent(Gallery, {
+				gallery: this.gallery,
+				galleryFocus: this.galleryFocus,
+				setGalleryFocus: this.setGalleryFocus,
+			}), galleryContainer);
+		}
+
+		// auto open custom views
+		this.openActivePicsView(false);
+	}
+
+	// onunload is inherited from generic Component rather than Plugin, and it can't be async!
 	onunload() {
 		const start = performance.now();
 
