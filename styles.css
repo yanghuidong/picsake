@@ -56,6 +56,25 @@ img.thumbnail {
 
 /* utils */
 
+.bg-black {
+    background-color: black;
+}
+
+.text-white {
+    color: white;
+}
+
+.fixed {
+    position: fixed;
+}
+
+.inset-0 {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
 .row {
     display: flex;
     flex-direction: row;

@@ -1,5 +1,5 @@
 import { ImageInfo } from 'services/gjako';
-import { Accessor, For, Setter } from 'solid-js';
+import { Accessor, For, Setter, Show } from 'solid-js';
 import { Picture } from 'types/picture';
 
 export function ImageUpload(props: {
@@ -82,5 +82,20 @@ export function ActivePics(props: {
 export function PicsExplorer() {
 	return (
 		<></>
+	);
+}
+
+export function Gallery(props: {
+	gallery: Accessor<Picture[]>,
+	galleryFocus: Accessor<number | null>,
+	setGalleryFocus: Setter<number | null>,
+}) {
+	return (
+		<Show when={props.galleryFocus() !== null}>
+			<div class="fixed inset-0 bg-black text-white" onClick={() => props.setGalleryFocus(null)}>
+				<div>number of pictures: {props.gallery().length}</div>
+				<div>focused picture: {props.galleryFocus()}</div>
+			</div>
+		</Show>
 	);
 }

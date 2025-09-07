@@ -4,11 +4,13 @@ import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } 
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
 import { isImageUrl, Picture, PicturesByPath } from 'types/picture';
-import { ActivePics, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
+import { ActivePics, Gallery, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
 
 const NAME = 'Picsake';
 const LANG = 'psk';
 const ICON = 'images';
+
+const GALLERY_ID = 'psk-gallery';
 
 
 type MyStore = {
@@ -84,6 +86,10 @@ export default class MyPlugin extends Plugin {
 	store!: MyStore;
 	private setStore!: SetStoreFunction<MyStore>;
 	private disposeEffect!: () => void;
+	gallery!: Accessor<Picture[]>;
+	setGallery!: Setter<Picture[]>;
+	galleryFocus!: Accessor<number | null>;
+	setGalleryFocus!: Setter<number | null>;
 
 	async onload() {
 		const start = performance.now();
@@ -95,6 +101,14 @@ export default class MyPlugin extends Plugin {
 		// eslint-disable-next-line solid/reactivity
 		this.store = store;
 		this.setStore = setStore;
+
+		const [gallery, setGallery] = createSignal<Picture[]>([]);
+		this.gallery = gallery;
+		this.setGallery = setGallery;
+
+		const [galleryFocus, setGalleryFocus] = createSignal<number | null>(null);
+		this.galleryFocus = galleryFocus;
+		this.setGalleryFocus = setGalleryFocus;
 
 		// Note: This is not called when a file is renamed for performance reasons. You must hook the vault rename event for those.
 		this.registerEvent(this.app.metadataCache.on('changed', this.onFileCacheChanged, this));
@@ -157,7 +171,18 @@ export default class MyPlugin extends Plugin {
 				this.setStore('pictures', mdFile.path, pictures);
 			}
 
-			// await delay(500);
+			// insert modal UI
+			const appContainer = document.querySelector('.app-container');
+			if (appContainer) {
+				const galleryContainer = document.createElement('div');
+				galleryContainer.id = GALLERY_ID;
+				appContainer.appendChild(galleryContainer);
+				render(() => createComponent(Gallery, {
+					gallery: this.gallery,
+					galleryFocus: this.galleryFocus,
+					setGalleryFocus: this.setGalleryFocus,
+				}), galleryContainer);
+			}
 
 			this.openActivePicsView(false);
 
@@ -225,6 +250,9 @@ export default class MyPlugin extends Plugin {
 		const start = performance.now();
 
 		this.disposeEffect();
+
+		// delete modal UI
+		document.getElementById(GALLERY_ID)?.remove();
 
 		// Have to manually reset the flag on plugin unload to shut up Solid,
 		// o/w when we reload the plugin, Solid sees this singleton flag already set, triggering a false positive:
@@ -307,13 +335,21 @@ export default class MyPlugin extends Plugin {
 		}
 	}
 
-	onClickDocument(evt: PointerEvent) {
+	onClickDocument = (evt: PointerEvent) => {
 		if (evt.target) {
 			const targetEl = evt.target as HTMLElement;
 			if (targetEl instanceof HTMLImageElement) {
 				const cmContent = targetEl.closest('.cm-content');
 				if (cmContent) {
-					console.log('img within note');
+					const activeFile = this.store.activeFile;
+					const gallery = activeFile
+						? this.store.pictures[activeFile.path] ?? []
+						: [];
+					this.setGallery(gallery);
+
+					const imgSiblings = targetEl.parentElement?.querySelectorAll('img');
+					const targetIndex = imgSiblings ? Array.from(imgSiblings).indexOf(targetEl) : null;
+					this.setGalleryFocus(targetIndex);
 				}
 				const activePicsView = targetEl.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
 				if (activePicsView) {
