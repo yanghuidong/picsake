@@ -80,6 +80,8 @@ const DEFAULT_SETTINGS: MySettings = {
 }
 
 export default class MyPlugin extends Plugin {
+	// 0. States
+
 	settings!: MySettings;
 
 	// Solid stuff
@@ -90,6 +92,155 @@ export default class MyPlugin extends Plugin {
 	setGallery!: Setter<Picture[]>;
 	galleryFocus!: Accessor<number | null>;
 	setGalleryFocus!: Setter<number | null>;
+
+	// 1. Class fields as arrow functions
+	// Advantage over using class methods: `this` always refers to the class instance!
+	// No need for manual bind(this)
+
+	// Note: this is also called on file creation!
+	onFileCacheChanged = (file: TFile, newContent: string, cache: CachedMetadata) => {
+		const paragraphs = getSectionsOfType('paragraph', cache);
+		const pictures = extractPicturesFromFile(file, newContent, paragraphs);
+		if (pictures.length > 0) {
+			this.setStore('pictures', file.path, pictures);
+		} else {
+			this.setStore('pictures', produce(pictures => {
+				delete pictures[file.path];
+			}));
+		}
+	}
+
+	onFileRename = (file: TAbstractFile, oldPath: string) => {
+		const oldPictures = this.store.pictures[oldPath];
+		if (!oldPictures || oldPictures.length === 0) return;
+
+		this.setStore('pictures', produce(pictures => {
+			delete pictures[oldPath];
+			pictures[file.path] = oldPictures;
+		}));
+
+		new Notice(`${oldPictures.length} pictures moved from ${oldPath} to ${file.path}`);
+	}
+
+	onFileDelete = (file: TAbstractFile) => {
+		const oldPictures = this.store.pictures[file.path];
+		if (!oldPictures) return;
+
+		this.setStore('pictures', produce(pictures => {
+			delete pictures[file.path];
+		}));
+
+		new Notice(`${oldPictures.length} pictures deleted from ${file.path}`);
+	}
+
+	onActivateFile = (file: TFile | null) => {
+		// new Notice(`Activated ${file?.name}`);
+		this.setStore('activeFile', file);
+	}
+
+	onPaste = (evt: ClipboardEvent, editor: Editor) => {
+		// https://docs.obsidian.md/Reference/TypeScript+API/Workspace/on('editor-paste')
+		// Check for evt.defaultPrevented before attempting to handle this event, and return if it has been already handled.
+		// Use evt.preventDefault() to indicate that you've handled the event.
+		if (evt.defaultPrevented) return;
+
+		const files = evt.clipboardData?.files;
+		if (!files) return;
+
+		const images = Array.from(files).filter((file) => file.type.startsWith('image/'));
+		if (images.length === 0) return;
+
+		// We have to use the blocking `window.confirm` dialogue to give users the option to use Obsidian's default pasting handler.
+		// const ok = window.confirm(`Upload ${images.length} images e.g. ${images[0]?.name}?`);
+		if (this.settings.uploadImagesOnPaste) {
+			evt.preventDefault();
+			new ImageUploadModal(this.app, this.settings, images,
+				{
+					onConfirm: async (selected, isPhoto, subDir) => {
+						new Notice(`Selected ${selected.size} images to upload`);
+						const res = await gjako.uploadImages(selected, isPhoto, subDir, this.settings.gjako);
+						const infoBlock = `\`\`\`${LANG}\n${JSON.stringify({ images: res }, null, '\t')}\n\`\`\``;
+						const imgMarkdown = res.map(info => `![${LANG} ${info.name}](${info.url})`).join('\n\n');
+						editor.replaceSelection(`${infoBlock}\n\n${imgMarkdown}`);
+					},
+					onCancel: () => { new Notice('No action is taken'); }
+				}
+			).open();
+		}
+	}
+
+	onClickDocument = (evt: PointerEvent) => {
+		if (evt.target) {
+			const targetEl = evt.target as HTMLElement;
+			if (targetEl instanceof HTMLImageElement) {
+				const cmContent = targetEl.closest('.cm-content');
+				if (cmContent) {
+					const activeFile = this.store.activeFile;
+					const gallery = activeFile
+						? this.store.pictures[activeFile.path] ?? []
+						: [];
+					this.setGallery(gallery);
+
+					const imgSiblings = targetEl.parentElement?.querySelectorAll('img');
+					const targetIndex = imgSiblings ? Array.from(imgSiblings).indexOf(targetEl) : null;
+					this.setGalleryFocus(targetIndex);
+				}
+				const activePicsView = targetEl.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
+				if (activePicsView) {
+					console.log('img within custom view');
+				}
+			}
+		}
+	}
+
+	openActivePicsView = async (show: boolean) => {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_ACTIVE_PICS);
+
+		if (leaves[0]) {
+			// A leaf with our view already exists, use that
+			leaf = leaves[0];
+		} else {
+			// Our view could not be found in the workspace, create a new leaf
+			// in the right sidebar for it
+			leaf = workspace.getRightLeaf(false);
+			if (leaf) {
+				// console.log(`leaf: ${leaf.getViewState().type}`);
+				await leaf.setViewState({ type: VIEW_TYPE_ACTIVE_PICS, active: show });
+				// console.log(`leaf: ${leaf.getViewState().type}`);
+			} else {
+				// shouldn't happen!
+				new Notice('getRightLeaf failed');
+			}
+		}
+
+		// Reveal the leaf in case it is in a collapsed sidebar
+		if (leaf && show) await workspace.revealLeaf(leaf);
+	}
+
+	openPicsExplorerView = async () => {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_PICS_EXPLORER);
+
+		if (leaves[0]) {
+			// A leaf with our view already exists, use that
+			leaf = leaves[0];
+		} else {
+			// Our view could not be found in the workspace, create a new leaf
+			// in the right sidebar for it
+			leaf = workspace.getLeaf('tab');
+			await leaf?.setViewState({ type: VIEW_TYPE_PICS_EXPLORER, active: true });
+		}
+
+		// Reveal the leaf in case it is in a collapsed sidebar
+		if (leaf) await workspace.revealLeaf(leaf);
+	}
+
+	// 2. Overriding inherited class methods
 
 	async onload() {
 		const start = performance.now();
@@ -263,101 +414,7 @@ export default class MyPlugin extends Plugin {
 		console.log(`[${NAME}] onunload: ${(finish - start).toFixed(1)} ms`);
 	}
 
-	// Note: this is also called on file creation!
-	onFileCacheChanged(file: TFile, newContent: string, cache: CachedMetadata) {
-		const paragraphs = getSectionsOfType('paragraph', cache);
-		const pictures = extractPicturesFromFile(file, newContent, paragraphs);
-		if (pictures.length > 0) {
-			this.setStore('pictures', file.path, pictures);
-		} else {
-			this.setStore('pictures', produce(pictures => {
-				delete pictures[file.path];
-			}));
-		}
-	}
-
-	onFileRename(file: TAbstractFile, oldPath: string) {
-		const oldPictures = this.store.pictures[oldPath];
-		if (!oldPictures || oldPictures.length === 0) return;
-
-		this.setStore('pictures', produce(pictures => {
-			delete pictures[oldPath];
-			pictures[file.path] = oldPictures;
-		}));
-
-		new Notice(`${oldPictures.length} pictures moved from ${oldPath} to ${file.path}`);
-	}
-
-	onFileDelete(file: TAbstractFile) {
-		const oldPictures = this.store.pictures[file.path];
-		if (!oldPictures) return;
-
-		this.setStore('pictures', produce(pictures => {
-			delete pictures[file.path];
-		}));
-
-		new Notice(`${oldPictures.length} pictures deleted from ${file.path}`);
-	}
-
-	onActivateFile(file: TFile | null) {
-		// new Notice(`Activated ${file?.name}`);
-		this.setStore('activeFile', file);
-	}
-
-	onPaste(evt: ClipboardEvent, editor: Editor) {
-		// https://docs.obsidian.md/Reference/TypeScript+API/Workspace/on('editor-paste')
-		// Check for evt.defaultPrevented before attempting to handle this event, and return if it has been already handled.
-		// Use evt.preventDefault() to indicate that you've handled the event.
-		if (evt.defaultPrevented) return;
-
-		const files = evt.clipboardData?.files;
-		if (!files) return;
-
-		const images = Array.from(files).filter((file) => file.type.startsWith('image/'));
-		if (images.length === 0) return;
-
-		// We have to use the blocking `window.confirm` dialogue to give users the option to use Obsidian's default pasting handler.
-		// const ok = window.confirm(`Upload ${images.length} images e.g. ${images[0]?.name}?`);
-		if (this.settings.uploadImagesOnPaste) {
-			evt.preventDefault();
-			new ImageUploadModal(this.app, this.settings, images,
-				{
-					onConfirm: async (selected, isPhoto, subDir) => {
-						new Notice(`Selected ${selected.size} images to upload`);
-						const res = await gjako.uploadImages(selected, isPhoto, subDir, this.settings.gjako);
-						const infoBlock = `\`\`\`${LANG}\n${JSON.stringify({ images: res }, null, '\t')}\n\`\`\``;
-						const imgMarkdown = res.map(info => `![${LANG} ${info.name}](${info.url})`).join('\n\n');
-						editor.replaceSelection(`${infoBlock}\n\n${imgMarkdown}`);
-					},
-					onCancel: () => { new Notice('No action is taken'); }
-				}
-			).open();
-		}
-	}
-
-	onClickDocument = (evt: PointerEvent) => {
-		if (evt.target) {
-			const targetEl = evt.target as HTMLElement;
-			if (targetEl instanceof HTMLImageElement) {
-				const cmContent = targetEl.closest('.cm-content');
-				if (cmContent) {
-					const activeFile = this.store.activeFile;
-					const gallery = activeFile
-						? this.store.pictures[activeFile.path] ?? []
-						: [];
-					this.setGallery(gallery);
-
-					const imgSiblings = targetEl.parentElement?.querySelectorAll('img');
-					const targetIndex = imgSiblings ? Array.from(imgSiblings).indexOf(targetEl) : null;
-					this.setGalleryFocus(targetIndex);
-				}
-				const activePicsView = targetEl.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
-				if (activePicsView) {
-					console.log('img within custom view');
-				}
-			}
-		}
-	}
+	// 3. My own class methods (utilities)
 
 	async loadSettings() {
 		// Assert: this.settings === undefined
@@ -376,53 +433,6 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-	}
-
-	async openActivePicsView(show: boolean) {
-		const { workspace } = this.app;
-
-		let leaf: WorkspaceLeaf | null = null;
-		const leaves = workspace.getLeavesOfType(VIEW_TYPE_ACTIVE_PICS);
-
-		if (leaves[0]) {
-			// A leaf with our view already exists, use that
-			leaf = leaves[0];
-		} else {
-			// Our view could not be found in the workspace, create a new leaf
-			// in the right sidebar for it
-			leaf = workspace.getRightLeaf(false);
-			if (leaf) {
-				// console.log(`leaf: ${leaf.getViewState().type}`);
-				await leaf.setViewState({ type: VIEW_TYPE_ACTIVE_PICS, active: show });
-				// console.log(`leaf: ${leaf.getViewState().type}`);
-			} else {
-				// shouldn't happen!
-				new Notice('getRightLeaf failed');
-			}
-		}
-
-		// Reveal the leaf in case it is in a collapsed sidebar
-		if (leaf && show) await workspace.revealLeaf(leaf);
-	}
-
-	async openPicsExplorerView() {
-		const { workspace } = this.app;
-
-		let leaf: WorkspaceLeaf | null = null;
-		const leaves = workspace.getLeavesOfType(VIEW_TYPE_PICS_EXPLORER);
-
-		if (leaves[0]) {
-			// A leaf with our view already exists, use that
-			leaf = leaves[0];
-		} else {
-			// Our view could not be found in the workspace, create a new leaf
-			// in the right sidebar for it
-			leaf = workspace.getLeaf('tab');
-			await leaf?.setViewState({ type: VIEW_TYPE_PICS_EXPLORER, active: true });
-		}
-
-		// Reveal the leaf in case it is in a collapsed sidebar
-		if (leaf) await workspace.revealLeaf(leaf);
 	}
 }
 
