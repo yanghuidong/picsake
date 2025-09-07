@@ -58,6 +58,12 @@ function extractPicturesFromFile(file: TFile, fileContent: string, sections: Sec
 	return pictures;
 }
 
+function shouldHandleTargetImage(target: HTMLImageElement): boolean {
+	// const activePicsView = target.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
+	const isMarkdownView = target.closest('.workspace-leaf-content[data-type="markdown"]') !== null;
+	return isMarkdownView;
+}
+
 // function delay(ms: number): Promise<void> {
 // 	return new Promise(resolve => setTimeout(resolve, ms));
 // }
@@ -173,9 +179,9 @@ export default class MyPlugin extends Plugin {
 		if (evt.target) {
 			const targetEl = evt.target as HTMLElement;
 			if (targetEl instanceof HTMLImageElement) {
-				const cmContent = targetEl.closest('.cm-content');
-				if (cmContent) {
+				if (shouldHandleTargetImage(targetEl)) {
 					evt.preventDefault();
+
 					const activeFile = this.store.activeFile;
 					const gallery = activeFile
 						? this.store.pictures[activeFile.path] ?? []
@@ -185,10 +191,6 @@ export default class MyPlugin extends Plugin {
 					const imgSiblings = targetEl.parentElement?.querySelectorAll('img');
 					const targetIndex = imgSiblings ? Array.from(imgSiblings).indexOf(targetEl) : null;
 					this.setGalleryFocus(targetIndex);
-				}
-				const activePicsView = targetEl.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
-				if (activePicsView) {
-					console.log('img within custom view');
 				}
 			}
 		}
