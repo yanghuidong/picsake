@@ -8,14 +8,19 @@
 /* specifics */
 
 #psk-gallery {
-    background-color: black;
+    background-color: hsla(0, 0%, 0%, 0.75);
     color: white;
-    opacity: 0.75;
     /* https://docs.obsidian.md/Reference/CSS+variables/Foundations/Layers
     `--layer-modal` is 50
     `--layer-notice` is 60
     */
     z-index: var(--layer-modal);
+}
+
+#psk-gallery img.infocus {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .block-language-psk {
@@ -103,6 +108,12 @@ img.thumbnail {
 
 .column-spacing-xs {
     row-gap: 0.5rem;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .flex-wrap {
