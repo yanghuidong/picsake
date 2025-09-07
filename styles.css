@@ -7,6 +7,17 @@
 
 /* specifics */
 
+#psk-gallery {
+    background-color: black;
+    color: white;
+    opacity: 0.75;
+    /* https://docs.obsidian.md/Reference/CSS+variables/Foundations/Layers
+    `--layer-modal` is 50
+    `--layer-notice` is 60
+    */
+    z-index: var(--layer-modal);
+}
+
 .block-language-psk {
     padding: 1rem;
 }
@@ -55,14 +66,6 @@ img.thumbnail {
 }
 
 /* utils */
-
-.bg-black {
-    background-color: black;
-}
-
-.text-white {
-    color: white;
-}
 
 .fixed {
     position: fixed;

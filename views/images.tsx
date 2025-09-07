@@ -92,7 +92,7 @@ export function Gallery(props: {
 }) {
 	return (
 		<Show when={props.galleryFocus() !== null}>
-			<div class="fixed inset-0 bg-black text-white" onClick={() => props.setGalleryFocus(null)}>
+			<div id="psk-gallery" class="fixed inset-0" onClick={() => props.setGalleryFocus(null)}>
 				<div>number of pictures: {props.gallery().length}</div>
 				<div>focused picture: {props.galleryFocus()}</div>
 			</div>

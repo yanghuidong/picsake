@@ -10,7 +10,7 @@ const NAME = 'Picsake';
 const LANG = 'psk';
 const ICON = 'images';
 
-const GALLERY_ID = 'psk-gallery';
+const GALLERY_ID = 'psk-gallery-container';
 
 
 type MyStore = {
