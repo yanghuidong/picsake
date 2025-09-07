@@ -175,6 +175,7 @@ export default class MyPlugin extends Plugin {
 			if (targetEl instanceof HTMLImageElement) {
 				const cmContent = targetEl.closest('.cm-content');
 				if (cmContent) {
+					evt.preventDefault();
 					const activeFile = this.store.activeFile;
 					const gallery = activeFile
 						? this.store.pictures[activeFile.path] ?? []
