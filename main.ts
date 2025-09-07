@@ -64,6 +64,20 @@ function shouldHandleTargetImage(target: HTMLImageElement): boolean {
 	return isMarkdownView;
 }
 
+function findPeerImages(target: HTMLImageElement): HTMLImageElement[] {
+	const isReadingView = target.closest('.markdown-reading-view') !== null;
+	const isLivePreview = target.closest('.markdown-source-view.is-live-preview') !== null;
+	if (isLivePreview) {
+		const nodes = target.parentElement?.querySelectorAll('img');
+		return nodes ? Array.from(nodes) : [];
+	} else if (isReadingView) {
+		const nodes = document.querySelectorAll('.markdown-reading-view img');
+		return Array.from(nodes) as HTMLImageElement[];
+	} else {
+		return [];
+	}
+}
+
 // function delay(ms: number): Promise<void> {
 // 	return new Promise(resolve => setTimeout(resolve, ms));
 // }
@@ -188,9 +202,9 @@ export default class MyPlugin extends Plugin {
 						: [];
 					this.setGallery(gallery);
 
-					const imgSiblings = targetEl.parentElement?.querySelectorAll('img');
-					const targetIndex = imgSiblings ? Array.from(imgSiblings).indexOf(targetEl) : null;
-					this.setGalleryFocus(targetIndex);
+					const imgPeers = findPeerImages(targetEl);
+					const targetIndex = imgPeers.indexOf(targetEl);
+					this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
 				}
 			}
 		}
