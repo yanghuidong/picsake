@@ -1,12 +1,22 @@
 import { TFile } from 'obsidian';
 
 export { isImageUrl };
-export type { Picture, PicturesByPath };
+export type { CSSDimensions, Dimensions, Picture, PicturesByPath };
 
 type Picture = {
 	url: string,
 	description: string,
 	file: TFile,
+};
+
+type Dimensions = {
+	width: number,
+	height: number,
+};
+
+type CSSDimensions = {
+	width: string,
+	height: string,
 };
 
 type PicturesByPath = { [key: string]: Picture[] };

@@ -1,6 +1,6 @@
 import { ImageInfo } from 'services/gjako';
-import { Accessor, createMemo, For, onMount, Setter, Show } from 'solid-js';
-import { Picture } from 'types/picture';
+import { Accessor, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
+import { CSSDimensions, Dimensions, Picture } from 'types/picture';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -89,6 +89,8 @@ export function Gallery(props: {
 	gallery: Accessor<Picture[]>,
 	galleryFocus: Accessor<number | null>,
 	setGalleryFocus: Setter<number | null>,
+	galleryZoom: Accessor<number | null>,
+	setGalleryZoom: Setter<number | null>,
 }) {
 	const pictureInFocus = createMemo(() => {
 		const index = props.galleryFocus();
@@ -131,11 +133,58 @@ export function Gallery(props: {
 								return null;
 							}
 						});
+					} else if (evt.key === 'o' || evt.key === '0' || evt.key === '1') {
+						props.setGalleryZoom(1);
+					} else if (evt.key === 'f') {
+						props.setGalleryZoom(null);
 					}
 				}}
 			>
-				<img class="infocus" src={pictureInFocus()?.url} alt={pictureInFocus()?.description} />
+				<Image />
 			</div>
+		);
+	};
+
+	const Image = () => {
+		const [dimensions, setDimensions] = createSignal<Dimensions>({ width: 0, height: 0 });
+
+		const zoomDimensions = createMemo<CSSDimensions>(() => {
+			const zoom = props.galleryZoom();
+			return {
+				width: zoom === null ? '100%' : `${dimensions().width * zoom}px`,
+				height: zoom === null ? '100%' : `${dimensions().height * zoom}px`,
+			};
+		});
+
+		let imgRef!: HTMLImageElement;
+
+		const setDimensionsToNatural = () => {
+			const dpr = window.devicePixelRatio;
+			setDimensions({
+				width: imgRef.naturalWidth / dpr,
+				height: imgRef.naturalHeight / dpr,
+			});
+		};
+
+		onMount(() => {
+			if (imgRef.complete) {
+				setDimensionsToNatural();
+			} else {
+				imgRef.onload = setDimensionsToNatural;
+			}
+		});
+
+		return (
+			<img ref={imgRef}
+				class="infocus"
+				src={pictureInFocus()?.url}
+				alt={pictureInFocus()?.description}
+				style={{
+					'object-fit': 'contain',
+					width: `${zoomDimensions().width}`,
+					height: `${zoomDimensions().height}`,
+				}}
+			/>
 		);
 	};
 

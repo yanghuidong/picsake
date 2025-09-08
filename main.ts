@@ -112,6 +112,8 @@ export default class MyPlugin extends Plugin {
 	setGallery!: Setter<Picture[]>;
 	galleryFocus!: Accessor<number | null>;
 	setGalleryFocus!: Setter<number | null>;
+	galleryZoom!: Accessor<number | null>;
+	setGalleryZoom!: Setter<number | null>;
 
 	// 1. Class fields as arrow functions
 	// Advantage over using class methods: `this` always refers to the class instance!
@@ -279,6 +281,10 @@ export default class MyPlugin extends Plugin {
 		this.galleryFocus = galleryFocus;
 		this.setGalleryFocus = setGalleryFocus;
 
+		const [galleryZoom, setGalleryZoom] = createSignal<number | null>(null); // null means fit max space (contained in viewport)
+		this.galleryZoom = galleryZoom;
+		this.setGalleryZoom = setGalleryZoom;
+
 		// Note: This is not called when a file is renamed for performance reasons. You must hook the vault rename event for those.
 		this.registerEvent(this.app.metadataCache.on('changed', this.onFileCacheChanged, this));
 
@@ -354,6 +360,8 @@ export default class MyPlugin extends Plugin {
 					gallery: this.gallery,
 					galleryFocus: this.galleryFocus,
 					setGalleryFocus: this.setGalleryFocus,
+					galleryZoom: this.galleryZoom,
+					setGalleryZoom: this.setGalleryZoom,
 				}), galleryContainer);
 			}
 
