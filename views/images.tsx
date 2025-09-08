@@ -112,9 +112,25 @@ export function Gallery(props: {
 				tabindex="-1"
 				onClick={() => props.setGalleryFocus(null)}
 				onKeyDown={(evt) => {
-					evt.stopPropagation();
+					evt.preventDefault();
+					// evt.stopImmediatePropagation();
 					if (evt.key === 'Escape') {
 						props.setGalleryFocus(null);
+					} else if (evt.key === 'ArrowRight') {
+						// Note: need to store the snapshot in a variable, else if calling the accessor directly inside the setter, we'll get a warning from solid eslint plugin!
+						const pictureCount = props.gallery().length;
+						props.setGalleryFocus((prev) => {
+							if (prev !== null) {
+								const next = prev + 1;
+								if (next >= pictureCount) {
+									return 0;
+								} else {
+									return next;
+								}
+							} else {
+								return null;
+							}
+						});
 					}
 				}}
 			>
