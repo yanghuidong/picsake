@@ -35,7 +35,7 @@
 
 /* "components" */
 
-img.thumbnail {
+img.psk-thumbnail {
     height: 120px;
     aspect-ratio: 3 / 2;
     object-fit: cover;

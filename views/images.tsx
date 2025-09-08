@@ -48,7 +48,7 @@ export function ImageResults(props: {
 			<For each={props.images}>
 				{image => (
 					<div class="row row-spacing-sm">
-						<img class="thumbnail" src={image.url} />
+						<img class="psk-thumbnail" src={image.url} />
 						<table>
 							<tbody>
 								<tr><th>Image dimensions</th><td>{image.width} × {image.height}</td></tr>
