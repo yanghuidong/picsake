@@ -1,5 +1,5 @@
 import { ImageInfo } from 'services/gjako';
-import { Accessor, createEffect, createMemo, For, Setter, Show } from 'solid-js';
+import { Accessor, createMemo, For, onMount, Setter, Show } from 'solid-js';
 import { Picture } from 'types/picture';
 
 export function ImageUpload(props: {
@@ -98,16 +98,14 @@ export function Gallery(props: {
 		return picture;
 	});
 
-	let modalRef: HTMLDivElement | undefined;
+	const GalleryContent = () => {
+		let modalRef!: HTMLDivElement;
 
-	createEffect(() => {
-		if (pictureInFocus() !== null) {
-			queueMicrotask(() => modalRef?.focus());
-		}
-	});
+		onMount(() => {
+			modalRef.focus();
+		});
 
-	return (
-		<Show when={pictureInFocus() !== null}>
+		return (
 			<div ref={modalRef}
 				id="psk-gallery"
 				class="fixed inset-0 flex-center"
@@ -115,6 +113,12 @@ export function Gallery(props: {
 				onClick={() => props.setGalleryFocus(null)}>
 				<img class="infocus" src={pictureInFocus()?.url} alt={pictureInFocus()?.description} />
 			</div>
+		);
+	};
+
+	return (
+		<Show when={pictureInFocus() !== null}>
+			<GalleryContent />
 		</Show>
 	);
 }
