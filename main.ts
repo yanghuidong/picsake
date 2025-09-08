@@ -68,10 +68,10 @@ function findPeerImages(target: HTMLImageElement): HTMLImageElement[] {
 	const isReadingView = target.closest('.markdown-reading-view') !== null;
 	const isLivePreview = target.closest('.markdown-source-view.is-live-preview') !== null;
 	if (isLivePreview) {
-		const nodes = target.parentElement?.querySelectorAll('img');
-		return nodes ? Array.from(nodes) : [];
+		const nodes = target.parentElement?.querySelectorAll('img:not(.thumbnail)');
+		return nodes ? Array.from(nodes) as HTMLImageElement[] : [];
 	} else if (isReadingView) {
-		const nodes = document.querySelectorAll('.markdown-reading-view img');
+		const nodes = document.querySelectorAll('.markdown-reading-view img:not(.thumbnail)');
 		return Array.from(nodes) as HTMLImageElement[];
 	} else {
 		return [];
@@ -204,6 +204,7 @@ export default class MyPlugin extends Plugin {
 
 					const imgPeers = findPeerImages(targetEl);
 					const targetIndex = imgPeers.indexOf(targetEl);
+					// console.log(`targetIndex: ${targetIndex}`);
 					this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
 				}
 			}
