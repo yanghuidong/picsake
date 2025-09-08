@@ -604,7 +604,7 @@ class ImageUploadModal extends Modal {
 			}), mainDiv
 		);
 
-		let isPhoto = false;
+		let isPhoto = true;
 		let subDir = '';
 		const config = this.settings.gjako
 
