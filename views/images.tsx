@@ -110,7 +110,14 @@ export function Gallery(props: {
 				id="psk-gallery"
 				class="fixed inset-0 flex-center"
 				tabindex="-1"
-				onClick={() => props.setGalleryFocus(null)}>
+				onClick={() => props.setGalleryFocus(null)}
+				onKeyDown={(evt) => {
+					evt.stopPropagation();
+					if (evt.key === 'Escape') {
+						props.setGalleryFocus(null);
+					}
+				}}
+			>
 				<img class="infocus" src={pictureInFocus()?.url} alt={pictureInFocus()?.description} />
 			</div>
 		);
