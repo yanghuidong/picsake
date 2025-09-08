@@ -321,6 +321,8 @@ export default class MyPlugin extends Plugin {
 
 			// new Notice('Workspace layout is ready!');
 
+			// 0. States
+
 			this.setStore('activeFile', this.app.workspace.getActiveFile());
 
 			const mdFiles = this.app.vault.getMarkdownFiles();
@@ -337,6 +339,21 @@ export default class MyPlugin extends Plugin {
 				if (pictures.length === 0) continue;
 
 				this.setStore('pictures', mdFile.path, pictures);
+			}
+
+			// 1. DOM
+
+			// insert modal UI
+			const appContainer = document.querySelector('.app-container');
+			if (appContainer) {
+				const galleryContainer = document.createElement('div');
+				galleryContainer.id = GALLERY_ID;
+				appContainer.appendChild(galleryContainer);
+				render(() => createComponent(Gallery, {
+					gallery: this.gallery,
+					galleryFocus: this.galleryFocus,
+					setGalleryFocus: this.setGalleryFocus,
+				}), galleryContainer);
 			}
 
 			const finish = performance.now();
@@ -399,23 +416,12 @@ export default class MyPlugin extends Plugin {
 		console.log(`[${NAME}] onload: ${(finish - start).toFixed(1)} ms`);
 	}
 
+	// Important: this does NOT run on app / plugin startup! It's meant for _one-time_ initialization when plugin is _manually_ enabled;
+	// for code that needs to run on every plugin load, put it in workspace.onLayoutReady.
 	// This happens after workspace.onLayoutReady!
-	// Officially recommended place to open custom views!
+	// Officially recommended place to auto open custom views! (This way, if a user wants a custom view closed, it'll stay so the next time the app / plugin starts.)
 	onUserEnable() {
 		// new Notice('onUserEnable');
-
-		// insert modal UI
-		const appContainer = document.querySelector('.app-container');
-		if (appContainer) {
-			const galleryContainer = document.createElement('div');
-			galleryContainer.id = GALLERY_ID;
-			appContainer.appendChild(galleryContainer);
-			render(() => createComponent(Gallery, {
-				gallery: this.gallery,
-				galleryFocus: this.galleryFocus,
-				setGalleryFocus: this.setGalleryFocus,
-			}), galleryContainer);
-		}
 
 		// auto open custom views
 		this.openActivePicsView(false);
