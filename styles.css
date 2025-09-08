@@ -18,7 +18,8 @@
 }
 
 #psk-gallery:focus {
-    border: 2px solid red;
+    border: 3px solid var(--color-accent);
+    border-radius: var(--radius-l);
 }
 
 .block-language-psk {
