@@ -170,6 +170,7 @@ export default class MyPlugin extends Plugin {
 				// Note: if Gallery modal is already activated, then we shouldn't handle the click, o/w clicking the focused picture of the gallery will also trigger the handler here!
 				// Alternatively, we could use the old approach, which is a tad hacky, but safe from this false positive:
 				// const isMarkdownView = targetEl.closest('.workspace-leaf-content[data-type="markdown"]') !== null;
+				// if (isMarkdownView) {
 				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (markdownView && this.galleryFocus() === null) {
 					evt.preventDefault();

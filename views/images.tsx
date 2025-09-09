@@ -161,6 +161,7 @@ export function Gallery(props: {
 				class="fixed inset-0 flex-center"
 				tabindex="-1"
 				onClick={(evt) => {
+					evt.stopImmediatePropagation(); // stopPropagation() won't prevent `MyPlugin.onClickDocument`
 					props.setGalleryFocus(null);
 				}}
 				onKeyDown={(evt) => {
