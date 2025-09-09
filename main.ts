@@ -198,13 +198,22 @@ export default class MyPlugin extends Plugin {
 				if (shouldHandleTargetImage(targetEl)) {
 					evt.preventDefault();
 
+					const imgPeers = findPeerImages(targetEl);
+
 					const activeFile = this.store.activeFile;
-					const gallery = activeFile
-						? this.store.pictures[activeFile.path] ?? []
+					// Note: we should get gallery pictures from DOM instead of Markdown source,
+					// because the index (gallery focus) is also computed from DOM;
+					// Two tightly coupled variables must be based on the same source of truth!
+					// Plus, markdown source parsing can be glitchy!
+					//
+					// const gallery = activeFile
+					// 	? this.store.pictures[activeFile.path] ?? []
+					// 	: [];
+					const gallery: Picture[] = activeFile
+						? imgPeers.map(img => ({ url: img.src, description: img.alt, file: activeFile }))
 						: [];
 					this.setGallery(gallery);
 
-					const imgPeers = findPeerImages(targetEl);
 					const targetIndex = imgPeers.indexOf(targetEl);
 					// console.log(`targetIndex: ${targetIndex}`);
 					this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
