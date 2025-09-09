@@ -68,8 +68,11 @@ function findPeerImages(target: HTMLImageElement): HTMLImageElement[] {
 	const isReadingView = target.closest('.markdown-reading-view') !== null;
 	const isLivePreview = target.closest('.markdown-source-view.is-live-preview') !== null;
 	if (isLivePreview) {
-		const nodes = target.parentElement?.querySelectorAll('img:not(.psk-thumbnail)');
-		return nodes ? Array.from(nodes) as HTMLImageElement[] : [];
+		// Note: embedded local images are NOT among top-level siblings like remote ones!
+		// const nodes = target.parentElement?.querySelectorAll('img:not(.psk-thumbnail)');
+		const closestAncestor = target.closest('.cm-content');
+		const imgNodes = closestAncestor?.querySelectorAll('img:not(.psk-thumbnail)') ?? [];
+		return Array.from(imgNodes) as HTMLImageElement[];
 	} else if (isReadingView) {
 		const nodes = document.querySelectorAll('.markdown-reading-view img:not(.psk-thumbnail)');
 		return Array.from(nodes) as HTMLImageElement[];
