@@ -476,18 +476,18 @@ export default class MyPlugin extends Plugin {
 			const sectionLines = fileLines.slice(start.line, end.line + 1);
 
 			for (const line of sectionLines) {
+				let picture: Picture | null = null;
 				const matches = line.trim().match(/^!\[(.*)\]\((.+)\)$/);
 				if (matches) {
 					const [, description, url] = matches;
 					// Note: description is allowed to be an empty string here!
 					// Note: url is guaranteed to be non-empty by the regex.
 					if (description !== undefined && url && isImageLink(url)) {
-						const picture: Picture = {
+						picture = {
 							url,
 							description,
 							file,
 						};
-						pictures.push(picture);
 					}
 				} else {
 					// maybe it's an embedded local image?
@@ -497,14 +497,19 @@ export default class MyPlugin extends Plugin {
 						if (linkText && isImageLink(linkText)) {
 							const url = this.getAttachmentUrl(linkText);
 							if (url) {
-								const pic: Picture = {
+								picture = {
 									url,
 									description: linkText,
 									file,
 								};
-								pictures.push(pic);
 							}
 						}
+					}
+				}
+				if (picture) {
+					// dedupe by url
+					if (!pictures.map(pic => pic.url).contains(picture.url)) {
+						pictures.push(picture);
 					}
 				}
 			}
