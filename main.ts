@@ -1,4 +1,4 @@
-import { App, CachedMetadata, Editor, ItemView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
+import { App, CachedMetadata, Editor, getLinkpath, ItemView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
@@ -13,65 +13,9 @@ const ICON = 'images';
 const GALLERY_ID = 'psk-gallery-container';
 
 
-type MyStore = {
-	activeFile: TFile | null,
-	pictures: PicturesByPath,
-};
-
 function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata): SectionCache[] {
 	if (!fileCache.sections) return [];
 	return fileCache.sections.filter(section => section.type === type);
-}
-
-/**
- * Currently naive parsing:
- * - only allows a single image per line
- * - only checks common image extensions
- * - doesn't validate URL / path
- * - doesn't support URL query string
- * - doesn't support data: blobs
- */
-function extractPicturesFromFile(file: TFile, fileContent: string, sections: SectionCache[]): Picture[] {
-	const fileLines = fileContent.split('\n');
-
-	const pictures = [];
-	for (const section of sections) {
-		const { start, end } = section.position;
-
-		const sectionLines = fileLines.slice(start.line, end.line + 1);
-
-		for (const line of sectionLines) {
-			const matches = line.trim().match(/^!\[(.*)\]\((.+)\)$/);
-			if (matches) {
-				const [, description, url] = matches;
-				// Note: description is allowed to be an empty string here!
-				// Note: url is guaranteed to be non-empty by the regex.
-				if (description !== undefined && url && isImageLink(url)) {
-					const picture: Picture = {
-						url,
-						description,
-						file,
-					};
-					pictures.push(picture);
-				}
-			} else {
-				// maybe it's an embedded local image?
-				const matchesEmbed = line.trim().match(/^!\[\[(.+)\]\]$/);
-				if (matchesEmbed) {
-					const [, link] = matchesEmbed;
-					if (link && isImageLink(link)) {
-						const pic: Picture = {
-							url: link, // TODO! needs to translate into full Obsidian-protocol URL, see Platform.resourcePathPrefix
-							description: link,
-							file,
-						};
-						pictures.push(pic);
-					}
-				}
-			}
-		}
-	}
-	return pictures;
 }
 
 function shouldHandleTargetImage(target: HTMLImageElement): boolean {
@@ -80,22 +24,22 @@ function shouldHandleTargetImage(target: HTMLImageElement): boolean {
 	return isMarkdownView;
 }
 
-function findPeerImages(target: HTMLImageElement): HTMLImageElement[] {
-	const isReadingView = target.closest('.markdown-reading-view') !== null;
-	const isLivePreview = target.closest('.markdown-source-view.is-live-preview') !== null;
-	if (isLivePreview) {
-		// Note: embedded local images are NOT among top-level siblings like remote ones!
-		// const nodes = target.parentElement?.querySelectorAll('img:not(.psk-thumbnail)');
-		const closestAncestor = target.closest('.cm-content');
-		const imgNodes = closestAncestor?.querySelectorAll('img:not(.psk-thumbnail)') ?? [];
-		return Array.from(imgNodes) as HTMLImageElement[];
-	} else if (isReadingView) {
-		const nodes = document.querySelectorAll('.markdown-reading-view img:not(.psk-thumbnail)');
-		return Array.from(nodes) as HTMLImageElement[];
-	} else {
-		return [];
-	}
-}
+// function findPeerImages(target: HTMLImageElement): HTMLImageElement[] {
+// 	const isReadingView = target.closest('.markdown-reading-view') !== null;
+// 	const isLivePreview = target.closest('.markdown-source-view.is-live-preview') !== null;
+// 	if (isLivePreview) {
+// 		// Note: embedded local images are NOT among top-level siblings like remote ones!
+// 		// const nodes = target.parentElement?.querySelectorAll('img:not(.psk-thumbnail)');
+// 		const closestAncestor = target.closest('.cm-content');
+// 		const imgNodes = closestAncestor?.querySelectorAll('img:not(.psk-thumbnail)') ?? [];
+// 		return Array.from(imgNodes) as HTMLImageElement[];
+// 	} else if (isReadingView) {
+// 		const nodes = document.querySelectorAll('.markdown-reading-view img:not(.psk-thumbnail)');
+// 		return Array.from(nodes) as HTMLImageElement[];
+// 	} else {
+// 		return [];
+// 	}
+// }
 
 // function delay(ms: number): Promise<void> {
 // 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -117,6 +61,11 @@ const DEFAULT_SETTINGS: MySettings = {
 	uploadImagesOnPaste: false,
 	gjako: gjako.DEFAULT_CONFIG,
 }
+
+type MyStore = {
+	activeFile: TFile | null,
+	pictures: PicturesByPath,
+};
 
 export default class MyPlugin extends Plugin {
 	// 0. States
@@ -141,7 +90,7 @@ export default class MyPlugin extends Plugin {
 	// Note: this is also called on file creation!
 	onFileCacheChanged = (file: TFile, newContent: string, cache: CachedMetadata) => {
 		const paragraphs = getSectionsOfType('paragraph', cache);
-		const pictures = extractPicturesFromFile(file, newContent, paragraphs);
+		const pictures = this.extractPicturesFromFile(file, newContent, paragraphs);
 		if (pictures.length > 0) {
 			this.setStore('pictures', file.path, pictures);
 		} else {
@@ -227,11 +176,11 @@ export default class MyPlugin extends Plugin {
 						this.setGallery(gallery);
 
 						const targetPic: Picture = {
-							url: targetEl.src, // TODO! strip query string
+							url: targetEl.src,
 							description: targetEl.alt,
 							file: activeFile,
 						};
-						const targetIndex = gallery.indexOf(targetPic);
+						const targetIndex = gallery.map(pic => pic.url).indexOf(targetPic.url);
 						this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
 					}
 				}
@@ -368,7 +317,7 @@ export default class MyPlugin extends Plugin {
 
 				const fileContent = await this.app.vault.cachedRead(mdFile);
 
-				const pictures = extractPicturesFromFile(mdFile, fileContent, paragraphs);
+				const pictures = this.extractPicturesFromFile(mdFile, fileContent, paragraphs);
 				if (pictures.length === 0) continue;
 
 				this.setStore('pictures', mdFile.path, pictures);
@@ -499,6 +448,68 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	getAttachmentUrl(linkText: string): string | null {
+		const linkPath = getLinkpath(linkText);
+		const sourcePath = this.store.activeFile?.path ?? '';
+		const file = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);
+
+		return file ? this.app.vault.getResourcePath(file) : null;
+	}
+
+	/**
+	 * Currently naive parsing:
+	 * - only allows a single image per line
+	 * - only checks common image extensions
+	 * - doesn't validate URL / path
+	 * - doesn't support URL query string
+	 * - doesn't support data: blobs
+	 */
+	extractPicturesFromFile(file: TFile, fileContent: string, sections: SectionCache[]): Picture[] {
+		const fileLines = fileContent.split('\n');
+
+		const pictures = [];
+		for (const section of sections) {
+			const { start, end } = section.position;
+
+			const sectionLines = fileLines.slice(start.line, end.line + 1);
+
+			for (const line of sectionLines) {
+				const matches = line.trim().match(/^!\[(.*)\]\((.+)\)$/);
+				if (matches) {
+					const [, description, url] = matches;
+					// Note: description is allowed to be an empty string here!
+					// Note: url is guaranteed to be non-empty by the regex.
+					if (description !== undefined && url && isImageLink(url)) {
+						const picture: Picture = {
+							url,
+							description,
+							file,
+						};
+						pictures.push(picture);
+					}
+				} else {
+					// maybe it's an embedded local image?
+					const matchesEmbed = line.trim().match(/^!\[\[(.+)\]\]$/);
+					if (matchesEmbed) {
+						const [, linkText] = matchesEmbed;
+						if (linkText && isImageLink(linkText)) {
+							const url = this.getAttachmentUrl(linkText);
+							if (url) {
+								const pic: Picture = {
+									url,
+									description: linkText,
+									file,
+								};
+								pictures.push(pic);
+							}
+						}
+					}
+				}
+			}
+		}
+		return pictures;
 	}
 }
 
