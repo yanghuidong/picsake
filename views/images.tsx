@@ -253,6 +253,9 @@ export function Gallery(props: {
 					width: `${zoomDimensions().width}`,
 					height: `${zoomDimensions().height}`,
 				}}
+				onClick={(evt) => {
+					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
+				}}
 			/>
 		);
 	};
