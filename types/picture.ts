@@ -1,4 +1,3 @@
-import { TFile } from 'obsidian';
 
 export { isImageLink };
 export type { CSSDimensions, Dimensions, Picture, PicturesByPath };
@@ -6,7 +5,6 @@ export type { CSSDimensions, Dimensions, Picture, PicturesByPath };
 type Picture = {
 	url: string,
 	description: string,
-	file: TFile,
 };
 
 type Dimensions = {

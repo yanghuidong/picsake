@@ -178,7 +178,6 @@ export default class MyPlugin extends Plugin {
 						const targetPic: Picture = {
 							url: targetEl.src,
 							description: targetEl.alt,
-							file: activeFile,
 						};
 						const targetIndex = gallery.map(pic => pic.url).indexOf(targetPic.url);
 						this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
@@ -486,7 +485,6 @@ export default class MyPlugin extends Plugin {
 						picture = {
 							url,
 							description,
-							file,
 						};
 					}
 				} else {
@@ -500,7 +498,6 @@ export default class MyPlugin extends Plugin {
 								picture = {
 									url,
 									description: linkText,
-									file,
 								};
 							}
 						}
