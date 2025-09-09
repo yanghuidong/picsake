@@ -82,6 +82,8 @@ export function ActivePics(props: {
 
 export function PicsExplorer(props: {
 	pictures: PicturesByPath,
+	setGallery: Setter<Picture[]>,
+	setGalleryFocus: Setter<number | null>,
 }) {
 	const allPictures = createMemo(() => {
 		const list: Picture[] = [];
@@ -116,8 +118,15 @@ export function PicsExplorer(props: {
 		<>
 			<div class="image-grid-4">
 				<For each={allPictures()}>
-					{pic => (
-						<img src={pic.url} alt={pic.description} />
+					{(pic, idx) => (
+						<img
+							src={pic.url}
+							alt={pic.description}
+							onClick={() => {
+								props.setGallery(allPictures());
+								props.setGalleryFocus(idx());
+							}}
+						/>
 					)}
 				</For>
 			</div>

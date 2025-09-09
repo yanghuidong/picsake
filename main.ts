@@ -1,4 +1,4 @@
-import { App, CachedMetadata, Editor, getLinkpath, ItemView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
+import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
@@ -18,11 +18,11 @@ function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata
 	return fileCache.sections.filter(section => section.type === type);
 }
 
-function shouldHandleTargetImage(target: HTMLImageElement): boolean {
-	// const activePicsView = target.closest(`[data-type="${VIEW_TYPE_ACTIVE_PICS}"]`);
-	const isMarkdownView = target.closest('.workspace-leaf-content[data-type="markdown"]') !== null;
-	return isMarkdownView;
-}
+// function shouldHandleTargetImage(target: HTMLImageElement): boolean {
+// 	// const isPicsExplorerView = target.closest(`[data-type="${VIEW_TYPE_PICS_EXPLORER}"]`) !== null;
+// 	const isMarkdownView = target.closest('.workspace-leaf-content[data-type="markdown"]') !== null;
+// 	return isMarkdownView;
+// }
 
 // function findPeerImages(target: HTMLImageElement): HTMLImageElement[] {
 // 	const isReadingView = target.closest('.markdown-reading-view') !== null;
@@ -163,7 +163,11 @@ export default class MyPlugin extends Plugin {
 		if (evt.target) {
 			const targetEl = evt.target as HTMLElement;
 			if (targetEl instanceof HTMLImageElement) {
-				if (shouldHandleTargetImage(targetEl)) {
+				// Note: for our custom view like PicsExplorer, we don't have to trigger the Gallery modal from here, because we have full control of the UI;
+				// We do the following only in places where we don't have control, e.g. the Markdown view. (Well, technically we could, via editor extensions etc.)
+				// const picsExplorerView = this.app.workspace.getActiveViewOfType(PicsExplorerView);
+				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (markdownView) {
 					evt.preventDefault();
 
 					// Note: DOM cannot be used as a reliable source, because of lazy loading;
@@ -603,7 +607,11 @@ class PicsExplorerView extends ItemView {
 
 		this.dispose = render(() => {
 			const pictures = this.plugin.store.pictures;
-			return createComponent(PicsExplorer, { pictures });
+			return createComponent(PicsExplorer, {
+				pictures,
+				setGallery: this.plugin.setGallery,
+				setGalleryFocus: this.plugin.setGalleryFocus,
+			});
 		}, contentEl);
 	}
 
