@@ -1,7 +1,6 @@
 import { ImageInfo } from 'services/gjako';
 import { Accessor, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, Picture, PicturesByPath } from 'types/picture';
-import { debugLog } from 'utils/debug';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -170,15 +169,27 @@ export function Gallery(props: {
 					} else if (evt.key === 'ArrowRight') {
 						// Note: need to store the snapshot in a variable, else if calling the accessor directly inside the setter, we'll get a warning from solid eslint plugin!
 						const pictureCount = props.gallery().length;
-						debugLog({ pictureCount });
-						props.setGalleryFocus((prev) => {
-							debugLog({ prev });
-							if (prev !== null) {
-								const next = prev + 1;
+						props.setGalleryFocus((curr) => {
+							if (curr !== null) {
+								const next = curr + 1;
 								if (next >= pictureCount) {
 									return 0;
 								} else {
 									return next;
+								}
+							} else {
+								return null;
+							}
+						});
+					} else if (evt.key === 'ArrowLeft') {
+						const pictureCount = props.gallery().length;
+						props.setGalleryFocus((curr) => {
+							if (curr !== null) {
+								const prev = curr - 1;
+								if (prev < 0) {
+									return pictureCount - 1;
+								} else {
+									return prev;
 								}
 							} else {
 								return null;
