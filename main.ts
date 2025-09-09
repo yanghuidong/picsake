@@ -166,8 +166,12 @@ export default class MyPlugin extends Plugin {
 				// Note: for our custom view like PicsExplorer, we don't have to trigger the Gallery modal from here, because we have full control of the UI;
 				// We do the following only in places where we don't have control, e.g. the Markdown view. (Well, technically we could, via editor extensions etc.)
 				// const picsExplorerView = this.app.workspace.getActiveViewOfType(PicsExplorerView);
+				//
+				// Note: if Gallery modal is already activated, then we shouldn't handle the click, o/w clicking the focused picture of the gallery will also trigger the handler here!
+				// Alternatively, we could use the old approach, which is a tad hacky, but safe from this false positive:
+				// const isMarkdownView = targetEl.closest('.workspace-leaf-content[data-type="markdown"]') !== null;
 				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
+				if (markdownView && this.galleryFocus() === null) {
 					evt.preventDefault();
 
 					// Note: DOM cannot be used as a reliable source, because of lazy loading;
@@ -179,11 +183,7 @@ export default class MyPlugin extends Plugin {
 						const gallery: Picture[] = this.store.pictures[activeFile.path] ?? [];
 						this.setGallery(gallery);
 
-						const targetPic: Picture = {
-							url: targetEl.src,
-							description: targetEl.alt,
-						};
-						const targetIndex = gallery.map(pic => pic.url).indexOf(targetPic.url);
+						const targetIndex = gallery.map(pic => pic.url).indexOf(targetEl.src);
 						this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
 					}
 				}

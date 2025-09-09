@@ -160,7 +160,9 @@ export function Gallery(props: {
 				id="psk-gallery"
 				class="fixed inset-0 flex-center"
 				tabindex="-1"
-				onClick={() => props.setGalleryFocus(null)}
+				onClick={(evt) => {
+					props.setGalleryFocus(null);
+				}}
 				onKeyDown={(evt) => {
 					evt.preventDefault();
 					// evt.stopImmediatePropagation();
