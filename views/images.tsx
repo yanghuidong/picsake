@@ -137,6 +137,10 @@ export function Gallery(props: {
 						props.setGalleryZoom(1);
 					} else if (evt.key === 'f') {
 						props.setGalleryZoom(null);
+					} else if (evt.key === '=') {
+						props.setGalleryZoom((prev) => prev !== null ? prev + 0.05 : 1);
+					} else if (evt.key === '-') {
+						props.setGalleryZoom((prev) => prev !== null ? prev - 0.05 : 1);
 					}
 				}}
 			>
