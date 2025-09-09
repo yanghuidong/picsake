@@ -244,19 +244,28 @@ export function Gallery(props: {
 		});
 
 		return (
-			<img ref={imgRef}
-				class="infocus"
-				src={pictureInFocus()?.url}
-				alt={pictureInFocus()?.description}
-				style={{
-					'object-fit': 'contain',
-					width: `${zoomDimensions().width}`,
-					height: `${zoomDimensions().height}`,
-				}}
-				onClick={(evt) => {
-					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
-				}}
-			/>
+			<>
+				<div
+					class="zebra absolute"
+					style={{
+						width: `${zoomDimensions().width}`,
+						height: `${zoomDimensions().height}`,
+					}}
+				/>
+				<img ref={imgRef}
+					class="infocus relative"
+					src={pictureInFocus()?.url}
+					alt={pictureInFocus()?.description}
+					style={{
+						'object-fit': 'contain',
+						width: `${zoomDimensions().width}`,
+						height: `${zoomDimensions().height}`,
+					}}
+					onClick={(evt) => {
+						evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
+					}}
+				/>
+			</>
 		);
 	};
 
