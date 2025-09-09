@@ -312,7 +312,7 @@ export default class MyPlugin extends Plugin {
 				if (!fileCache) continue;
 
 				const paragraphs = getSectionsOfType('paragraph', fileCache);
-				if (paragraphs.length === 0) continue; // avoid `cachedRead` of the file if we know it contains no code blocks!
+				if (paragraphs.length === 0) continue; // avoid `cachedRead` of the file if we know it contains no paragraphs!
 
 				const fileContent = await this.app.vault.cachedRead(mdFile);
 
