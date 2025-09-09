@@ -3,7 +3,7 @@ import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
-import { isImageUrl, Picture, PicturesByPath } from 'types/picture';
+import { isImageLink, Picture, PicturesByPath } from 'types/picture';
 import { ActivePics, Gallery, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
 
 const NAME = 'Picsake';
@@ -44,13 +44,29 @@ function extractPicturesFromFile(file: TFile, fileContent: string, sections: Sec
 			const matches = line.trim().match(/^!\[(.*)\]\((.+)\)$/);
 			if (matches) {
 				const [, description, url] = matches;
-				if (description && url && isImageUrl(url)) {
+				// Note: description is allowed to be an empty string here!
+				// Note: url is guaranteed to be non-empty by the regex.
+				if (description !== undefined && url && isImageLink(url)) {
 					const picture: Picture = {
 						url,
 						description,
 						file,
 					};
 					pictures.push(picture);
+				}
+			} else {
+				// maybe it's an embedded local image?
+				const matchesEmbed = line.trim().match(/^!\[\[(.+)\]\]$/);
+				if (matchesEmbed) {
+					const [, link] = matchesEmbed;
+					if (link && isImageLink(link)) {
+						const pic: Picture = {
+							url: link, // TODO! needs to translate into full Obsidian-protocol URL, see Platform.resourcePathPrefix
+							description: link,
+							file,
+						};
+						pictures.push(pic);
+					}
 				}
 			}
 		}
@@ -201,25 +217,23 @@ export default class MyPlugin extends Plugin {
 				if (shouldHandleTargetImage(targetEl)) {
 					evt.preventDefault();
 
-					const imgPeers = findPeerImages(targetEl);
+					// Note: DOM cannot be used as a reliable source, because of lazy loading;
+					// We therefore have to use our global state obtained from parsing the Markdown source.
+					// see `extractPicturesFromFile`
 
 					const activeFile = this.store.activeFile;
-					// Note: we should get gallery pictures from DOM instead of Markdown source,
-					// because the index (gallery focus) is also computed from DOM;
-					// Two tightly coupled variables must be based on the same source of truth!
-					// Plus, markdown source parsing can be glitchy!
-					//
-					// const gallery = activeFile
-					// 	? this.store.pictures[activeFile.path] ?? []
-					// 	: [];
-					const gallery: Picture[] = activeFile
-						? imgPeers.map(img => ({ url: img.src, description: img.alt, file: activeFile }))
-						: [];
-					this.setGallery(gallery);
+					if (activeFile) {
+						const gallery: Picture[] = this.store.pictures[activeFile.path] ?? [];
+						this.setGallery(gallery);
 
-					const targetIndex = imgPeers.indexOf(targetEl);
-					// console.log(`targetIndex: ${targetIndex}`);
-					this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
+						const targetPic: Picture = {
+							url: targetEl.src, // TODO! strip query string
+							description: targetEl.alt,
+							file: activeFile,
+						};
+						const targetIndex = gallery.indexOf(targetPic);
+						this.setGalleryFocus(targetIndex >= 0 ? targetIndex : null);
+					}
 				}
 			}
 		}

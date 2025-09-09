@@ -1,6 +1,6 @@
 import { TFile } from 'obsidian';
 
-export { isImageUrl };
+export { isImageLink };
 export type { CSSDimensions, Dimensions, Picture, PicturesByPath };
 
 type Picture = {
@@ -21,7 +21,7 @@ type CSSDimensions = {
 
 type PicturesByPath = { [key: string]: Picture[] };
 
-function isImageUrl(url: string) {
+function isImageLink(link: string) {
 	const regex = /\.(avif|gif|jpe?g|png|svg|webp)$/i;
-	return regex.test(url);
+	return regex.test(link);
 }
