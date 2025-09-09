@@ -1,6 +1,6 @@
 import { ImageInfo } from 'services/gjako';
 import { Accessor, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, Picture } from 'types/picture';
+import { CSSDimensions, Dimensions, Picture, PicturesByPath } from 'types/picture';
 import { debugLog } from 'utils/debug';
 
 export function ImageUpload(props: {
@@ -80,9 +80,48 @@ export function ActivePics(props: {
 	);
 }
 
-export function PicsExplorer() {
+export function PicsExplorer(props: {
+	pictures: PicturesByPath,
+}) {
+	const allPictures = createMemo(() => {
+		const list: Picture[] = [];
+		const urlSet = new Set<string>();
+		for (const pictures of Object.values(props.pictures)) {
+			for (const pic of pictures) {
+				if (!urlSet.has(pic.url)) {
+					list.push(pic);
+					urlSet.add(pic.url);
+				}
+			}
+		}
+		return list;
+	});
+
+	const sourcePathsDict = createMemo(() => {
+		const dict: { [key: string]: string[] } = {};
+		for (const [path, pictures] of Object.entries(props.pictures)) {
+			for (const pic of pictures) {
+				const existing = dict[pic.url];
+				if (existing === undefined) {
+					dict[pic.url] = [path];
+				} else {
+					dict[pic.url] = [...existing, path];
+				}
+			}
+		}
+		return dict;
+	});
+
 	return (
-		<></>
+		<>
+			<div class="image-grid-4">
+				<For each={allPictures()}>
+					{pic => (
+						<img src={pic.url} alt={pic.description} />
+					)}
+				</For>
+			</div>
+		</>
 	);
 }
 

@@ -361,7 +361,15 @@ export default class MyPlugin extends Plugin {
 			// this.register(dispose); // do it in `onunload` is more explicit
 			this.disposeEffect = dispose;
 
-			const picsCount = createMemo(() => Object.values(this.store.pictures).map(l => l.length).reduce((acc, n) => acc + n, 0));
+			const picsCount = createMemo(() => {
+				const urlSet = new Set<string>();
+				for (const pictures of Object.values(this.store.pictures)) {
+					for (const pic of pictures) {
+						urlSet.add(pic.url);
+					}
+				}
+				return urlSet.size;
+			});
 			createEffect(() => {
 				statusBarItemEl.setText(`${picsCount()} pics`);
 			});
@@ -594,8 +602,8 @@ class PicsExplorerView extends ItemView {
 		const { contentEl } = this;
 
 		this.dispose = render(() => {
-			// const notelets = this.plugin.store.notelets;
-			return createComponent(PicsExplorer, {});
+			const pictures = this.plugin.store.pictures;
+			return createComponent(PicsExplorer, { pictures });
 		}, contentEl);
 	}
 
