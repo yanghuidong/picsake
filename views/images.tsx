@@ -139,6 +139,8 @@ export function Gallery(props: {
 	setGalleryFocus: Setter<number | null>,
 	galleryZoom: Accessor<number | null>,
 	setGalleryZoom: Setter<number | null>,
+	translateX: Accessor<number | null>,
+	setTranslateX: Setter<number | null>,
 	translateY: Accessor<number | null>,
 	setTranslateY: Setter<number | null>,
 }) {
@@ -211,6 +213,12 @@ export function Gallery(props: {
 						props.setGalleryZoom((prev) => prev !== null ? prev - 0.05 : 1);
 					} else if (evt.key === 'w') {
 						props.setTranslateY((prev) => prev !== null ? prev - 40 : 0);
+					} else if (evt.key === 's') {
+						props.setTranslateY((prev) => prev !== null ? prev + 40 : 0);
+					} else if (evt.key === 'a') {
+						props.setTranslateX((prev) => prev !== null ? prev - 40 : 0);
+					} else if (evt.key === 'd') {
+						props.setTranslateX((prev) => prev !== null ? prev + 40 : 0);
 					}
 				}}
 			>
@@ -258,7 +266,7 @@ export function Gallery(props: {
 				style={{
 					width: `${zoomDimensions().width}`,
 					height: `${zoomDimensions().height}`,
-					transform: `translateY(${props.translateY()}px)`
+					transform: `translate(${props.translateX()}px, ${props.translateY()}px)`,
 				}}
 				onClick={(evt) => {
 					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
