@@ -269,7 +269,9 @@ export function Gallery(props: {
 
 		return (
 			<div
-				class="relative" // for zebra bg child
+				// for zebra child positioning, relative would be enough;
+				// but absolute is necessary for zooming, because we need it to expand beyond the confinement of the parent, #psk-gallery
+				class="absolute"
 				style={{
 					width: `${zoomDimensions().width}`,
 					height: `${zoomDimensions().height}`,
