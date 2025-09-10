@@ -96,6 +96,14 @@ img.psk-thumbnail {
     left: 0;
 }
 
+.w-full {
+    width: 100%;
+}
+
+.h-full {
+    height: 100%;
+}
+
 .row {
     display: flex;
     flex-direction: row;
@@ -131,4 +139,8 @@ img.psk-thumbnail {
 
 .flex-wrap {
     flex-wrap: wrap;
+}
+
+.object-contain {
+    object-fit: contain;
 }

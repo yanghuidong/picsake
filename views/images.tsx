@@ -265,21 +265,12 @@ export function Gallery(props: {
 				}}
 			>
 				<div
-					class="zebra absolute"
-					style={{
-						width: '100%',
-						height: '100%',
-					}}
+					class="zebra absolute w-full h-full"
 				/>
 				<img ref={imgRef}
-					class="infocus relative"
+					class="relative w-full h-full object-contain"
 					src={pictureInFocus()?.url}
 					alt={pictureInFocus()?.description}
-					style={{
-						'object-fit': 'contain',
-						width: '100%',
-						height: '100%',
-					}}
 				/>
 			</div>
 		);
