@@ -221,6 +221,9 @@ export function Gallery(props: {
 						props.setTranslateX((prev) => prev - PAN_STEP);
 					} else if (evt.key === 'd') {
 						props.setTranslateX((prev) => prev + PAN_STEP);
+					} else if (evt.key === 'q') {
+						props.setTranslateX(0);
+						props.setTranslateY(0);
 					}
 				}}
 			>
