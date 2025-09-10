@@ -269,7 +269,7 @@ export function Gallery(props: {
 
 		return (
 			<div
-				class="absolute"
+				class="relative" // for zebra bg child
 				style={{
 					width: `${zoomDimensions().width}`,
 					height: `${zoomDimensions().height}`,
@@ -279,9 +279,10 @@ export function Gallery(props: {
 					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
 				}}
 			>
-				<div
-					class="zebra absolute w-full h-full"
-				/>
+				{/* zebra has to be absolute to not get in the way of the image,
+				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
+				*/}
+				<div class="zebra absolute w-full h-full" />
 				<img ref={imgRef}
 					class="relative w-full h-full object-contain"
 					src={pictureInFocus()?.url}
