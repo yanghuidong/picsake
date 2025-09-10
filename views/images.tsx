@@ -258,6 +258,8 @@ export function Gallery(props: {
 			}
 		});
 
+		// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
+		// we don't want the aspect ratio of the previous image to carry over to the current!
 		createEffect(() => {
 			if (pictureInFocus()) setDimensionsToNatural();
 		})
