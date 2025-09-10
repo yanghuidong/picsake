@@ -147,6 +147,7 @@ export function Gallery(props: {
 		const picture = index !== null
 			? props.gallery().at(index) ?? null
 			: null;
+		// debugLog({ picture });
 		return picture;
 	});
 
@@ -252,12 +253,22 @@ export function Gallery(props: {
 		})
 
 		return (
-			<>
+			<div
+				class="relative"
+				style={{
+					width: `${zoomDimensions().width}`,
+					height: `${zoomDimensions().height}`,
+					transform: `translateY(${props.translateY()}px)`
+				}}
+				onClick={(evt) => {
+					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
+				}}
+			>
 				<div
 					class="zebra absolute"
 					style={{
-						width: `${zoomDimensions().width}`,
-						height: `${zoomDimensions().height}`,
+						width: '100%',
+						height: '100%',
 					}}
 				/>
 				<img ref={imgRef}
@@ -266,15 +277,11 @@ export function Gallery(props: {
 					alt={pictureInFocus()?.description}
 					style={{
 						'object-fit': 'contain',
-						width: `${zoomDimensions().width}`,
-						height: `${zoomDimensions().height}`,
-						transform: `translateY(${props.translateY()}px)`
-					}}
-					onClick={(evt) => {
-						evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
+						width: '100%',
+						height: '100%',
 					}}
 				/>
-			</>
+			</div>
 		);
 	};
 
