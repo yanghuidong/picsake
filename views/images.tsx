@@ -1,5 +1,5 @@
 import { ImageInfo } from 'services/gjako';
-import { Accessor, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
+import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, Picture, PicturesByPath } from 'types/picture';
 
 export function ImageUpload(props: {
@@ -227,8 +227,8 @@ export function Gallery(props: {
 
 		let imgRef!: HTMLImageElement;
 
+		const dpr = window.devicePixelRatio;
 		const setDimensionsToNatural = () => {
-			const dpr = window.devicePixelRatio;
 			setDimensions({
 				width: imgRef.naturalWidth / dpr,
 				height: imgRef.naturalHeight / dpr,
@@ -242,6 +242,10 @@ export function Gallery(props: {
 				imgRef.onload = setDimensionsToNatural;
 			}
 		});
+
+		createEffect(() => {
+			if (pictureInFocus()) setDimensionsToNatural();
+		})
 
 		return (
 			<>
