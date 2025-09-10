@@ -254,7 +254,7 @@ export function Gallery(props: {
 
 		return (
 			<div
-				class="relative"
+				class="absolute"
 				style={{
 					width: `${zoomDimensions().width}`,
 					height: `${zoomDimensions().height}`,
