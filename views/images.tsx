@@ -217,7 +217,7 @@ export function Gallery(props: {
 					} else if (evt.key === '=') {
 						props.setGalleryZoom((prev) => prev + ZOOM_STEP);
 					} else if (evt.key === '-') {
-						props.setGalleryZoom((prev) => prev - ZOOM_STEP);
+						props.setGalleryZoom((prev) => prev > ZOOM_STEP ? prev - ZOOM_STEP : prev);
 					} else if (evt.key === 'w') {
 						props.setTranslateY((prev) => prev - PAN_STEP);
 					} else if (evt.key === 's') {
