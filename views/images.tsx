@@ -139,6 +139,8 @@ export function Gallery(props: {
 	setGalleryFocus: Setter<number | null>,
 	galleryZoom: Accessor<number | null>,
 	setGalleryZoom: Setter<number | null>,
+	translateY: Accessor<number | null>,
+	setTranslateY: Setter<number | null>,
 }) {
 	const pictureInFocus = createMemo(() => {
 		const index = props.galleryFocus();
@@ -206,6 +208,8 @@ export function Gallery(props: {
 						props.setGalleryZoom((prev) => prev !== null ? prev + 0.05 : 1);
 					} else if (evt.key === '-') {
 						props.setGalleryZoom((prev) => prev !== null ? prev - 0.05 : 1);
+					} else if (evt.key === 'w') {
+						props.setTranslateY((prev) => prev !== null ? prev - 40 : 0);
 					}
 				}}
 			>
@@ -264,6 +268,7 @@ export function Gallery(props: {
 						'object-fit': 'contain',
 						width: `${zoomDimensions().width}`,
 						height: `${zoomDimensions().height}`,
+						transform: `translateY(${props.translateY()}px)`
 					}}
 					onClick={(evt) => {
 						evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
