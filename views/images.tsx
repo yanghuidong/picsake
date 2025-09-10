@@ -137,14 +137,17 @@ export function Gallery(props: {
 	gallery: Accessor<Picture[]>,
 	galleryFocus: Accessor<number | null>,
 	setGalleryFocus: Setter<number | null>,
-	galleryZoom: Accessor<number | null>,
-	setGalleryZoom: Setter<number | null>,
+	galleryFit: Accessor<boolean>,
+	setGalleryFit: Setter<boolean>,
+	galleryZoom: Accessor<number>,
+	setGalleryZoom: Setter<number>,
 	translateX: Accessor<number>,
 	setTranslateX: Setter<number>,
 	translateY: Accessor<number>,
 	setTranslateY: Setter<number>,
 }) {
-	const PAN_STEP: number = 40;
+	const PAN_STEP: number = 40; // px
+	const ZOOM_STEP: number = 0.05; // fraction
 
 	const pictureInFocus = createMemo(() => {
 		const index = props.galleryFocus();
@@ -206,13 +209,15 @@ export function Gallery(props: {
 							}
 						});
 					} else if (evt.key === 'o' || evt.key === '0' || evt.key === '1') {
+						props.setGalleryFit(false);
 						props.setGalleryZoom(1);
 					} else if (evt.key === 'f') {
-						props.setGalleryZoom(null);
+						props.setGalleryFit(true);
+						props.setGalleryZoom(1);
 					} else if (evt.key === '=') {
-						props.setGalleryZoom((prev) => prev !== null ? prev + 0.05 : 1);
+						props.setGalleryZoom((prev) => prev + ZOOM_STEP);
 					} else if (evt.key === '-') {
-						props.setGalleryZoom((prev) => prev !== null ? prev - 0.05 : 1);
+						props.setGalleryZoom((prev) => prev - ZOOM_STEP);
 					} else if (evt.key === 'w') {
 						props.setTranslateY((prev) => prev - PAN_STEP);
 					} else if (evt.key === 's') {
@@ -235,11 +240,11 @@ export function Gallery(props: {
 	const Image = () => {
 		const [dimensions, setDimensions] = createSignal<Dimensions>({ width: 0, height: 0 });
 
-		const zoomDimensions = createMemo<CSSDimensions>(() => {
-			const zoom = props.galleryZoom();
+		const dimensionsByMode = createMemo<CSSDimensions>(() => {
+			const fitMode = props.galleryFit();
 			return {
-				width: zoom === null ? '100%' : `${dimensions().width * zoom}px`,
-				height: zoom === null ? '100%' : `${dimensions().height * zoom}px`,
+				width: fitMode ? '100%' : `${dimensions().width}px`,
+				height: fitMode ? '100%' : `${dimensions().height}px`,
 			};
 		});
 
@@ -273,9 +278,9 @@ export function Gallery(props: {
 				// but absolute is necessary for zooming, because we need it to expand beyond the confinement of the parent, #psk-gallery
 				class="absolute"
 				style={{
-					width: `${zoomDimensions().width}`,
-					height: `${zoomDimensions().height}`,
-					transform: `translate(${props.translateX()}px, ${props.translateY()}px)`,
+					width: `${dimensionsByMode().width}`,
+					height: `${dimensionsByMode().height}`,
+					transform: `translate(${props.translateX()}px, ${props.translateY()}px) scale(${props.galleryZoom()})`,
 				}}
 				onClick={(evt) => {
 					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick

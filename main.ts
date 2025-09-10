@@ -80,8 +80,10 @@ export default class MyPlugin extends Plugin {
 	setGallery!: Setter<Picture[]>;
 	galleryFocus!: Accessor<number | null>;
 	setGalleryFocus!: Setter<number | null>;
-	galleryZoom!: Accessor<number | null>;
-	setGalleryZoom!: Setter<number | null>;
+	galleryFit!: Accessor<boolean>;
+	setGalleryFit!: Setter<boolean>;
+	galleryZoom!: Accessor<number>;
+	setGalleryZoom!: Setter<number>;
 	translateX!: Accessor<number>;
 	setTranslateX!: Setter<number>;
 	translateY!: Accessor<number>;
@@ -264,7 +266,11 @@ export default class MyPlugin extends Plugin {
 		this.galleryFocus = galleryFocus;
 		this.setGalleryFocus = setGalleryFocus;
 
-		const [galleryZoom, setGalleryZoom] = createSignal<number | null>(null); // null means fit max space (contained in viewport)
+		const [galleryFit, setGalleryFit] = createSignal<boolean>(false);
+		this.galleryFit = galleryFit;
+		this.setGalleryFit = setGalleryFit;
+
+		const [galleryZoom, setGalleryZoom] = createSignal<number>(1);
 		this.galleryZoom = galleryZoom;
 		this.setGalleryZoom = setGalleryZoom;
 
@@ -351,6 +357,8 @@ export default class MyPlugin extends Plugin {
 					gallery: this.gallery,
 					galleryFocus: this.galleryFocus,
 					setGalleryFocus: this.setGalleryFocus,
+					galleryFit: this.galleryFit,
+					setGalleryFit: this.setGalleryFit,
 					galleryZoom: this.galleryZoom,
 					setGalleryZoom: this.setGalleryZoom,
 					translateX: this.translateX,
