@@ -22,9 +22,9 @@
     border-radius: var(--radius-l);
 }
 
-/* https://tailwindcss.com/docs/object-fit#containing-within */
+/* Based on https://tailwindcss.com/docs/object-fit#containing-within */
 #psk-gallery .zebra {
-    background-image: repeating-linear-gradient(315deg, currentColor 0 1px, #0000 0 50%);
+    background-image: repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25) 0 1px, rgba(0,0,0, 0) 0 50%);
     background-size: 8px 8px;
 }
 
