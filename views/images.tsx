@@ -139,11 +139,13 @@ export function Gallery(props: {
 	setGalleryFocus: Setter<number | null>,
 	galleryZoom: Accessor<number | null>,
 	setGalleryZoom: Setter<number | null>,
-	translateX: Accessor<number | null>,
-	setTranslateX: Setter<number | null>,
-	translateY: Accessor<number | null>,
-	setTranslateY: Setter<number | null>,
+	translateX: Accessor<number>,
+	setTranslateX: Setter<number>,
+	translateY: Accessor<number>,
+	setTranslateY: Setter<number>,
 }) {
+	const PAN_STEP: number = 40;
+
 	const pictureInFocus = createMemo(() => {
 		const index = props.galleryFocus();
 		const picture = index !== null
@@ -212,13 +214,13 @@ export function Gallery(props: {
 					} else if (evt.key === '-') {
 						props.setGalleryZoom((prev) => prev !== null ? prev - 0.05 : 1);
 					} else if (evt.key === 'w') {
-						props.setTranslateY((prev) => prev !== null ? prev - 40 : 0);
+						props.setTranslateY((prev) => prev - PAN_STEP);
 					} else if (evt.key === 's') {
-						props.setTranslateY((prev) => prev !== null ? prev + 40 : 0);
+						props.setTranslateY((prev) => prev + PAN_STEP);
 					} else if (evt.key === 'a') {
-						props.setTranslateX((prev) => prev !== null ? prev - 40 : 0);
+						props.setTranslateX((prev) => prev - PAN_STEP);
 					} else if (evt.key === 'd') {
-						props.setTranslateX((prev) => prev !== null ? prev + 40 : 0);
+						props.setTranslateX((prev) => prev + PAN_STEP);
 					}
 				}}
 			>

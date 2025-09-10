@@ -82,10 +82,10 @@ export default class MyPlugin extends Plugin {
 	setGalleryFocus!: Setter<number | null>;
 	galleryZoom!: Accessor<number | null>;
 	setGalleryZoom!: Setter<number | null>;
-	translateX!: Accessor<number | null>;
-	setTranslateX!: Setter<number | null>;
-	translateY!: Accessor<number | null>;
-	setTranslateY!: Setter<number | null>;
+	translateX!: Accessor<number>;
+	setTranslateX!: Setter<number>;
+	translateY!: Accessor<number>;
+	setTranslateY!: Setter<number>;
 
 	// 1. Class fields as arrow functions
 	// Advantage over using class methods: `this` always refers to the class instance!
@@ -268,11 +268,11 @@ export default class MyPlugin extends Plugin {
 		this.galleryZoom = galleryZoom;
 		this.setGalleryZoom = setGalleryZoom;
 
-		const [translateX, setTranslateX] = createSignal<number | null>(null);
+		const [translateX, setTranslateX] = createSignal<number>(0);
 		this.translateX = translateX;
 		this.setTranslateX = setTranslateX;
 
-		const [translateY, setTranslateY] = createSignal<number | null>(null);
+		const [translateY, setTranslateY] = createSignal<number>(0);
 		this.translateY = translateY;
 		this.setTranslateY = setTranslateY;
 
