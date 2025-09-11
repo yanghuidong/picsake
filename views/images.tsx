@@ -258,13 +258,16 @@ export function Gallery(props: {
 			});
 		};
 
-		onMount(() => {
-			if (imgRef.complete) {
-				setDimensionsToNatural();
-			} else {
-				imgRef.onload = setDimensionsToNatural;
-			}
-		});
+		// Note: no need to do this one-time setup;
+		// the effect below takes care of _reactively_ updating the dimensions signal
+		// per each picture currently in focus
+		// onMount(() => {
+		// 	if (imgRef.complete) {
+		// 		setDimensionsToNatural();
+		// 	} else {
+		// 		imgRef.onload = setDimensionsToNatural;
+		// 	}
+		// });
 
 		// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
 		// we don't want the aspect ratio of the previous image to carry over to the current!
