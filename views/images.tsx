@@ -338,6 +338,13 @@ export function Gallery(props: {
 				<div
 					class="progressbar relative"
 					classList={{ 'hidden': props.gallery().length < 2 }}
+					onClick={(evt) => {
+						const rect = evt.currentTarget.getBoundingClientRect();
+						const offsetX = evt.clientX - rect.left;
+						const fraction = offsetX / rect.width;
+						const index = Math.floor(props.gallery().length * fraction);
+						props.setGalleryFocus(index);
+					}}
 				>
 					<div
 						class="absolute inset-0"
