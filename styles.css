@@ -64,7 +64,7 @@
 
 /* Based on https://tailwindcss.com/docs/object-fit#containing-within */
 .zebra {
-    background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.25) 0 1px, rgb(0 0 0 / 0) 0 50%);
+    background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.25) 0 1px, transparent 0 50%);
     background-size: 8px 8px;
 }
 
