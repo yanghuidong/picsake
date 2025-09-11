@@ -566,7 +566,6 @@ class ActivePicsView extends ItemView {
 
 	// Solid stuff
 	private dispose!: () => void;
-	private disposeEffect!: () => void;
 
 	constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
 		super(leaf);
@@ -581,23 +580,11 @@ class ActivePicsView extends ItemView {
 	getDisplayText(): string {
 		// Note: the code below can update the "title" property persisted in "workspace.json" when active file changes,
 		// but it doesn't update the UI, including the view leaf's tab title and its tooltip.
-		return `Pictures in ${this.plugin.store.activeFile?.name}`;
-		// return 'Active pictures';
+		// return `Pictures in ${this.plugin.store.activeFile?.name}`;
+		return 'Pictures in active file';
 	}
 
 	async onOpen() {
-		const { contentEl } = this;
-
-		const title = contentEl.createEl('h4');
-
-		createRoot((dispose) => {
-			this.disposeEffect = dispose;
-
-			createEffect(() => {
-				title.setText(`${this.plugin.store.activeFile?.name}`);
-			});
-		});
-
 		this.dispose = render(() => {
 			const activePictures = createMemo(() => {
 				const activeFile = this.plugin.store.activeFile;
@@ -605,13 +592,20 @@ class ActivePicsView extends ItemView {
 					? this.plugin.store.pictures[activeFile.path] ?? []
 					: []
 			});
-			return createComponent(ActivePics, { activePictures });
-		}, contentEl);
+			const activeFile = createMemo(() => {
+				return this.plugin.store.activeFile;
+			});
+			return createComponent(ActivePics, {
+				activePictures,
+				activeFile,
+				setGallery: this.plugin.setGallery,
+				setGalleryFocus: this.plugin.setGalleryFocus,
+			});
+		}, this.contentEl);
 	}
 
 	async onClose() {
 		this.dispose();
-		this.disposeEffect();
 	}
 }
 

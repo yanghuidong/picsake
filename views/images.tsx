@@ -1,3 +1,4 @@
+import { TFile } from 'obsidian';
 import { ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, Picture, PicturesByPath } from 'types/picture';
@@ -66,15 +67,28 @@ export function ImageResults(props: {
 
 export function ActivePics(props: {
 	activePictures: Accessor<Picture[]>,
+	activeFile: Accessor<TFile | null>,
+	setGallery: Setter<Picture[]>,
+	setGalleryFocus: Setter<number | null>,
 }) {
 	return (
 		<>
-			<div>{props.activePictures().length} pictures</div>
-			<For each={props.activePictures()}>
-				{picture => (
-					<img src={picture.url} alt={picture.description} />
-				)}
-			</For>
+			<h4>{props.activeFile()?.name}</h4>
+			<div class="my-xs">{props.activePictures().length} pictures</div>
+			<div class="image-grid-2">
+				<For each={props.activePictures()}>
+					{(pic, idx) => (
+						<img
+							src={pic.url}
+							alt={pic.description}
+							onClick={() => {
+								props.setGallery(props.activePictures());
+								props.setGalleryFocus(idx());
+							}}
+						/>
+					)}
+				</For>
+			</div>
 		</>
 	);
 }
