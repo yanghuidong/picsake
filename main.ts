@@ -520,7 +520,7 @@ export default class MyPlugin extends Plugin {
 
 			for (const line of sectionLines) {
 				let picture: Picture | null = null;
-				const matches = line.trim().match(/^!\[(.*)\]\((.+)\)$/);
+				const matches = line.trim().match(/^!\[(.*?)\]\((.+)\)$/);
 				if (matches) {
 					const [, description, url] = matches;
 					// Note: description is allowed to be an empty string here!
