@@ -38,6 +38,7 @@
 #psk-gallery .progressbar > div {
     background-color: var(--color-accent);
     border-radius: 1rem;
+    transition: transform 0.1s ease;
 }
 
 .block-language-psk {

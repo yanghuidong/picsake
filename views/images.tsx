@@ -351,7 +351,6 @@ export function Gallery(props: {
 						style={{
 							'transform': `scaleX(${progress()})`,
 							'transform-origin': 'left center',
-							'transition': 'transform 0.5s ease',
 						}}
 					/>
 				</div>
