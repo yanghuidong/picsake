@@ -22,23 +22,22 @@
     border-radius: var(--radius-l);
 }
 
-#psk-gallery .hoverbar {
-    opacity: 0;
-    transition: opacity 0.5s ease-in;
-}
-
-#psk-gallery .hoverbar:hover {
-    opacity: 1;
+#psk-gallery .infobar {
+    background-color: rgba(255, 255, 255, 0.15);
+    height: 25vh;
 }
 
 #psk-gallery .progressbar {
-    background-color: var(--color-accent);
+    width: 50vw;
+    height: 1rem;
+    overflow: clip;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 1rem;
 }
 
-/* Based on https://tailwindcss.com/docs/object-fit#containing-within */
-#psk-gallery .zebra {
-    background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.25) 0 1px, rgba(0, 0, 0, 0) 0 50%);
-    background-size: 8px 8px;
+#psk-gallery .progressbar > div {
+    background-color: var(--color-accent);
+    border-radius: 1rem;
 }
 
 .block-language-psk {
@@ -52,6 +51,21 @@
 }
 
 /* "components" */
+
+.hoverbar {
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+.hoverbar:hover {
+    opacity: 1;
+}
+
+/* Based on https://tailwindcss.com/docs/object-fit#containing-within */
+.zebra {
+    background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.25) 0 1px, rgba(0, 0, 0, 0) 0 50%);
+    background-size: 8px 8px;
+}
 
 img.psk-thumbnail {
     height: 120px;
@@ -112,6 +126,14 @@ img.psk-thumbnail {
 
 .relative {
     position: relative;
+}
+
+.bottom-0 {
+    bottom: 0;
+}
+
+.right-0 {
+    right: 0;
 }
 
 .inset-0 {
