@@ -132,6 +132,13 @@ export default class MyPlugin extends Plugin {
 	onActivateFile = (file: TFile | null) => {
 		// new Notice(`Activated ${file?.name}`);
 		this.setStore('activeFile', file);
+
+		// FIXME this doesn't dynamically update the tooltip text;
+		// somehow the Outline core plugin is able to update correctly, what's the API?
+		// const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_ACTIVE_PICS);
+		// for (const leaf of leaves) {
+		// 	// ???
+		// }
 	}
 
 	onPaste = (evt: ClipboardEvent, editor: Editor) => {
@@ -572,7 +579,10 @@ class ActivePicsView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return 'Active pics view';
+		// Note: the code below can update the "title" property persisted in "workspace.json" when active file changes,
+		// but it doesn't update the UI, including the view leaf's tab title and its tooltip.
+		return `Pictures in ${this.plugin.store.activeFile?.name}`;
+		// return 'Active pictures';
 	}
 
 	async onOpen() {
