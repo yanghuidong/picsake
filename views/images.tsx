@@ -288,6 +288,10 @@ export function Gallery(props: {
 				onClick={(evt) => {
 					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
 				}}
+				onDblClick={(evt) => {
+					evt.stopPropagation();
+					props.setGalleryFocus(null);
+				}}
 			>
 				{/* zebra has to be absolute to not get in the way of the image,
 				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
