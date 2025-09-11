@@ -337,6 +337,7 @@ export function Gallery(props: {
 			>
 				<div
 					class="progressbar relative"
+					classList={{ 'hidden': props.gallery().length < 2 }}
 				>
 					<div
 						class="absolute inset-0"

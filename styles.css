@@ -116,6 +116,10 @@ img.psk-thumbnail {
 
 /* utils */
 
+.hidden {
+    display: none;
+}
+
 .absolute {
     position: absolute;
 }
