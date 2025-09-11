@@ -247,6 +247,7 @@ export function Gallery(props: {
 				}}
 			>
 				<Image />
+				<InfoBar />
 			</div>
 		);
 	};
@@ -316,6 +317,48 @@ export function Gallery(props: {
 					src={pictureInFocus()?.url}
 					alt={pictureInFocus()?.description}
 				/>
+			</div>
+		);
+	};
+
+	const InfoBar = () => {
+		const progress = createMemo(() => {
+			const index = props.galleryFocus();
+			const total = props.gallery().length;
+			return index !== null ? (index + 1) / total : 0;
+		});
+		return (
+			<div
+				class="hoverbar absolute w-full flex-center"
+				style={{
+					bottom: '0',
+					height: '25vh',
+					'background-color': 'rgba(255,255,255, 0.25)',
+				}}
+				onClick={(evt) => {
+					evt.stopPropagation();
+				}}
+			>
+				<div
+					class="relative"
+					style={{
+						width: '50vw',
+						height: '1rem',
+						overflow: 'clip',
+						'background-color': 'rgba(0,0,0, 0.5)',
+						'border-radius': '1rem',
+					}}
+				>
+					<div
+						class="progressbar absolute inset-0"
+						style={{
+							transform: `scaleX(${progress()})`,
+							'transform-origin': 'left center',
+							transition: 'transform 0.5s ease',
+							'border-radius': '1rem',
+						}}
+					/>
+				</div>
 			</div>
 		);
 	};

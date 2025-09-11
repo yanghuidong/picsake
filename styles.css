@@ -1,4 +1,3 @@
-
 /* fixes for Obsidian */
 
 .setting-item.is-disabled {
@@ -14,6 +13,7 @@
     `--layer-modal` is 50
     `--layer-notice` is 60
     */
+    overflow: clip;
     z-index: var(--layer-modal);
 }
 
@@ -22,9 +22,22 @@
     border-radius: var(--radius-l);
 }
 
+#psk-gallery .hoverbar {
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+#psk-gallery .hoverbar:hover {
+    opacity: 1;
+}
+
+#psk-gallery .progressbar {
+    background-color: var(--color-accent);
+}
+
 /* Based on https://tailwindcss.com/docs/object-fit#containing-within */
 #psk-gallery .zebra {
-    background-image: repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25) 0 1px, rgba(0,0,0, 0) 0 50%);
+    background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.25) 0 1px, rgba(0, 0, 0, 0) 0 50%);
     background-size: 8px 8px;
 }
 
