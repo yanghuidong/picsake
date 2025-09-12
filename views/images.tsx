@@ -361,6 +361,9 @@ export function Gallery(props: {
 				<div
 					class="ProgressBar relative"
 					classList={{ 'hidden': props.gallery().length < 2 }}
+					style={{
+						width: `${props.gallery().length * 50}px`,
+					}}
 					onClick={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();
 						const { index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
