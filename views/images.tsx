@@ -333,11 +333,23 @@ export function Gallery(props: {
 				: null;
 		});
 
+		// range: [0, 1]
 		const progress = createMemo(() => {
 			const index = props.galleryFocus();
 			const total = props.gallery().length;
 			return index !== null ? (index + 1) / total : 0;
 		});
+
+		// helper
+		const getOffsetXAndIndex = (rect: DOMRect, clientX: number, total: number) => {
+			// Note: must bound offset between 0 and rect.width (inclusive)
+			const offsetX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+			const fraction = offsetX / rect.width;
+			const index = fraction < 1
+				? Math.floor(total * fraction)
+				: total - 1;
+			return { offsetX, index };
+		}
 
 		return (
 			<div
@@ -351,9 +363,7 @@ export function Gallery(props: {
 					classList={{ 'hidden': props.gallery().length < 2 }}
 					onClick={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();
-						const offsetX = evt.clientX - rect.left;
-						const fraction = offsetX / rect.width;
-						const index = Math.floor(props.gallery().length * fraction);
+						const { index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
 						props.setGalleryFocus(index);
 					}}
 					onMouseEnter={() => {
@@ -366,14 +376,8 @@ export function Gallery(props: {
 					}}
 					onMouseMove={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();
-						// Note: must bound offset between 0 and rect.width (inclusive)
-						const offsetX = Math.max(0, Math.min(evt.clientX - rect.left, rect.width));
-						const fraction = offsetX / rect.width;
-						const index = fraction < 1
-							? Math.floor(props.gallery().length * fraction)
-							: props.gallery().length - 1;
+						const { offsetX, index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
 						setSeekPosition(offsetX);
-						// debugLog({ offsetX });
 						setSeekIndex(index);
 					}}
 				>
