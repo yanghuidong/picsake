@@ -32,20 +32,24 @@
     border-radius: var(--radius-l);
 }
 
-#psk-gallery .InfoBar {
+.InfoBar {
     background-color: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.25);
     height: 25vh;
 }
 
-#psk-gallery .ProgressBar {
+.ProgressBar {
     width: 50vw;
     height: 1rem;
-    /* overflow: clip; */
     background-color: rgb(0 0 0 / 0.5);
     border-radius: 1rem;
 }
 
-#psk-gallery .ProgressBar .ProgressFill {
+.ProgressBar .ProgressMask {
+    overflow: clip;
+    border-radius: 1rem;
+}
+
+.ProgressBar .ProgressFill {
     background-color: var(--color-accent);
     border-radius: 1rem;
     transition: transform 0.1s ease;
@@ -226,6 +230,10 @@ img.psk-thumbnail {
 
 .flex-wrap {
     flex-wrap: wrap;
+}
+
+.overflow-hidden {
+    overflow: hidden;
 }
 
 .object-contain {

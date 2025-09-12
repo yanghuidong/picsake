@@ -368,11 +368,9 @@ export function Gallery(props: {
 					}}
 					onMouseEnter={() => {
 						setSeeking(true);
-						console.log('enter');
 					}}
 					onMouseLeave={() => {
 						setSeeking(false);
-						console.log('leave');
 					}}
 					onMouseMove={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();
@@ -382,12 +380,18 @@ export function Gallery(props: {
 					}}
 				>
 					<div
-						class="ProgressFill absolute inset-0"
-						style={{
-							'transform': `scaleX(${progress()})`,
-							'transform-origin': 'left center',
-						}}
-					/>
+						// because we use transform: scaleX instead of setting width,
+						// the border-radius of ProgressFill will be distorted; so we need masking
+						class="ProgressMask absolute inset-0"
+					>
+						<div
+							class="ProgressFill absolute inset-0"
+							style={{
+								'transform': `scaleX(${progress()})`,
+								'transform-origin': 'left center',
+							}}
+						/>
+					</div>
 					<SeekPreview
 						seeking={seeking}
 						seekPosition={seekPosition}
