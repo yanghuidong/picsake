@@ -30,12 +30,12 @@
 #psk-gallery .progressbar {
     width: 50vw;
     height: 1rem;
-    overflow: clip;
+    /* overflow: clip; */
     background-color: rgb(0 0 0 / 0.5);
     border-radius: 1rem;
 }
 
-#psk-gallery .progressbar > div {
+#psk-gallery .progressbar .ProgressFill {
     background-color: var(--color-accent);
     border-radius: 1rem;
     transition: transform 0.1s ease;
@@ -118,7 +118,7 @@ img.psk-thumbnail {
 /* utils */
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .absolute {

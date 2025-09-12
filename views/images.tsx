@@ -322,6 +322,9 @@ export function Gallery(props: {
 	};
 
 	const InfoBar = () => {
+		const [seeking, setSeeking] = createSignal<boolean>(false);
+		const [seekPosition, setSeekPosition] = createSignal<number>(0);
+
 		const progress = createMemo(() => {
 			const index = props.galleryFocus();
 			const total = props.gallery().length;
@@ -345,15 +348,69 @@ export function Gallery(props: {
 						const index = Math.floor(props.gallery().length * fraction);
 						props.setGalleryFocus(index);
 					}}
+					onMouseEnter={() => {
+						setSeeking(true);
+						console.log('enter');
+					}}
+					onMouseLeave={() => {
+						setSeeking(false);
+						console.log('leave');
+					}}
+					onMouseMove={(evt) => {
+						const rect = evt.currentTarget.getBoundingClientRect();
+						const offsetX = evt.clientX - rect.left;
+						// const fraction = offsetX / rect.width;
+						// const index = Math.floor(props.gallery().length * fraction);
+						setSeekPosition(offsetX);
+						// debugLog({ offsetX });
+					}}
 				>
 					<div
-						class="absolute inset-0"
+						class="ProgressFill absolute inset-0"
 						style={{
 							'transform': `scaleX(${progress()})`,
 							'transform-origin': 'left center',
 						}}
 					/>
+					<SeekPreview
+						seeking={seeking}
+						seekPosition={seekPosition}
+					/>
 				</div>
+			</div>
+		);
+	};
+
+	const SeekPreview = (props: {
+		seeking: Accessor<boolean>,
+		seekPosition: Accessor<number>,
+	}) => {
+		return (
+			<div
+				class="absolute bottom-0 column"
+				classList={{ 'hidden': !props.seeking() }}
+				style={{
+					transform: `translateX(${props.seekPosition()}px)`
+				}}
+			>
+				<div
+					class="flex-center"
+					style={{
+						width: '200px',
+						height: '200px',
+						'background-color': 'cyan',
+					}}
+				>
+					TODO
+				</div>
+				<div
+					style={{
+						width: '1rem',
+						height: '1rem',
+						'background-color': 'magenta',
+						'border-radius': '1rem',
+					}}
+				/>
 			</div>
 		);
 	};
