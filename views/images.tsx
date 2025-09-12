@@ -326,6 +326,13 @@ export function Gallery(props: {
 		const [seekPosition, setSeekPosition] = createSignal<number>(0);
 		const [seekIndex, setSeekIndex] = createSignal<number | null>(null);
 
+		const seekPicture = createMemo(() => {
+			const index = seekIndex();
+			return index !== null
+				? props.gallery().at(index) ?? null
+				: null;
+		});
+
 		const progress = createMemo(() => {
 			const index = props.galleryFocus();
 			const total = props.gallery().length;
@@ -381,6 +388,7 @@ export function Gallery(props: {
 						seeking={seeking}
 						seekPosition={seekPosition}
 						seekIndex={seekIndex}
+						seekPicture={seekPicture}
 					/>
 				</div>
 			</div>
@@ -391,7 +399,16 @@ export function Gallery(props: {
 		seeking: Accessor<boolean>,
 		seekPosition: Accessor<number>,
 		seekIndex: Accessor<number | null>,
+		seekPicture: Accessor<Picture | null>,
 	}) => {
+		// one-based index: string
+		const seekNumber = createMemo(() => {
+			const index = props.seekIndex();
+			return index !== null
+				? String(index + 1)
+				: '';
+		});
+
 		return (
 			<div
 				class="absolute bottom-0 column"
@@ -401,7 +418,7 @@ export function Gallery(props: {
 				}}
 			>
 				<div
-					class="flex-center"
+					class="relative flex-center"
 					style={{
 						width: '200px',
 						height: '200px',
@@ -409,7 +426,18 @@ export function Gallery(props: {
 						color: 'darkblue',
 					}}
 				>
-					{props.seekIndex()}
+					<Show when={props.seekPicture() !== null}>
+						<img
+							class="w-full h-full object-cover"
+							src={props.seekPicture()?.url}
+							alt={props.seekPicture()?.description}
+						/>
+					</Show>
+					<div
+						class="absolute"
+					>
+						{seekNumber()}
+					</div>
 				</div>
 				<div
 					style={{
