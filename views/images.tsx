@@ -341,13 +341,13 @@ export function Gallery(props: {
 
 		return (
 			<div
-				class="infobar hoverbar absolute bottom-0 w-full flex-center"
+				class="InfoBar hoverbar absolute bottom-0 w-full flex-center"
 				onClick={(evt) => {
 					evt.stopPropagation();
 				}}
 			>
 				<div
-					class="progressbar relative"
+					class="ProgressBar relative"
 					classList={{ 'hidden': props.gallery().length < 2 }}
 					onClick={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();

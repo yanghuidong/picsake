@@ -6,6 +6,16 @@
 
 /* specifics */
 
+.block-language-psk {
+    padding: 1rem;
+}
+
+.block-language-psk table {
+    /* overriding `.markdown-rendered table` */
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
 #psk-gallery {
     background-color: hsla(0, 0%, 0%, 0.75);
     color: white;
@@ -22,12 +32,12 @@
     border-radius: var(--radius-l);
 }
 
-#psk-gallery .infobar {
+#psk-gallery .InfoBar {
     background-color: hsl(var(--accent-h) var(--accent-s) var(--accent-l) / 0.25);
     height: 25vh;
 }
 
-#psk-gallery .progressbar {
+#psk-gallery .ProgressBar {
     width: 50vw;
     height: 1rem;
     /* overflow: clip; */
@@ -35,20 +45,10 @@
     border-radius: 1rem;
 }
 
-#psk-gallery .progressbar .ProgressFill {
+#psk-gallery .ProgressBar .ProgressFill {
     background-color: var(--color-accent);
     border-radius: 1rem;
     transition: transform 0.1s ease;
-}
-
-.block-language-psk {
-    padding: 1rem;
-}
-
-.block-language-psk table {
-    /* overriding `.markdown-rendered table` */
-    margin-block-start: 0;
-    margin-block-end: 0;
 }
 
 .SeekPreview .PreviewPicture {
