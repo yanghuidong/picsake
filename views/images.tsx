@@ -324,6 +324,7 @@ export function Gallery(props: {
 	const InfoBar = () => {
 		const [seeking, setSeeking] = createSignal<boolean>(false);
 		const [seekPosition, setSeekPosition] = createSignal<number>(0);
+		const [seekIndex, setSeekIndex] = createSignal<number | null>(null);
 
 		const progress = createMemo(() => {
 			const index = props.galleryFocus();
@@ -359,10 +360,11 @@ export function Gallery(props: {
 					onMouseMove={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();
 						const offsetX = evt.clientX - rect.left;
-						// const fraction = offsetX / rect.width;
-						// const index = Math.floor(props.gallery().length * fraction);
+						const fraction = offsetX / rect.width;
+						const index = Math.floor(props.gallery().length * fraction);
 						setSeekPosition(offsetX);
 						// debugLog({ offsetX });
+						setSeekIndex(index);
 					}}
 				>
 					<div
@@ -375,6 +377,7 @@ export function Gallery(props: {
 					<SeekPreview
 						seeking={seeking}
 						seekPosition={seekPosition}
+						seekIndex={seekIndex}
 					/>
 				</div>
 			</div>
@@ -384,6 +387,7 @@ export function Gallery(props: {
 	const SeekPreview = (props: {
 		seeking: Accessor<boolean>,
 		seekPosition: Accessor<number>,
+		seekIndex: Accessor<number | null>,
 	}) => {
 		return (
 			<div
@@ -399,9 +403,10 @@ export function Gallery(props: {
 						width: '200px',
 						height: '200px',
 						'background-color': 'cyan',
+						color: 'darkblue',
 					}}
 				>
-					TODO
+					{props.seekIndex()}
 				</div>
 				<div
 					style={{
