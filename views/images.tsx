@@ -411,20 +411,14 @@ export function Gallery(props: {
 
 		return (
 			<div
-				class="absolute bottom-0 column"
+				class="SeekPreview absolute bottom-0 column"
 				classList={{ 'hidden': !props.seeking() }}
 				style={{
 					transform: `translateX(${props.seekPosition()}px)`
 				}}
 			>
 				<div
-					class="relative flex-center"
-					style={{
-						width: '200px',
-						height: '200px',
-						'background-color': 'cyan',
-						color: 'darkblue',
-					}}
+					class="PreviewPicture relative flex-center"
 				>
 					<Show when={props.seekPicture()}>
 						{pic => (
@@ -436,18 +430,13 @@ export function Gallery(props: {
 						)}
 					</Show>
 					<div
-						class="absolute"
+						class="NumberBadge absolute flex-center"
 					>
 						{seekNumber()}
 					</div>
 				</div>
 				<div
-					style={{
-						width: '1rem',
-						height: '1rem',
-						'background-color': 'magenta',
-						'border-radius': '1rem',
-					}}
+					class="SeekBall"
 				/>
 			</div>
 		);
