@@ -359,9 +359,12 @@ export function Gallery(props: {
 					}}
 					onMouseMove={(evt) => {
 						const rect = evt.currentTarget.getBoundingClientRect();
-						const offsetX = evt.clientX - rect.left;
+						// Note: must bound offset between 0 and rect.width (inclusive)
+						const offsetX = Math.max(0, Math.min(evt.clientX - rect.left, rect.width));
 						const fraction = offsetX / rect.width;
-						const index = Math.floor(props.gallery().length * fraction);
+						const index = fraction < 1
+							? Math.floor(props.gallery().length * fraction)
+							: props.gallery().length - 1;
 						setSeekPosition(offsetX);
 						// debugLog({ offsetX });
 						setSeekIndex(index);
