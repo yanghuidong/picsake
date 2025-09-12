@@ -426,12 +426,14 @@ export function Gallery(props: {
 						color: 'darkblue',
 					}}
 				>
-					<Show when={props.seekPicture() !== null}>
-						<img
-							class="w-full h-full object-cover"
-							src={props.seekPicture()?.url}
-							alt={props.seekPicture()?.description}
-						/>
+					<Show when={props.seekPicture()}>
+						{pic => (
+							<img
+								class="w-full h-full object-cover"
+								src={pic().url}
+								alt={pic().description}
+							/>
+						)}
 					</Show>
 					<div
 						class="absolute"
