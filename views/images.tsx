@@ -207,13 +207,13 @@ export function Gallery(props: {
 					} else if (evt.key === 'ArrowRight') {
 						// Note: need to store the snapshot in a variable, else if calling the accessor directly inside the setter, we'll get a warning from solid eslint plugin!
 						const pictureCount = props.gallery().length;
-						props.setGalleryFocus((curr) => {
-							if (curr !== null) {
-								const next = curr + 1;
-								if (next >= pictureCount) {
+						props.setGalleryFocus((prev) => {
+							if (prev !== null) {
+								const curr = prev + 1;
+								if (curr >= pictureCount) {
 									return 0;
 								} else {
-									return next;
+									return curr;
 								}
 							} else {
 								return null;
@@ -221,13 +221,13 @@ export function Gallery(props: {
 						});
 					} else if (evt.key === 'ArrowLeft') {
 						const pictureCount = props.gallery().length;
-						props.setGalleryFocus((curr) => {
-							if (curr !== null) {
-								const prev = curr - 1;
-								if (prev < 0) {
+						props.setGalleryFocus((prev) => {
+							if (prev !== null) {
+								const curr = prev - 1;
+								if (curr < 0) {
 									return pictureCount - 1;
 								} else {
-									return prev;
+									return curr;
 								}
 							} else {
 								return null;
