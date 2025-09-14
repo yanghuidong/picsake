@@ -253,6 +253,8 @@ export function Gallery(props: {
 	};
 
 	const Image = () => {
+		const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
+
 		const [dimensions, setDimensions] = createSignal<Dimensions>({ width: 0, height: 0 });
 
 		const dimensionsByMode = createMemo<CSSDimensions>(() => {
@@ -307,6 +309,22 @@ export function Gallery(props: {
 					evt.stopPropagation();
 					props.setGalleryFocus(null);
 				}}
+				onPointerDown={(evt) => {
+					setMoveStart({ x: evt.clientX, y: evt.clientY });
+				}}
+				onPointerUp={(evt) => {
+					setMoveStart(null);
+				}}
+				onPointerMove={(evt) => {
+					const prevStart = moveStart();
+					if (prevStart !== null) {
+						setMoveStart({ x: evt.clientX, y: evt.clientY });
+						const deltaX = evt.clientX - prevStart.x;
+						const deltaY = evt.clientY - prevStart.y;
+						props.setTranslateX(prev => prev + deltaX);
+						props.setTranslateY(prev => prev + deltaY);
+					}
+				}}
 			>
 				{/* zebra has to be absolute to not get in the way of the image,
 				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
@@ -316,6 +334,9 @@ export function Gallery(props: {
 					class="relative w-full h-full object-contain"
 					src={pictureInFocus()?.url}
 					alt={pictureInFocus()?.description}
+					onDragStart={evt => {
+						evt.preventDefault();
+					}}
 				/>
 			</div>
 		);
