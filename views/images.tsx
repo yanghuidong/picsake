@@ -172,6 +172,10 @@ export function Gallery(props: {
 		return picture;
 	});
 
+	// Note: the semantics of `moveStart` not only tracks the coordinates,
+	// but also serves as a flag similar to a Boolean `isDraggingImage`
+	const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
+
 	const GalleryContent = () => {
 		let modalRef!: HTMLDivElement;
 
@@ -186,7 +190,14 @@ export function Gallery(props: {
 				tabindex="-1"
 				onClick={(evt) => {
 					evt.stopImmediatePropagation(); // stopPropagation() won't prevent `MyPlugin.onClickDocument`
+					// Note: if image dragging (pointer move) is fast enough, it can escape the Image div and land here on the parent,
+					// and on pointer up, this click event on the parent will fire! (Browser idiosyncrasy)
+					if (moveStart() !== null) {
+						setMoveStart(null);
+						return;
+					}
 					props.setGalleryFocus(null);
+					// console.log('gallery modal clicked');
 				}}
 				onKeyDown={(evt) => {
 					evt.preventDefault();
@@ -253,8 +264,6 @@ export function Gallery(props: {
 	};
 
 	const Image = () => {
-		const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
-
 		const [dimensions, setDimensions] = createSignal<Dimensions>({ width: 0, height: 0 });
 
 		const dimensionsByMode = createMemo<CSSDimensions>(() => {
