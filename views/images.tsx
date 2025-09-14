@@ -305,7 +305,8 @@ export function Gallery(props: {
 			<div
 				// for zebra child positioning, relative would be enough;
 				// but absolute is necessary for zooming, because we need it to expand beyond the confinement of the parent, #psk-gallery
-				class="absolute"
+				class="absolute cursor-grab"
+				classList={{ 'cursor-grabbing': moveStart() !== null }}
 				style={{
 					width: `${dimensionsByMode().width}`,
 					height: `${dimensionsByMode().height}`,
@@ -319,7 +320,9 @@ export function Gallery(props: {
 					props.setGalleryFocus(null);
 				}}
 				onPointerDown={(evt) => {
-					evt.preventDefault(); // prevents cursor from changing to "grab" hand, o/w it'd get stuck even after pointer up
+					// Must prevent the browser from changing the cursor to "grabbing" hand, o/w it'd get stuck even after pointer up;
+					// Note however, this issue only manifests because we called preventDefault in the inner img's onDragStart handler!
+					evt.preventDefault();
 					setMoveStart({ x: evt.clientX, y: evt.clientY });
 				}}
 				onPointerUp={(evt) => {

@@ -244,3 +244,11 @@ img.psk-thumbnail {
 .object-cover {
     object-fit: cover;
 }
+
+.cursor-grab {
+    cursor: grab;
+}
+
+.cursor-grabbing {
+    cursor: grabbing;
+}
