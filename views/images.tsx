@@ -319,6 +319,7 @@ export function Gallery(props: {
 					props.setGalleryFocus(null);
 				}}
 				onPointerDown={(evt) => {
+					evt.preventDefault(); // prevents cursor from changing to "grab" hand, o/w it'd get stuck even after pointer up
 					setMoveStart({ x: evt.clientX, y: evt.clientY });
 				}}
 				onPointerUp={(evt) => {
@@ -344,6 +345,7 @@ export function Gallery(props: {
 					src={pictureInFocus()?.url}
 					alt={pictureInFocus()?.description}
 					onDragStart={evt => {
+						// Note: Obsidian has its own handler on this
 						evt.preventDefault();
 					}}
 				/>
