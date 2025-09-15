@@ -504,30 +504,30 @@ function SeekPreview(props: {
 
 	return (
 		<div
-			class="SeekPreview absolute bottom-0 column"
+			class="SeekPreview absolute bottom-0 column column-spacing-xs"
 			classList={{ 'hidden': !props.seeking() }}
 			style={{
 				transform: `translateX(${props.seekPosition()}px)`
 			}}
 		>
-			<div
-				class="PreviewPicture relative flex-center"
-			>
-				<Show when={props.seekPicture()}>
-					{pic => (
+			<Show when={props.seekPicture()}>
+				{pic => (
+					<div
+						class="PreviewPicture relative flex-center"
+					>
 						<img
 							class="w-full h-full object-cover"
 							src={pic().url}
 							alt={pic().description}
 						/>
-					)}
-				</Show>
-				<div
-					class="NumberBadge absolute flex-center"
-				>
-					{seekNumber()}
-				</div>
-			</div>
+						<div
+							class="NumberBadge absolute flex-center"
+						>
+							{seekNumber()}
+						</div>
+					</div>
+				)}
+			</Show>
 			<div
 				class="SeekBall"
 			/>

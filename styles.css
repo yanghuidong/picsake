@@ -69,6 +69,10 @@ img.psk-thumbnail {
     width: 200px;
     height: 200px;
     transform: translateX(-50%);
+    overflow: clip;
+    border: 3px solid hsl(var(--accent-h) calc(var(--accent-s) - 10%) calc(var(--accent-l) + 10%));
+    border-radius: 0.5rem;
+    box-shadow: 1px 1px 2px black;
 }
 
 .PreviewPicture .NumberBadge {
@@ -85,9 +89,9 @@ img.psk-thumbnail {
 .SeekPreview .SeekBall {
     width: 1rem;
     height: 1rem;
+    transform: translateX(-50%);
     background-color: white;
     border-radius: 1rem;
-    transform: translateX(-50%);
 }
 
 .ImageInfo {
