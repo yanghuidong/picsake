@@ -53,7 +53,8 @@
 .ProgressBar .ProgressFill {
     background-color: var(--color-accent);
     border-radius: 1rem;
-    transition: transform 0.1s ease;
+    /* Transition animation must be in sync with the gallery pictures, which currently use none. */
+    /* transition: transform 0.1s ease; */
 }
 
 .SeekPreview .PreviewPicture {
