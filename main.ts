@@ -533,7 +533,7 @@ export default class MyPlugin extends Plugin {
 					}
 				} else {
 					// maybe it's an embedded local image?
-					const matchesEmbed = line.trim().match(/^!\[\[(.+?)(\|.+)?\]\]$/);
+					const matchesEmbed = line.trim().match(/^!\[\[(.+?)(?:\|(.+))?\]\]$/);
 					if (matchesEmbed) {
 						const [, linkText, displayText] = matchesEmbed;
 						if (linkText && isImageLink(linkText)) {
