@@ -400,6 +400,10 @@ export function Gallery(props: {
 			return index !== null ? (index + 1) / total : 0;
 		});
 
+		const translateOccurred = createMemo(() => {
+			return props.translateX() !== 0 || props.translateY() !== 0;
+		});
+
 		// helper
 		const getOffsetXAndIndex = (rect: DOMRect, clientX: number, total: number) => {
 			// Note: must bound offset between 0 and rect.width (inclusive)
@@ -483,9 +487,12 @@ export function Gallery(props: {
 								</div>
 								<IconButton
 									name='undo-2'
+									enabled={translateOccurred}
 									onClick={() => {
-										props.setTranslateX(0);
-										props.setTranslateY(0);
+										if (translateOccurred()) {
+											props.setTranslateX(0);
+											props.setTranslateY(0);
+										}
 									}}
 								/>
 							</div>

@@ -1,10 +1,11 @@
 import { setIcon } from 'obsidian';
-import { onMount } from 'solid-js';
+import { Accessor, onMount } from 'solid-js';
 
 export { IconButton };
 
 function IconButton(props: {
 	name: 'undo-2'
+	enabled: Accessor<boolean>
 	onClick: (evt: MouseEvent) => void
 }) {
 	let iconRef!: HTMLDivElement;
@@ -15,6 +16,8 @@ function IconButton(props: {
 
 	return (
 		<div ref={iconRef}
+			class="iconButton"
+			classList={{ 'enabled': props.enabled() }}
 			onClick={(evt) => props.onClick(evt)}
 		/>
 	);
