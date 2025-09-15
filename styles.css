@@ -128,6 +128,11 @@ img.psk-thumbnail {
     text-transform: uppercase;
 }
 
+.ImageZoomActive {
+    color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 15%));
+    cursor: pointer;
+}
+
 /* "components" */
 
 .showOnHover {
