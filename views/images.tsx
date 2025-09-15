@@ -21,7 +21,7 @@ export function ImageUpload(props: {
 	}
 
 	return (
-		<div class="image-grid-4">
+		<div class="imageGrid-4">
 			<For each={props.images}>
 				{(image) => (
 					<div class="column">
@@ -75,7 +75,7 @@ export function ActivePics(props: {
 		<>
 			<h4>{props.activeFile()?.name}</h4>
 			<div class="my-xs">{props.activePictures().length} pictures</div>
-			<div class="image-grid-2">
+			<div class="imageGrid-2">
 				<For each={props.activePictures()}>
 					{(pic, idx) => (
 						<img
@@ -129,7 +129,7 @@ export function PicsExplorer(props: {
 
 	return (
 		<>
-			<div class="image-grid-4">
+			<div class="imageGrid-4">
 				<For each={allPictures()}>
 					{(pic, idx) => (
 						<img
@@ -365,7 +365,7 @@ export function Gallery(props: {
 				{/* zebra has to be absolute to not get in the way of the image,
 				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
 				*/}
-				<div class="zebra absolute w-full h-full" />
+				<div class="bgZebra absolute w-full h-full" />
 				<img ref={imgRef}
 					class="relative w-full h-full object-contain"
 					src={pictureInFocus()?.url}
@@ -411,7 +411,7 @@ export function Gallery(props: {
 
 		return (
 			<div
-				class="InfoBar hoverbar absolute bottom-0 w-full flex-center"
+				class="InfoBar showOnHover absolute bottom-0 w-full flex-center"
 				classList={{ 'hidden': moveStart() !== null }}
 				onClick={(evt) => {
 					evt.stopPropagation();

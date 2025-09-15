@@ -16,6 +16,14 @@
     margin-block-end: 0;
 }
 
+img.psk-thumbnail {
+    height: 120px;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 2px solid lightblue;
+}
+
 #psk-gallery {
     background-color: hsla(0, 0%, 0%, 0.75);
     color: white;
@@ -84,58 +92,50 @@
 
 /* "components" */
 
-.hoverbar {
+.showOnHover {
     opacity: 0;
     transition: opacity 0.5s ease-in;
 }
 
-.hoverbar:hover {
+.showOnHover:hover {
     opacity: 1;
 }
 
 /* Based on https://tailwindcss.com/docs/object-fit#containing-within */
-.zebra {
+.bgZebra {
     background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.25) 0 1px, transparent 0 50%);
     background-size: 8px 8px;
 }
 
-img.psk-thumbnail {
-    height: 120px;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-    border-radius: 5px;
-    border: 2px solid lightblue;
-}
-
-.image-grid-2 {
+.imageGrid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
 }
 
-.image-grid-2 img {
+.imageGrid-2 img {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
 }
 
-.image-grid-4 {
+.imageGrid-4 {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.5rem;
 }
 
-.image-grid-4 img {
+.imageGrid-4 img {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
 }
 
-.image-grid-4 .selected {
+.imageGrid-4 .selected {
     border: 1px solid lightblue;
 }
 
-.image-grid-4 .caption {
+.imageGrid-4 .caption {
     overflow: hidden;
     text-overflow: ellipsis;
     word-break: break-word;
