@@ -301,6 +301,24 @@ export function Gallery(props: {
 			if (pictureInFocus()) setDimensionsToNatural();
 		})
 
+		const onPointerMove = (evt: PointerEvent) => {
+			const prevStart = moveStart();
+			if (prevStart !== null) {
+				setMoveStart({ x: evt.clientX, y: evt.clientY });
+				const deltaX = evt.clientX - prevStart.x;
+				const deltaY = evt.clientY - prevStart.y;
+				props.setTranslateX(prev => prev + deltaX);
+				props.setTranslateY(prev => prev + deltaY);
+			}
+		};
+
+		const onPointerUp = (evt: PointerEvent) => {
+			setMoveStart(null);
+
+			window.removeEventListener('pointermove', onPointerMove);
+			window.removeEventListener('pointerup', onPointerUp);
+		};
+
 		return (
 			<div
 				// for zebra child positioning, relative would be enough;
@@ -324,20 +342,25 @@ export function Gallery(props: {
 					// Note however, this issue only manifests because we called preventDefault in the inner img's onDragStart handler!
 					evt.preventDefault();
 					setMoveStart({ x: evt.clientX, y: evt.clientY });
+
+					// Note: when pointer moves fast enough, it can escape the Image region,
+					// but we want the move handler to continue working even if that happens!
+					window.addEventListener('pointermove', onPointerMove);
+					window.addEventListener('pointerup', onPointerUp);
 				}}
-				onPointerUp={(evt) => {
-					setMoveStart(null);
-				}}
-				onPointerMove={(evt) => {
-					const prevStart = moveStart();
-					if (prevStart !== null) {
-						setMoveStart({ x: evt.clientX, y: evt.clientY });
-						const deltaX = evt.clientX - prevStart.x;
-						const deltaY = evt.clientY - prevStart.y;
-						props.setTranslateX(prev => prev + deltaX);
-						props.setTranslateY(prev => prev + deltaY);
-					}
-				}}
+			// onPointerUp={(evt) => {
+			// 	setMoveStart(null);
+			// }}
+			// onPointerMove={(evt) => {
+			// 	const prevStart = moveStart();
+			// 	if (prevStart !== null) {
+			// 		setMoveStart({ x: evt.clientX, y: evt.clientY });
+			// 		const deltaX = evt.clientX - prevStart.x;
+			// 		const deltaY = evt.clientY - prevStart.y;
+			// 		props.setTranslateX(prev => prev + deltaX);
+			// 		props.setTranslateY(prev => prev + deltaY);
+			// 	}
+			// }}
 			>
 				{/* zebra has to be absolute to not get in the way of the image,
 				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
