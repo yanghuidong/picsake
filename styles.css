@@ -7,6 +7,9 @@
 #psk-gallery {
     --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 20%));
     --subtle: hsl(0 0% 80%);
+    --preview-size: 200px;
+    --progress-height: 1rem;
+    --progress-radius: var(--progress-height);
 }
 
 /* specifics */
@@ -53,19 +56,19 @@ img.psk-thumbnail {
 .ProgressBar {
     min-width: 0;
     max-width: 50vw;
-    height: 1rem;
+    height: var(--progress-height);
     background-color: rgb(0 0 0 / 0.5);
-    border-radius: 1rem;
+    border-radius: var(--progress-radius);
 }
 
 .ProgressBar .ProgressMask {
     overflow: clip;
-    border-radius: 1rem;
+    border-radius: var(--progress-radius);
 }
 
 .ProgressBar .ProgressFill {
     background-color: var(--color-accent);
-    border-radius: 1rem;
+    border-radius: var(--progress-radius);
     /* Transition animation must be in sync with the gallery pictures, which currently use none. */
     /* transition: transform 0.1s ease; */
 }
@@ -75,10 +78,10 @@ img.psk-thumbnail {
 } */
 
 .SeekPreview .PreviewPicturePlaceholder {
-    width: 200px;
-    height: 200px;
-    left: -100px;
-    bottom: 1rem;
+    width: var(--preview-size);
+    height: var(--preview-size);
+    left: calc(var(--preview-size) / -2);
+    bottom: var(--progress-height);
     /* background-color: magenta; */
 }
 
@@ -105,11 +108,11 @@ img.psk-thumbnail {
 }
 
 .SeekPreview .SeekBall {
-    width: 1rem;
-    height: 1rem;
+    width: var(--progress-height);
+    height: var(--progress-height);
     transform: translateX(-50%);
     background-color: white;
-    border-radius: 1rem;
+    border-radius: var(--progress-radius);
 }
 
 .ImageInfo {
