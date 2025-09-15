@@ -513,18 +513,25 @@ function SeekPreview(props: {
 		>
 			<Show when={props.seekPicture()}>
 				{pic => (
+					// The purpose of PreviewPicturePlaceholder is such that even when the pointer enters
+					// the _gap_ between the SeekBall and the PreviewPicture, the latter still stays in place,
+					// because it has this nice wrapper that's "holding its place"!
 					<div
-						class="PreviewPicture relative flex-center"
+						class="PreviewPicturePlaceholder absolute"
 					>
-						<img
-							class="w-full h-full object-cover"
-							src={pic().url}
-							alt={pic().description}
-						/>
 						<div
-							class="NumberBadge absolute flex-center"
+							class="PreviewPicture absolute flex-center"
 						>
-							{seekNumber()}
+							<img
+								class="w-full h-full object-cover"
+								src={pic().url}
+								alt={pic().description}
+							/>
+							<div
+								class="NumberBadge absolute flex-center"
+							>
+								{seekNumber()}
+							</div>
 						</div>
 					</div>
 				)}
