@@ -5,7 +5,7 @@
 }
 
 #psk-gallery {
-    --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 15%));
+    --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 20%));
     --subtle: gray;
 }
 
