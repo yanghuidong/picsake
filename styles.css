@@ -83,7 +83,7 @@ img.psk-thumbnail {
     bottom: 0.5rem;
     /* transform: translateY(-0.5rem); */
     overflow: clip;
-    border: 3px solid hsl(var(--accent-h) calc(var(--accent-s) - 10%) calc(var(--accent-l) + 10%));
+    border: 6px solid hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 10%) / 0.8);
     border-radius: 0.5rem;
     box-shadow: 1px 1px 2px black;
 }
