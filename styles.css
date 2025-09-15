@@ -90,6 +90,22 @@ img.psk-thumbnail {
     transform: translateX(-50%);
 }
 
+.ImageInfo {
+    font-size: x-large;
+    padding-block: 1rem;
+}
+
+.ImageInfoBasic {
+    padding-block: 0.5rem;
+    padding-inline: 1rem;
+    background-color: rgba(0 0 0 / 0.25);
+    border-radius: 0.25rem;
+}
+
+.ImageFormatBadge {
+    text-transform: uppercase;
+}
+
 /* "components" */
 
 .showOnHover {

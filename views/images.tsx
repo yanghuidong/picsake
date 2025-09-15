@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, Picture, PicturesByPath } from 'types/picture';
+import { CSSDimensions, Dimensions, imageFormatFromLink, Picture, PicturesByPath } from 'types/picture';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -172,6 +172,8 @@ export function Gallery(props: {
 		return picture;
 	});
 
+	const [dimensions, setDimensions] = createSignal<Dimensions>({ width: 0, height: 0 });
+
 	// Note: the semantics of `moveStart` not only tracks the coordinates,
 	// but also serves as a flag similar to a Boolean `isDraggingImage`
 	const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
@@ -264,8 +266,6 @@ export function Gallery(props: {
 	};
 
 	const Image = () => {
-		const [dimensions, setDimensions] = createSignal<Dimensions>({ width: 0, height: 0 });
-
 		const dimensionsByMode = createMemo<CSSDimensions>(() => {
 			const fitMode = props.galleryFit();
 			return {
@@ -407,7 +407,7 @@ export function Gallery(props: {
 				? Math.floor(total * fraction)
 				: total - 1;
 			return { offsetX, index };
-		}
+		};
 
 		return (
 			<div
@@ -461,6 +461,22 @@ export function Gallery(props: {
 						seekPicture={seekPicture}
 					/>
 				</div>
+				<Show when={pictureInFocus()}>
+					{pic => (
+						<div
+							class="ImageInfo absolute bottom-0"
+						>
+							<div
+								class="ImageInfoBasic row row-spacing-sm"
+							>
+								<div class="ImageFormatBadge">{imageFormatFromLink(pic().url)}</div>
+								<div>{dimensions().width} × {dimensions().height}</div>
+								<div>{(props.galleryZoom() * 100).toFixed(0)}%</div>
+							</div>
+							{/* {pic().description} */}
+						</div>
+					)}
+				</Show>
 			</div>
 		);
 	};
