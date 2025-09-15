@@ -103,6 +103,11 @@ img.psk-thumbnail {
 }
 
 .ImageFormatBadge {
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    background-color: rgb(0 0 0 / 0.35);
+    border-radius: 0.25rem;
+    font-size: smaller;
     text-transform: uppercase;
 }
 
