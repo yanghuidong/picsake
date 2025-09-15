@@ -412,6 +412,7 @@ export function Gallery(props: {
 		return (
 			<div
 				class="InfoBar hoverbar absolute bottom-0 w-full flex-center"
+				classList={{ 'hidden': moveStart() !== null }}
 				onClick={(evt) => {
 					evt.stopPropagation();
 				}}
