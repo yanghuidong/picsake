@@ -4,6 +4,11 @@
     opacity: 0.3;
 }
 
+#psk-gallery {
+    --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 15%));
+    --subtle: gray;
+}
+
 /* specifics */
 
 .block-language-psk {
@@ -129,11 +134,11 @@ img.psk-thumbnail {
 }
 
 .ImageZoom {
-    color: gray;
+    color: var(--subtle);
 }
 
 .ImageZoom.active {
-    color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 15%));
+    color: var(--accent-bright);
     cursor: pointer;
 }
 
@@ -149,11 +154,11 @@ img.psk-thumbnail {
 }
 
 .iconButton {
-    color: gray;
+    color: var(--subtle);
 }
 
 .iconButton.enabled {
-    color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 15%));
+    color: var(--accent-bright);
     cursor: pointer;
 }
 
