@@ -112,6 +112,7 @@ export function PicsExplorer(props: {
 		return list;
 	});
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const sourcePathsDict = createMemo(() => {
 		const dict: { [key: string]: string[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
