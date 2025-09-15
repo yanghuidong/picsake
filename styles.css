@@ -17,6 +17,7 @@
     --preview-size: 200px;
     --progress-height: 1rem;
     --progress-radius: var(--progress-height);
+    --blur-radius: 6px;
 }
 
 /* specifics */
@@ -321,4 +322,9 @@ img.psk-thumbnail {
 
 .cursor-grabbing {
     cursor: grabbing;
+}
+
+.bg-blur {
+    backdrop-filter: blur(var(--blur-radius));
+    -webkit-backdrop-filter: blur(var(--blur-radius));
 }

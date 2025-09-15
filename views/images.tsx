@@ -473,7 +473,7 @@ export function Gallery(props: {
 							class="ImageInfo absolute bottom-0"
 						>
 							<div
-								class="ImageInfoBasic row row-spacing-sm"
+								class="ImageInfoBasic row row-spacing-sm bg-blur"
 							>
 								<div class="ImageFormatBadge">{imageFormatFromLink(pic().url)}</div>
 								<div>{dimensions().width} × {dimensions().height}</div>
