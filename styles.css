@@ -128,7 +128,11 @@ img.psk-thumbnail {
     text-transform: uppercase;
 }
 
-.ImageZoomActive {
+.ImageZoom {
+    color: gray;
+}
+
+.ImageZoom.active {
     color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 15%));
     cursor: pointer;
 }
@@ -142,6 +146,10 @@ img.psk-thumbnail {
 
 .showOnHover:hover {
     opacity: 1;
+}
+
+.iconButton {
+    color: gray;
 }
 
 .iconButton.enabled {

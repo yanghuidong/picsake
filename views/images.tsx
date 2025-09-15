@@ -478,7 +478,8 @@ export function Gallery(props: {
 								<div class="ImageFormatBadge">{imageFormatFromLink(pic().url)}</div>
 								<div>{dimensions().width} × {dimensions().height}</div>
 								<div
-									classList={{ 'ImageZoomActive': props.galleryZoom() !== 1 }}
+									class="ImageZoom"
+									classList={{ 'active': props.galleryZoom() !== 1 }}
 									onClick={() => {
 										if (props.galleryZoom() !== 1) props.setGalleryZoom(1);
 									}}
