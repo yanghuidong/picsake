@@ -465,56 +465,56 @@ export function Gallery(props: {
 		);
 	};
 
-	const SeekPreview = (props: {
-		seeking: Accessor<boolean>,
-		seekPosition: Accessor<number>,
-		seekIndex: Accessor<number | null>,
-		seekPicture: Accessor<Picture | null>,
-	}) => {
-		// one-based index: string
-		const seekNumber = createMemo(() => {
-			const index = props.seekIndex();
-			return index !== null
-				? String(index + 1)
-				: '';
-		});
-
-		return (
-			<div
-				class="SeekPreview absolute bottom-0 column"
-				classList={{ 'hidden': !props.seeking() }}
-				style={{
-					transform: `translateX(${props.seekPosition()}px)`
-				}}
-			>
-				<div
-					class="PreviewPicture relative flex-center"
-				>
-					<Show when={props.seekPicture()}>
-						{pic => (
-							<img
-								class="w-full h-full object-cover"
-								src={pic().url}
-								alt={pic().description}
-							/>
-						)}
-					</Show>
-					<div
-						class="NumberBadge absolute flex-center"
-					>
-						{seekNumber()}
-					</div>
-				</div>
-				<div
-					class="SeekBall"
-				/>
-			</div>
-		);
-	};
-
 	return (
 		<Show when={pictureInFocus() !== null}>
 			<GalleryContent />
 		</Show>
 	);
 }
+
+function SeekPreview(props: {
+	seeking: Accessor<boolean>,
+	seekPosition: Accessor<number>,
+	seekIndex: Accessor<number | null>,
+	seekPicture: Accessor<Picture | null>,
+}) {
+	// one-based index: string
+	const seekNumber = createMemo(() => {
+		const index = props.seekIndex();
+		return index !== null
+			? String(index + 1)
+			: '';
+	});
+
+	return (
+		<div
+			class="SeekPreview absolute bottom-0 column"
+			classList={{ 'hidden': !props.seeking() }}
+			style={{
+				transform: `translateX(${props.seekPosition()}px)`
+			}}
+		>
+			<div
+				class="PreviewPicture relative flex-center"
+			>
+				<Show when={props.seekPicture()}>
+					{pic => (
+						<img
+							class="w-full h-full object-cover"
+							src={pic().url}
+							alt={pic().description}
+						/>
+					)}
+				</Show>
+				<div
+					class="NumberBadge absolute flex-center"
+				>
+					{seekNumber()}
+				</div>
+			</div>
+			<div
+				class="SeekBall"
+			/>
+		</div>
+	);
+};
