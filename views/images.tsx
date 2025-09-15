@@ -2,6 +2,7 @@ import { TFile } from 'obsidian';
 import { ImageInfo } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, imageFormatFromLink, Picture, PicturesByPath } from 'types/picture';
+import { IconButton } from 'views/icons';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -480,6 +481,13 @@ export function Gallery(props: {
 								>
 									{(props.galleryZoom() * 100).toFixed(0)}%
 								</div>
+								<IconButton
+									name='undo-2'
+									onClick={() => {
+										props.setTranslateX(0);
+										props.setTranslateY(0);
+									}}
+								/>
 							</div>
 							{/* {pic().description} */}
 						</div>
