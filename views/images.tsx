@@ -42,12 +42,12 @@ export function ImageUpload(props: {
 	);
 }
 
-export function ImageResults(props: {
-	images: ImageInfo[]
+export function UploadResults(props: {
+	uploads: ImageInfo[]
 }) {
 	return (
 		<div class="column column-spacing-sm">
-			<For each={props.images}>
+			<For each={props.uploads}>
 				{image => (
 					<div class="row row-spacing-sm">
 						<img class="psk-thumbnail" src={image.url} />

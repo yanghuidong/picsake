@@ -4,7 +4,7 @@ import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } 
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
 import { isImageLink, Picture, PicturesByPath } from 'types/picture';
-import { ActivePics, Gallery, ImageResults, ImageUpload, PicsExplorer } from 'views/images';
+import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResults } from 'views/images';
 
 const NAME = 'Picsake';
 const LANG = 'psk';
@@ -162,7 +162,7 @@ export default class MyPlugin extends Plugin {
 					onConfirm: async (selected, isPhoto, subDir) => {
 						new Notice(`Selected ${selected.size} images to upload`);
 						const res = await gjako.uploadImages(selected, isPhoto, subDir, this.settings.gjako);
-						const infoBlock = `\`\`\`${LANG}\n${JSON.stringify({ images: res }, null, '\t')}\n\`\`\``;
+						const infoBlock = `\`\`\`${LANG}\n${JSON.stringify({ uploads: res }, null, '\t')}\n\`\`\``;
 						const imgMarkdown = res.map(info => `![${LANG} ${info.name}](${info.url})`).join('\n\n');
 						editor.replaceSelection(`${infoBlock}\n\n${imgMarkdown}`);
 					},
@@ -320,9 +320,9 @@ export default class MyPlugin extends Plugin {
 
 		this.registerMarkdownCodeBlockProcessor(LANG, (blockText, container, ctx) => {
 			const info = JSON.parse(blockText);
-			if (Object.hasOwn(info, 'images')) {
-				const images: ImageInfo[] = info.images;
-				render(() => createComponent(ImageResults, { images }), container);
+			if (Object.hasOwn(info, 'uploads')) {
+				const uploads: ImageInfo[] = info.uploads;
+				render(() => createComponent(UploadResults, { uploads }), container);
 			}
 		});
 
