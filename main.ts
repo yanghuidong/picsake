@@ -520,7 +520,7 @@ export default class MyPlugin extends Plugin {
 
 			for (const line of sectionLines) {
 				let picture: Picture | null = null;
-				const matches = line.trim().match(/^!\[(.*?)\]\((.+)\)/); // Note: possible trailing block ID
+				const matches = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)/); // Note: possible trailing block ID
 				if (matches) {
 					const [, description, url] = matches;
 					// Note: description is allowed to be an empty string here!
