@@ -1,10 +1,10 @@
 import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
-import gjako, { GjakoConfig, ImageInfo } from 'services/gjako';
+import gjako, { GjakoConfig, UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
-import { isImageLink, Picture, PicturesByPath } from 'types/picture';
-import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResults } from 'views/images';
+import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, UploadResultDict } from 'types/picture';
+import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
 const NAME = 'Picsake';
 const LANG = 'psk';
@@ -13,9 +13,26 @@ const ICON = 'images';
 const GALLERY_ID = 'psk-gallery-container';
 
 
-function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata): SectionCache[] {
-	if (!fileCache.sections) return [];
-	return fileCache.sections.filter(section => section.type === type);
+// function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata): SectionCache[] {
+// 	if (!fileCache.sections) return [];
+// 	return fileCache.sections.filter(section => section.type === type);
+// }
+
+function getSectionsOfInterest(fileCache: CachedMetadata) {
+	const codeblocks: SectionCache[] = [];
+	const paragraphs: SectionCache[] = [];
+
+	if (fileCache.sections) {
+		for (const section of fileCache.sections) {
+			if (section.type === 'code') {
+				codeblocks.push(section);
+			} else if (section.type === 'paragraph') {
+				paragraphs.push(section);
+			}
+		}
+	}
+
+	return { codeblocks, paragraphs };
 }
 
 // function shouldHandleTargetImage(target: HTMLImageElement): boolean {
@@ -65,6 +82,8 @@ const DEFAULT_SETTINGS: MySettings = {
 type MyStore = {
 	activeFile: TFile | null,
 	pictures: PicturesByPath,
+	uploads: UploadResultDict,
+	annotations: AnnotationsByURL,
 };
 
 export default class MyPlugin extends Plugin {
@@ -95,7 +114,8 @@ export default class MyPlugin extends Plugin {
 
 	// Note: this is also called on file creation!
 	onFileCacheChanged = (file: TFile, newContent: string, cache: CachedMetadata) => {
-		const paragraphs = getSectionsOfType('paragraph', cache);
+		const { codeblocks, paragraphs } = getSectionsOfInterest(cache);
+
 		const pictures = this.extractPicturesFromFile(file, newContent, paragraphs);
 		if (pictures.length > 0) {
 			this.setStore('pictures', file.path, pictures);
@@ -104,6 +124,11 @@ export default class MyPlugin extends Plugin {
 				delete pictures[file.path];
 			}));
 		}
+
+		const { uploads } = this.extractPictureMetadataFromFile(file, newContent, codeblocks);
+		uploads.forEach(upload => {
+			this.setStore('uploads', upload.url, upload);
+		});
 	}
 
 	onFileRename = (file: TAbstractFile, oldPath: string) => {
@@ -260,6 +285,8 @@ export default class MyPlugin extends Plugin {
 		const [store, setStore] = createStore<MyStore>({
 			activeFile: null,
 			pictures: {},
+			uploads: {},
+			annotations: {},
 		});
 		// eslint-disable-next-line solid/reactivity
 		this.store = store;
@@ -321,8 +348,8 @@ export default class MyPlugin extends Plugin {
 		this.registerMarkdownCodeBlockProcessor(LANG, (blockText, container, ctx) => {
 			const info = JSON.parse(blockText);
 			if (Object.hasOwn(info, 'uploads')) {
-				const uploads: ImageInfo[] = info.uploads;
-				render(() => createComponent(UploadResults, { uploads }), container);
+				const uploads: UploadResult[] = info.uploads;
+				render(() => createComponent(UploadResultSummary, { uploads }), container);
 			}
 		});
 
@@ -341,15 +368,21 @@ export default class MyPlugin extends Plugin {
 				const fileCache = this.app.metadataCache.getFileCache(mdFile);
 				if (!fileCache) continue;
 
-				const paragraphs = getSectionsOfType('paragraph', fileCache);
+				const { codeblocks, paragraphs } = getSectionsOfInterest(fileCache);
 				if (paragraphs.length === 0) continue; // avoid `cachedRead` of the file if we know it contains no paragraphs!
 
 				const fileContent = await this.app.vault.cachedRead(mdFile);
 
 				const pictures = this.extractPicturesFromFile(mdFile, fileContent, paragraphs);
 				if (pictures.length === 0) continue;
-
 				this.setStore('pictures', mdFile.path, pictures);
+
+				// Note: we assume that the metadata are bound to the pictures present in the file;
+				// if no pictures are found in the file, we skip, ignoring any metadata (regarding them as broken references)
+				const { uploads } = this.extractPictureMetadataFromFile(mdFile, fileContent, codeblocks);
+				uploads.forEach(upload => {
+					this.setStore('uploads', upload.url, upload);
+				});
 			}
 
 			// 1. DOM
@@ -406,8 +439,13 @@ export default class MyPlugin extends Plugin {
 				}
 				return urlSet.size;
 			});
+
+			const uploadCount = createMemo(() => {
+				return Object.keys(this.store.uploads).length;
+			});
+
 			createEffect(() => {
-				statusBarItemEl.setText(`${picsCount()} pics`);
+				statusBarItemEl.setText(`${picsCount()} (${uploadCount()}) pics`);
 			});
 		});
 
@@ -509,12 +547,12 @@ export default class MyPlugin extends Plugin {
 	 * - doesn't support URL query string
 	 * - doesn't support data: blobs
 	 */
-	extractPicturesFromFile(file: TFile, fileContent: string, sections: SectionCache[]): Picture[] {
+	extractPicturesFromFile(file: TFile, fileContent: string, paragraphs: SectionCache[]): Picture[] {
 		const fileLines = fileContent.split('\n');
 
 		const pictures = [];
-		for (const section of sections) {
-			const { start, end } = section.position;
+		for (const paragraph of paragraphs) {
+			const { start, end } = paragraph.position;
 
 			const sectionLines = fileLines.slice(start.line, end.line + 1);
 
@@ -556,6 +594,31 @@ export default class MyPlugin extends Plugin {
 			}
 		}
 		return pictures;
+	}
+
+	extractPictureMetadataFromFile(file: TFile, fileContent: string, codeblocks: SectionCache[]) {
+		const uploads: UploadResult[] = [];
+		const annotations: Annotation[] = [];
+
+		const fileLines = fileContent.split('\n');
+
+		for (const codeblock of codeblocks) {
+			const { start, end } = codeblock.position;
+			const lines = fileLines.slice(start.line, end.line); // exclude the final ``` line
+			const firstLine = lines[0];
+			if (firstLine && firstLine === `\`\`\`${LANG}`) {
+				const content = lines.slice(1).join('\n');
+				const parsed = JSON.parse(content);
+				if (Object.hasOwn(parsed, 'uploads')) {
+					const uploadsInCodeblock: UploadResult[] = parsed.uploads;
+					uploads.push(...uploadsInCodeblock);
+				} else if (Object.hasOwn(parsed, 'annotations')) {
+					// TODO
+				}
+			}
+		}
+
+		return { uploads, annotations };
 	}
 }
 

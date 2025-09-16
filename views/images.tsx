@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian';
-import { ImageInfo } from 'services/gjako';
+import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, imageFormatFromLink, Picture, PicturesByPath } from 'types/picture';
 import { IconButton } from 'views/icons';
@@ -42,8 +42,8 @@ export function ImageUpload(props: {
 	);
 }
 
-export function UploadResults(props: {
-	uploads: ImageInfo[]
+export function UploadResultSummary(props: {
+	uploads: UploadResult[]
 }) {
 	return (
 		<div class="column column-spacing-sm">

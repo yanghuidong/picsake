@@ -1,5 +1,5 @@
 
-export type ImageInfo = {
+export type UploadResult = {
 	name: string,
 	size: number,
 	origSize: number,
@@ -9,7 +9,7 @@ export type ImageInfo = {
 	url: string,
 };
 
-async function uploadImages(files: Iterable<File>, isPhoto: boolean, subDir: string, config: GjakoConfig): Promise<ImageInfo[]> {
+async function uploadImages(files: Iterable<File>, isPhoto: boolean, subDir: string, config: GjakoConfig): Promise<UploadResult[]> {
 	const formData = new FormData();
 	for (const file of files) {
 		formData.append('file', file);
@@ -30,7 +30,7 @@ async function uploadImages(files: Iterable<File>, isPhoto: boolean, subDir: str
 	});
 	if (res.ok) {
 		const data = await res.json();
-		return data as ImageInfo[];
+		return data as UploadResult[];
 	} else {
 		throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 	}

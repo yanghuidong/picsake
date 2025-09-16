@@ -1,11 +1,25 @@
+import { UploadResult } from 'services/gjako';
 
 export { imageFormatFromLink, isImageLink };
-export type { CSSDimensions, Dimensions, Picture, PicturesByPath };
+export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, Picture, PicturesByPath, UploadResultDict };
 
 type Picture = {
 	url: string,
 	description: string,
 };
+
+type Annotation = {
+	url: string,
+	filePath: string,
+	note: string,
+	// tags, groups, flags, even visual effects and processing, etc
+};
+
+type PicturesByPath = { [key: string]: Picture[] };
+
+type UploadResultDict = { [key: string]: UploadResult };
+
+type AnnotationsByURL = { [key: string]: Annotation[] };
 
 type Dimensions = {
 	width: number,
@@ -16,8 +30,6 @@ type CSSDimensions = {
 	width: string,
 	height: string,
 };
-
-type PicturesByPath = { [key: string]: Picture[] };
 
 const IMAGE_EXT_LIST = [
 	'avif',
