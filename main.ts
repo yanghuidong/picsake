@@ -163,7 +163,7 @@ export default class MyPlugin extends Plugin {
 						new Notice(`Selected ${selected.size} images to upload`);
 						const res = await gjako.uploadImages(selected, isPhoto, subDir, this.settings.gjako);
 						const infoBlock = `\`\`\`${LANG}\n${JSON.stringify({ uploads: res }, null, '\t')}\n\`\`\``;
-						const imgMarkdown = res.map(info => `![${LANG} ${info.name}](${info.url})`).join('\n\n');
+						const imgMarkdown = res.map(info => `![${info.name}](${info.url})`).join('\n\n');
 						editor.replaceSelection(`${infoBlock}\n\n${imgMarkdown}`);
 					},
 					onCancel: () => { new Notice('No action is taken'); }
