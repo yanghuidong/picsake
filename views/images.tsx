@@ -74,7 +74,7 @@ export function ActivePics(props: {
 }) {
 	return (
 		<>
-			<h4>{props.activeFile()?.name}</h4>
+			{/* <h4>{props.activeFile()?.name}</h4> */}
 			<div class="my-xs">{props.activePictures().length} pictures</div>
 			<div class="imageGrid-2">
 				<For each={props.activePictures()}>

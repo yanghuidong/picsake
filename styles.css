@@ -146,6 +146,7 @@ img.psk-thumbnail {
 
 .ImageZoom {
     color: var(--subtle);
+    font-size: smaller;
 }
 
 .ImageZoom.active {
