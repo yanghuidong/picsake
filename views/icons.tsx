@@ -16,9 +16,11 @@ function IconButton(props: {
 		setIcon(iconRef, props.name);
 	});
 
+	const defaultClass = 'iconButton flex-center'
+
 	return (
 		<div ref={iconRef}
-			class={props.class ? `${props.class} iconButton flex-center` : 'iconButton flex-center'}
+			class={props.class ? `${props.class} ${defaultClass}` : defaultClass}
 			classList={{ 'enabled': props.enabled(), ...props.classList }}
 			onClick={(evt) => {
 				if (props.enabled()) {
@@ -34,6 +36,7 @@ function IconToggle(props: {
 	offIcon: 'eye-off',
 	state: Accessor<boolean>,
 	setState: Setter<boolean>,
+	class?: string,
 }) {
 	let iconRef!: HTMLDivElement;
 
@@ -45,9 +48,12 @@ function IconToggle(props: {
 		}
 	});
 
+	const defaultClass = 'iconToggle flex-center'
+
 	return (
 		<div ref={iconRef}
-			class="flex-center"
+			class={props.class ? `${props.class} ${defaultClass}` : defaultClass}
+			classList={{ 'enabled': props.state() }}
 			onClick={() => {
 				props.setState(prev => !prev);
 			}}

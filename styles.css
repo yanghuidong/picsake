@@ -185,7 +185,7 @@ img.psk-thumbnail {
     height: var(--search-height);
     cursor: pointer;
     opacity: 0.5;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease-in;
 }
 
 .ClearSearch:hover {
@@ -194,6 +194,11 @@ img.psk-thumbnail {
 
 .SearchHitsInfo {
     padding-block: 1rem;
+}
+
+.RevealToggle {
+    width: var(--search-height);
+    height: var(--search-height);
 }
 
 /* "components" */
@@ -213,6 +218,16 @@ img.psk-thumbnail {
 
 .iconButton.enabled {
     cursor: pointer;
+}
+
+.iconToggle {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s ease-in;
+}
+
+.iconToggle.enabled {
+    opacity: 1;
 }
 
 /* Based on https://tailwindcss.com/docs/object-fit#containing-within */

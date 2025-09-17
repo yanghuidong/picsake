@@ -191,6 +191,7 @@ export function PicsExplorer(props: {
 					/>
 				</div>
 				<IconToggle
+					class='RevealToggle'
 					onIcon='eye'
 					offIcon='eye-off'
 					state={revealExcluded}
