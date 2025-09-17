@@ -1,11 +1,17 @@
 import { UploadResult } from 'services/gjako';
 
 export { imageFormatFromLink, isImageLink };
-export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, Picture, PicturesByPath, UploadResultDict };
+export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, UploadResultDict };
 
 type Picture = {
 	url: string,
 	description: string,
+};
+
+type GlobalPicture = {
+	url: string,
+	description: string,
+	sourcePaths: string[],
 };
 
 type Annotation = {

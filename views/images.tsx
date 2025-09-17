@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, imageFormatFromLink, Picture, PicturesByPath } from 'types/picture';
+import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath } from 'types/picture';
 import { IconButton } from 'views/icons';
 
 export function ImageUpload(props: {
@@ -103,20 +103,6 @@ export function PicsExplorer(props: {
 
 	const [searchResults, setSearchResults] = createSignal<Picture[] | null>(null);
 
-	const allPictures = createMemo(() => {
-		const list: Picture[] = [];
-		const urlSet = new Set<string>();
-		for (const pictures of Object.values(props.pictures)) {
-			for (const pic of pictures) {
-				if (!urlSet.has(pic.url)) {
-					list.push(pic);
-					urlSet.add(pic.url);
-				}
-			}
-		}
-		return list;
-	});
-
 	const sourcePathsDict = createMemo(() => {
 		const dict: { [key: string]: string[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
@@ -130,6 +116,22 @@ export function PicsExplorer(props: {
 			}
 		}
 		return dict;
+	});
+
+	const allPictures = createMemo(() => {
+		const list: GlobalPicture[] = [];
+		const urlSet = new Set<string>();
+		for (const pictures of Object.values(props.pictures)) {
+			for (const pic of pictures) {
+				if (!urlSet.has(pic.url)) {
+					const sourcePaths = sourcePathsDict()[pic.url] ?? [];
+					const globalPic = { ...pic, sourcePaths };
+					list.push(globalPic);
+					urlSet.add(pic.url);
+				}
+			}
+		}
+		return list;
 	});
 
 	const shownPictures = createMemo(() => {
@@ -166,11 +168,7 @@ export function PicsExplorer(props: {
 									setSearchResults(null);
 								} else {
 									const res = allPictures().filter(pic => {
-										const haystack = [pic.description];
-										const filePaths = sourcePathsDict()[pic.url];
-										if (filePaths && filePaths.length > 0) {
-											haystack.push(...filePaths);
-										}
+										const haystack = [pic.description, ...pic.sourcePaths];
 										const haystackCompact = haystack.join().toLowerCase();
 										return haystackCompact.contains(needle);
 									});
