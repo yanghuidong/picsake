@@ -96,6 +96,7 @@ export function ActivePics(props: {
 
 export function PicsExplorer(props: {
 	pictures: PicturesByPath,
+	excludePaths: Accessor<string[]>,
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 }) {
@@ -133,7 +134,7 @@ export function PicsExplorer(props: {
 				}
 			}
 		}
-		return list.filter(pic => !shouldExcludePicture(pic, revealExcluded()));
+		return list.filter(pic => !shouldExcludePicture(pic, props.excludePaths(), revealExcluded()));
 	});
 
 	const shownPictures = createMemo(() => {

@@ -109,6 +109,9 @@ export default class MyPlugin extends Plugin {
 	setTranslateX!: Setter<number>;
 	translateY!: Accessor<number>;
 	setTranslateY!: Setter<number>;
+	// Make settings reactive!
+	excludePaths!: Accessor<string[]>;
+	setExcludePaths!: Setter<string[]>;
 
 	// 1. Class fields as arrow functions
 	// Advantage over using class methods: `this` always refers to the class instance!
@@ -416,6 +419,10 @@ export default class MyPlugin extends Plugin {
 
 		await this.loadSettings();
 
+		const [excludePaths, setExcludePaths] = createSignal<string[]>(this.settings.excludePaths);
+		this.excludePaths = excludePaths;
+		this.setExcludePaths = setExcludePaths;
+
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon(ICON, NAME, (evt: MouseEvent) => {
 			if (evt.metaKey) {
@@ -703,6 +710,7 @@ class PicsExplorerView extends ItemView {
 			const pictures = this.plugin.store.pictures;
 			return createComponent(PicsExplorer, {
 				pictures,
+				excludePaths: this.plugin.excludePaths,
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 			});
@@ -870,6 +878,7 @@ class MyPluginSettingTab extends PluginSettingTab {
 				.setValue(settings.excludePaths.join('\n'))
 				.onChange(async value => {
 					settings.excludePaths = value.split('\n').filter(line => line.length > 0);
+					this.plugin.setExcludePaths(settings.excludePaths);
 					await this.plugin.saveSettings();
 				})
 			)

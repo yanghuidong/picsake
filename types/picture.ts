@@ -14,9 +14,16 @@ type GlobalPicture = {
 	sourcePaths: string[],
 };
 
-function shouldExcludePicture(pic: GlobalPicture, alwaysInclude: boolean): boolean {
+function shouldExcludePicture(pic: GlobalPicture, excludePaths: string[], alwaysInclude: boolean): boolean {
+	function shouldExcludeByPath(path: string): boolean {
+		return excludePaths.some(exclude => {
+			return path.startsWith(exclude);
+		});
+	}
+
 	if (alwaysInclude) return false;
 	if (pic.description.startsWith('//')) return true;
+	if (pic.sourcePaths.some(path => shouldExcludeByPath(path))) return true;
 	return false;
 }
 
