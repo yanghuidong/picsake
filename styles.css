@@ -162,6 +162,10 @@ img.psk-thumbnail {
     width: 50%;
 }
 
+.SearchHitsInfo {
+    padding-block: 1rem;
+}
+
 /* "components" */
 
 .showOnHover {

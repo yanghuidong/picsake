@@ -173,6 +173,13 @@ export function PicsExplorer(props: {
 					}}
 				/>
 			</div>
+			<Show when={searchResults()}>
+				{results =>
+					<div class="SearchHitsInfo">
+						Found {results().length} pictures
+					</div>
+				}
+			</Show>
 			<div class="imageGrid-4">
 				<For each={shownPictures()}>
 					{(pic, idx) => (
