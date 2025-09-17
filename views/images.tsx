@@ -161,19 +161,18 @@ export function PicsExplorer(props: {
 						}}
 						onKeyUp={(evt) => {
 							if (evt.key === 'Enter') {
-								// console.log('Search started');
 								const needle = query().trim().toLowerCase();
 								if (needle === '') {
 									setSearchResults(null);
 								} else {
 									const res = allPictures().filter(pic => {
+										const haystack = [pic.description];
 										const filePaths = sourcePathsDict()[pic.url];
 										if (filePaths && filePaths.length > 0) {
-											const haystack = filePaths.join().toLowerCase();
-											return haystack.contains(needle);
-										} else {
-											return false;
+											haystack.push(...filePaths);
 										}
+										const haystackCompact = haystack.join().toLowerCase();
+										return haystackCompact.contains(needle);
 									});
 									setSearchResults(res);
 								}
