@@ -175,6 +175,11 @@ img.psk-thumbnail {
     height: var(--search-height);
 }
 
+.SearchBox input {
+    padding-inline-start: 0.75rem;
+    padding-inline-end: var(--search-height);
+}
+
 .ClearSearch {
     width: var(--search-height);
     height: var(--search-height);
