@@ -67,6 +67,7 @@ function getSectionsOfInterest(fileCache: CachedMetadata) {
 interface MySettings {
 	mySetting: string;
 	mySetting2: number;
+	excludePaths: string[];
 	// helpers
 	uploadImagesOnPaste: boolean;
 	gjako: GjakoConfig;
@@ -75,6 +76,7 @@ interface MySettings {
 const DEFAULT_SETTINGS: MySettings = {
 	mySetting: 'default',
 	mySetting2: 42,
+	excludePaths: [],
 	uploadImagesOnPaste: false,
 	gjako: gjako.DEFAULT_CONFIG,
 }
@@ -860,6 +862,17 @@ class MyPluginSettingTab extends PluginSettingTab {
 					settings.mySetting2 = Number(value);
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Exclude paths')
+			.setDesc('Add one path prefix per line, e.g. Tmp/ will excludes all paths that match the prefix.')
+			.addTextArea(comp => comp
+				.setValue(settings.excludePaths.join('\n'))
+				.onChange(async value => {
+					settings.excludePaths = value.split('\n').filter(line => line.length > 0);
+					await this.plugin.saveSettings();
+				})
+			)
 
 		new Setting(containerEl)
 			.setName('Helpers')
