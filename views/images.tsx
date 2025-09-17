@@ -139,6 +139,10 @@ export function PicsExplorer(props: {
 			: allPictures();
 	});
 
+	const showingSearchResults = createMemo(() => {
+		return searchResults() !== null;
+	});
+
 	return (
 		<>
 			<div
@@ -176,16 +180,16 @@ export function PicsExplorer(props: {
 							}
 						}}
 					/>
-					<div
+					<IconButton
 						class="ClearSearch absolute right-0 flex-center"
-						classList={{ 'hidden': searchResults() === null }}
+						classList={{ 'hidden': !showingSearchResults() }}
+						name='x'
+						enabled={showingSearchResults}
 						onClick={() => {
 							setQuery('');
 							setSearchResults(null);
 						}}
-					>
-						×
-					</div>
+					/>
 				</div>
 			</div>
 			<Show when={searchResults()}>
@@ -551,13 +555,12 @@ export function Gallery(props: {
 									{(props.galleryZoom() * 100).toFixed(0)}%
 								</div>
 								<IconButton
+									class="GalleryIconButton"
 									name='undo-2'
 									enabled={translateOccurred}
 									onClick={() => {
-										if (translateOccurred()) {
-											props.setTranslateX(0);
-											props.setTranslateY(0);
-										}
+										props.setTranslateX(0);
+										props.setTranslateY(0);
 									}}
 								/>
 							</div>

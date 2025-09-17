@@ -158,6 +158,14 @@ img.psk-thumbnail {
     cursor: pointer;
 }
 
+.GalleryIconButton {
+    color: var(--subtle);
+}
+
+.GalleryIconButton.enabled {
+    color: var(--accent-bright);
+}
+
 .SearchBar {
     padding-block: 1rem;
 }
@@ -171,12 +179,12 @@ img.psk-thumbnail {
     width: var(--search-height);
     height: var(--search-height);
     cursor: pointer;
-    color: gray;
-    /* background-color: darkblue; */
+    opacity: 0.5;
+    transition: opacity 0.5s ease;
 }
 
 .ClearSearch:hover {
-    color: white;
+    opacity: 1;
 }
 
 .SearchHitsInfo {
@@ -195,11 +203,10 @@ img.psk-thumbnail {
 }
 
 .iconButton {
-    color: var(--subtle);
+    cursor: not-allowed;
 }
 
 .iconButton.enabled {
-    color: var(--accent-bright);
     cursor: pointer;
 }
 
