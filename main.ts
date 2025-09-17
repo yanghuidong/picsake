@@ -65,8 +65,6 @@ function getSectionsOfInterest(fileCache: CachedMetadata) {
 // Remember to rename these classes and interfaces!
 
 interface MySettings {
-	mySetting: string;
-	mySetting2: number;
 	excludePaths: string[];
 	// helpers
 	uploadImagesOnPaste: boolean;
@@ -74,8 +72,6 @@ interface MySettings {
 }
 
 const DEFAULT_SETTINGS: MySettings = {
-	mySetting: 'default',
-	mySetting2: 42,
 	excludePaths: [],
 	uploadImagesOnPaste: false,
 	gjako: gjako.DEFAULT_CONFIG,
@@ -848,28 +844,6 @@ class MyPluginSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty(); // Necessary! o/w we get duplicated settings whenever we navigate back to our tab
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret.')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(settings.mySetting)
-				.onChange(async (value) => {
-					settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Setting #2')
-			.setDesc('It\'s a duh.')
-			.addText(text => text
-				.setPlaceholder('Enter your thing')
-				.setValue(String(settings.mySetting2))
-				.onChange(async (value) => {
-					settings.mySetting2 = Number(value);
-					await this.plugin.saveSettings();
-				}));
 
 		new Setting(containerEl)
 			.setName('Excluded paths')
