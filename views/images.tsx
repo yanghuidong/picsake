@@ -99,6 +99,10 @@ export function PicsExplorer(props: {
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 }) {
+	const [query, setQuery] = createSignal<string>('');
+
+	const [searchResults, setSearchResults] = createSignal<Picture[] | null>(null);
+
 	const allPictures = createMemo(() => {
 		const list: Picture[] = [];
 		const urlSet = new Set<string>();
@@ -113,7 +117,6 @@ export function PicsExplorer(props: {
 		return list;
 	});
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const sourcePathsDict = createMemo(() => {
 		const dict: { [key: string]: string[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
@@ -129,16 +132,55 @@ export function PicsExplorer(props: {
 		return dict;
 	});
 
+	const shownPictures = createMemo(() => {
+		const res = searchResults();
+		return res !== null
+			? res
+			: allPictures();
+	});
+
 	return (
 		<>
+			<div
+				class="SearchBar row flex-center"
+			>
+				<input
+					type="search"
+					value={query()}
+					onInput={(evt) => {
+						const str = evt.target.value;
+						setQuery(str);
+					}}
+					onKeyUp={(evt) => {
+						if (evt.key === 'Enter') {
+							// console.log('Search started');
+							const needle = query().trim().toLowerCase();
+							if (needle === '') {
+								setSearchResults(null);
+							} else {
+								const res = allPictures().filter(pic => {
+									const filePaths = sourcePathsDict()[pic.url];
+									if (filePaths && filePaths.length > 0) {
+										const haystack = filePaths.join().toLowerCase();
+										return haystack.contains(needle);
+									} else {
+										return false;
+									}
+								});
+								setSearchResults(res);
+							}
+						}
+					}}
+				/>
+			</div>
 			<div class="imageGrid-4">
-				<For each={allPictures()}>
+				<For each={shownPictures()}>
 					{(pic, idx) => (
 						<img
 							src={pic.url}
 							alt={pic.description}
 							onClick={() => {
-								props.setGallery(allPictures());
+								props.setGallery(shownPictures());
 								props.setGalleryFocus(idx());
 							}}
 						/>

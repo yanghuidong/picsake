@@ -154,6 +154,14 @@ img.psk-thumbnail {
     cursor: pointer;
 }
 
+.SearchBar {
+    padding-block: 1rem;
+}
+
+.SearchBar input {
+    width: 50%;
+}
+
 /* "components" */
 
 .showOnHover {
