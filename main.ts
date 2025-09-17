@@ -613,7 +613,7 @@ export default class MyPlugin extends Plugin {
 					const uploadsInCodeblock: UploadResult[] = parsed.uploads;
 					uploads.push(...uploadsInCodeblock);
 				} else if (Object.hasOwn(parsed, 'annotations')) {
-					// TODO
+					// MAYBE (NOT)
 				}
 			}
 		}
