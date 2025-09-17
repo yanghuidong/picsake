@@ -144,34 +144,49 @@ export function PicsExplorer(props: {
 			<div
 				class="SearchBar row flex-center"
 			>
-				<input
-					type="search"
-					value={query()}
-					onInput={(evt) => {
-						const str = evt.target.value;
-						setQuery(str);
-					}}
-					onKeyUp={(evt) => {
-						if (evt.key === 'Enter') {
-							// console.log('Search started');
-							const needle = query().trim().toLowerCase();
-							if (needle === '') {
-								setSearchResults(null);
-							} else {
-								const res = allPictures().filter(pic => {
-									const filePaths = sourcePathsDict()[pic.url];
-									if (filePaths && filePaths.length > 0) {
-										const haystack = filePaths.join().toLowerCase();
-										return haystack.contains(needle);
-									} else {
-										return false;
-									}
-								});
-								setSearchResults(res);
+				<div
+					class="SearchBox relative row"
+				>
+					<input
+						class="w-full h-full"
+						type="search"
+						value={query()}
+						onInput={(evt) => {
+							const str = evt.target.value;
+							setQuery(str);
+						}}
+						onKeyUp={(evt) => {
+							if (evt.key === 'Enter') {
+								// console.log('Search started');
+								const needle = query().trim().toLowerCase();
+								if (needle === '') {
+									setSearchResults(null);
+								} else {
+									const res = allPictures().filter(pic => {
+										const filePaths = sourcePathsDict()[pic.url];
+										if (filePaths && filePaths.length > 0) {
+											const haystack = filePaths.join().toLowerCase();
+											return haystack.contains(needle);
+										} else {
+											return false;
+										}
+									});
+									setSearchResults(res);
+								}
 							}
-						}
-					}}
-				/>
+						}}
+					/>
+					<div
+						class="ClearSearch absolute right-0 flex-center"
+						classList={{ 'hidden': searchResults() === null }}
+						onClick={() => {
+							setQuery('');
+							setSearchResults(null);
+						}}
+					>
+						×
+					</div>
+				</div>
 			</div>
 			<Show when={searchResults()}>
 				{results =>

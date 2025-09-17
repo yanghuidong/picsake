@@ -158,8 +158,21 @@ img.psk-thumbnail {
     padding-block: 1rem;
 }
 
-.SearchBar input {
+.SearchBox {
     width: 50%;
+    height: 2rem;
+}
+
+.ClearSearch {
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    color: gray;
+    /* background-color: darkblue; */
+}
+
+.ClearSearch:hover {
+    color: white;
 }
 
 .SearchHitsInfo {
