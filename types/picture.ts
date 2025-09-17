@@ -1,6 +1,6 @@
 import { UploadResult } from 'services/gjako';
 
-export { imageFormatFromLink, isImageLink };
+export { imageFormatFromLink, isImageLink, shouldExcludePicture };
 export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, UploadResultDict };
 
 type Picture = {
@@ -13,6 +13,12 @@ type GlobalPicture = {
 	description: string,
 	sourcePaths: string[],
 };
+
+function shouldExcludePicture(pic: GlobalPicture, alwaysInclude: boolean): boolean {
+	if (alwaysInclude) return false;
+	if (pic.description.startsWith('//')) return true;
+	return false;
+}
 
 type Annotation = {
 	url: string,

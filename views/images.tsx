@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath } from 'types/picture';
+import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, shouldExcludePicture } from 'types/picture';
 import { IconButton } from 'views/icons';
 
 export function ImageUpload(props: {
@@ -99,6 +99,8 @@ export function PicsExplorer(props: {
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 }) {
+	const [revealExcluded, setRevealExcluded] = createSignal<boolean>(false);
+
 	const [query, setQuery] = createSignal<string>('');
 
 	const [searchResults, setSearchResults] = createSignal<Picture[] | null>(null);
@@ -131,7 +133,7 @@ export function PicsExplorer(props: {
 				}
 			}
 		}
-		return list;
+		return list.filter(pic => !shouldExcludePicture(pic, revealExcluded()));
 	});
 
 	const shownPictures = createMemo(() => {
