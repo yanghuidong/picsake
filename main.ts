@@ -872,9 +872,10 @@ class MyPluginSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Exclude paths')
-			.setDesc('Add one path prefix per line, e.g. Tmp/ will excludes all paths that match the prefix.')
+			.setName('Excluded paths')
+			.setDesc('Add one path prefix per line, e.g. Tmp/ will exclude all file paths that match the prefix.')
 			.addTextArea(comp => comp
+				.setPlaceholder('Tmp/\nTmp file.md')
 				.setValue(settings.excludePaths.join('\n'))
 				.onChange(async value => {
 					settings.excludePaths = value.split('\n').filter(line => line.length > 0);
