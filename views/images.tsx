@@ -2,7 +2,7 @@ import { TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, shouldExcludePicture } from 'types/picture';
-import { IconButton } from 'views/icons';
+import { IconButton, IconToggle } from 'views/icons';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -150,7 +150,7 @@ export function PicsExplorer(props: {
 	return (
 		<>
 			<div
-				class="SearchBar row flex-center"
+				class="SearchBar row row-spacing-sm flex-center"
 			>
 				<div
 					class="SearchBox relative row"
@@ -190,6 +190,12 @@ export function PicsExplorer(props: {
 						}}
 					/>
 				</div>
+				<IconToggle
+					onIcon='eye'
+					offIcon='eye-off'
+					state={revealExcluded}
+					setState={setRevealExcluded}
+				/>
 			</div>
 			<Show when={searchResults()}>
 				{results =>
