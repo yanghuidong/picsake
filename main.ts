@@ -1,4 +1,4 @@
-import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
+import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, prepareSimpleSearch, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
@@ -282,6 +282,22 @@ export default class MyPlugin extends Plugin {
 
 		// Reveal the leaf in case it is in a collapsed sidebar
 		if (leaf) await workspace.revealLeaf(leaf);
+	}
+
+	// Note: fts needs to be an arrow function instead of a class method because `this` binding is automatic;
+	// o/w we'd get TypeError: Cannot read properties of undefined (reading 'vault')
+	fts = async (query: string): Promise<string[]> => {
+		const searcher = prepareSimpleSearch(query);
+		const mdFiles = this.app.vault.getMarkdownFiles();
+		const matchedPaths = [];
+
+		for (const mdFile of mdFiles) {
+			const content = await this.app.vault.cachedRead(mdFile);
+			const searchResult = searcher(content);
+			if (searchResult !== null) matchedPaths.push(mdFile.path);
+		}
+
+		return matchedPaths;
 	}
 
 	// 2. Overriding inherited class methods
@@ -715,6 +731,7 @@ class PicsExplorerView extends ItemView {
 				excludePaths: this.plugin.excludePaths,
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
+				fts: this.plugin.fts,
 			});
 		}, contentEl);
 	}

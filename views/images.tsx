@@ -99,6 +99,7 @@ export function PicsExplorer(props: {
 	excludePaths: Accessor<string[]>,
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
+	fts: (query: string) => Promise<string[]>,
 }) {
 	const [revealExcluded, setRevealExcluded] = createSignal<boolean>(false);
 
@@ -165,16 +166,27 @@ export function PicsExplorer(props: {
 							const str = evt.target.value;
 							setQuery(str);
 						}}
-						onKeyUp={(evt) => {
+						onKeyUp={async (evt) => {
 							if (evt.key === 'Enter') {
 								const needle = query().trim().toLowerCase();
 								if (needle === '') {
 									setSearchResults(null);
 								} else {
+									const ftsMatchedPaths = evt.shiftKey
+										? await props.fts(needle)
+										: null;
+
 									const res = allPictures().filter(pic => {
 										const haystack = toHaystack(pic);
-										return haystack.contains(needle);
+										const quickMatch = haystack.contains(needle);
+
+										const ftsMatch = ftsMatchedPaths !== null
+											? pic.sources.map(src => src.filePath).some(path => ftsMatchedPaths.contains(path))
+											: false;
+
+										return quickMatch || ftsMatch;
 									});
+
 									setSearchResults(res);
 								}
 							}
