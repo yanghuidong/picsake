@@ -193,7 +193,16 @@ img.psk-thumbnail {
 }
 
 .SearchHitsInfo {
-    padding-block: 1rem;
+    padding-block: 0.75rem;
+    padding-inline: 1.25rem;
+    margin-block-end: 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-accent);
+    background-color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) - 5%) / 0.3);
+}
+
+.SearchHitsInfo .Tip {
+    margin-inline-start: 0.5rem;
 }
 
 .RevealToggle {
@@ -228,6 +237,11 @@ img.psk-thumbnail {
 
 .iconToggle.enabled {
     opacity: 1;
+}
+
+.inlineIcon {
+    vertical-align: middle;
+    margin-inline-end: 0.25rem;
 }
 
 /* Based on https://tailwindcss.com/docs/object-fit#containing-within */

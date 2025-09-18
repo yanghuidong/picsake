@@ -2,7 +2,7 @@ import { TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
-import { IconButton, IconToggle } from 'views/icons';
+import { IconButton, IconToggle, InlineIcon } from 'views/icons';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -220,7 +220,15 @@ export function PicsExplorer(props: {
 			<Show when={searchResults()}>
 				{results =>
 					<div class="SearchHitsInfo">
-						Found {results().length} pictures {ftsMode() ? 'via full-text search' : 'via quick search (use Shift+Enter to enable full-text search)'}
+						Found {results().length} pictures via{' '}
+						<em>{ftsMode() ? 'full-text' : 'quick'}</em>{' '}
+						search.
+						<Show when={!ftsMode()}>
+							<span class="Tip">
+								<InlineIcon name="info" />
+								Use <kbd>Shift</kbd>+<kbd>Enter</kbd> to enable full-text search.
+							</span>
+						</Show>
 					</div>
 				}
 			</Show>

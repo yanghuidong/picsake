@@ -1,7 +1,7 @@
 import { setIcon } from 'obsidian';
 import { Accessor, createEffect, onMount, Setter } from 'solid-js';
 
-export { IconButton, IconToggle };
+export { IconButton, IconToggle, InlineIcon };
 
 function IconButton(props: {
 	name: 'undo-2' | 'x'
@@ -57,6 +57,25 @@ function IconToggle(props: {
 			onClick={() => {
 				props.setState(prev => !prev);
 			}}
+		/>
+	);
+}
+
+function InlineIcon(props: {
+	name: 'info'
+	class?: string,
+}) {
+	let iconRef!: HTMLSpanElement;
+
+	onMount(() => {
+		setIcon(iconRef, props.name);
+	});
+
+	const defaultClass = 'inlineIcon'
+
+	return (
+		<span ref={iconRef}
+			class={props.class ? `${props.class} ${defaultClass}` : defaultClass}
 		/>
 	);
 }
