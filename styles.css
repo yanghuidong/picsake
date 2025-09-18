@@ -201,6 +201,11 @@ img.psk-thumbnail {
     background-color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) - 5%) / 0.3);
 }
 
+.SearchHitsInfo.ZeroHit {
+    border: none;
+    background-color: hsl(0 0% 35% / .15);
+}
+
 .SearchHitsInfo .Tip {
     margin-inline-start: 0.5rem;
 }

@@ -219,8 +219,12 @@ export function PicsExplorer(props: {
 			</div>
 			<Show when={searchResults()}>
 				{results =>
-					<div class="SearchHitsInfo">
-						Found {results().length} pictures via{' '}
+					<div
+						class="SearchHitsInfo"
+						classList={{ 'ZeroHit': results().length === 0 }}
+					>
+						<InlineIcon name={results().length > 0 ? 'circle-check-big' : 'circle-minus'} />
+						Found <strong>{results().length}</strong> pictures via{' '}
 						<em>{ftsMode() ? 'full-text' : 'quick'}</em>{' '}
 						search.
 						<Show when={!ftsMode()}>

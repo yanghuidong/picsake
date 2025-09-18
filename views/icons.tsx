@@ -62,12 +62,12 @@ function IconToggle(props: {
 }
 
 function InlineIcon(props: {
-	name: 'info'
+	name: 'circle-check-big' | 'circle-minus' | 'info'
 	class?: string,
 }) {
 	let iconRef!: HTMLSpanElement;
 
-	onMount(() => {
+	createEffect(() => {
 		setIcon(iconRef, props.name);
 	});
 
