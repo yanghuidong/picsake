@@ -1,6 +1,6 @@
 import { UploadResult } from 'services/gjako';
 
-export { imageFormatFromLink, isImageLink, shouldExcludePicture, toLocalPicture };
+export { imageFormatFromLink, isImageLink, shouldExcludePicture, toHaystack, toLocalPicture };
 export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, PictureSource, UploadResultDict };
 
 type Picture = {
@@ -20,6 +20,12 @@ type PictureSource = {
 
 function toLocalPicture(global: GlobalPicture): Picture {
 	return { url: global.url, description: global.sources[0]?.description ?? '' };
+}
+
+function toHaystack(pic: GlobalPicture): string {
+	const SEP = '\t';
+	const haystack = pic.sources.map(src => `${src.filePath}${SEP}${src.description}`);
+	return haystack.join(SEP).toLowerCase();
 }
 
 function shouldExcludePicture(pic: GlobalPicture, excludePaths: string[], alwaysInclude: boolean): boolean {

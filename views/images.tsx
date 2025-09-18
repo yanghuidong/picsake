@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toLocalPicture } from 'types/picture';
+import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
 import { IconButton, IconToggle } from 'views/icons';
 
 export function ImageUpload(props: {
@@ -172,10 +172,8 @@ export function PicsExplorer(props: {
 									setSearchResults(null);
 								} else {
 									const res = allPictures().filter(pic => {
-										// TODO extract to types/picture.ts
-										const haystack = pic.sources.map(src => `${src.filePath}\t${src.description}`);
-										const haystackCompact = haystack.join('\t').toLowerCase();
-										return haystackCompact.contains(needle);
+										const haystack = toHaystack(pic);
+										return haystack.contains(needle);
 									});
 									setSearchResults(res);
 								}
