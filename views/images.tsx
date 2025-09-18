@@ -107,6 +107,8 @@ export function PicsExplorer(props: {
 
 	const [searchResults, setSearchResults] = createSignal<GlobalPicture[] | null>(null);
 
+	const [ftsMode, setFtsMode] = createSignal<boolean>(false);
+
 	const sourcePathsDict = createMemo(() => {
 		const dict: { [key: string]: PictureSource[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
@@ -172,9 +174,13 @@ export function PicsExplorer(props: {
 								if (needle === '') {
 									setSearchResults(null);
 								} else {
-									const ftsMatchedPaths = evt.shiftKey
-										? await props.fts(needle)
-										: null;
+									let ftsMatchedPaths: string[] | null = null;
+									if (evt.shiftKey) {
+										setFtsMode(true);
+										ftsMatchedPaths = await props.fts(needle);
+									} else {
+										setFtsMode(false);
+									}
 
 									const res = allPictures().filter(pic => {
 										const haystack = toHaystack(pic);
@@ -214,7 +220,7 @@ export function PicsExplorer(props: {
 			<Show when={searchResults()}>
 				{results =>
 					<div class="SearchHitsInfo">
-						Found {results().length} pictures
+						Found {results().length} pictures {ftsMode() ? 'via full-text search' : 'via quick search (use Shift+Enter to enable full-text search)'}
 					</div>
 				}
 			</Show>
