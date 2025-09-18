@@ -132,16 +132,22 @@ export default class MyPlugin extends Plugin {
 		});
 	}
 
-	onFileRename = (file: TAbstractFile, oldPath: string) => {
+	onFileRename = (newFile: TAbstractFile, oldPath: string) => {
+		if (this.store.activeFile?.path === oldPath) {
+			// Note: newFile is NOT a TFile
+			// Note: alternatively, use `this.app.workspace.getActiveFile()`
+			this.setStore('activeFile', this.app.vault.getFileByPath(newFile.path));
+		}
+
 		const oldPictures = this.store.pictures[oldPath];
 		if (!oldPictures || oldPictures.length === 0) return;
 
 		this.setStore('pictures', produce(pictures => {
 			delete pictures[oldPath];
-			pictures[file.path] = oldPictures;
+			pictures[newFile.path] = oldPictures;
 		}));
 
-		new Notice(`${oldPictures.length} pictures moved from ${oldPath} to ${file.path}`);
+		new Notice(`${oldPictures.length} pictures moved from ${oldPath} to ${newFile.path}`);
 	}
 
 	onFileDelete = (file: TAbstractFile) => {
