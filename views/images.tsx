@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, shouldExcludePicture } from 'types/picture';
+import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toLocalPicture } from 'types/picture';
 import { IconButton, IconToggle } from 'views/icons';
 
 export function ImageUpload(props: {
@@ -104,17 +104,18 @@ export function PicsExplorer(props: {
 
 	const [query, setQuery] = createSignal<string>('');
 
-	const [searchResults, setSearchResults] = createSignal<Picture[] | null>(null);
+	const [searchResults, setSearchResults] = createSignal<GlobalPicture[] | null>(null);
 
 	const sourcePathsDict = createMemo(() => {
-		const dict: { [key: string]: string[] } = {};
+		const dict: { [key: string]: PictureSource[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
 			for (const pic of pictures) {
+				const source = { filePath: path, description: pic.description };
 				const existing = dict[pic.url];
 				if (existing === undefined) {
-					dict[pic.url] = [path];
+					dict[pic.url] = [source];
 				} else {
-					dict[pic.url] = [...existing, path];
+					dict[pic.url] = [...existing, source];
 				}
 			}
 		}
@@ -127,8 +128,8 @@ export function PicsExplorer(props: {
 		for (const pictures of Object.values(props.pictures)) {
 			for (const pic of pictures) {
 				if (!urlSet.has(pic.url)) {
-					const sourcePaths = sourcePathsDict()[pic.url] ?? [];
-					const globalPic = { ...pic, sourcePaths };
+					const sources = sourcePathsDict()[pic.url] ?? [];
+					const globalPic = { ...pic, sources };
 					list.push(globalPic);
 					urlSet.add(pic.url);
 				}
@@ -171,8 +172,9 @@ export function PicsExplorer(props: {
 									setSearchResults(null);
 								} else {
 									const res = allPictures().filter(pic => {
-										const haystack = [pic.description, ...pic.sourcePaths];
-										const haystackCompact = haystack.join().toLowerCase();
+										// TODO extract to types/picture.ts
+										const haystack = pic.sources.map(src => `${src.filePath}\t${src.description}`);
+										const haystackCompact = haystack.join('\t').toLowerCase();
 										return haystackCompact.contains(needle);
 									});
 									setSearchResults(res);
@@ -211,9 +213,9 @@ export function PicsExplorer(props: {
 					{(pic, idx) => (
 						<img
 							src={pic.url}
-							alt={pic.description}
+							alt={pic.sources[0]?.description}
 							onClick={() => {
-								props.setGallery(shownPictures());
+								props.setGallery(shownPictures().map(toLocalPicture));
 								props.setGalleryFocus(idx());
 							}}
 						/>

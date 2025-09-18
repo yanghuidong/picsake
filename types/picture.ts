@@ -1,7 +1,7 @@
 import { UploadResult } from 'services/gjako';
 
-export { imageFormatFromLink, isImageLink, shouldExcludePicture };
-export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, UploadResultDict };
+export { imageFormatFromLink, isImageLink, shouldExcludePicture, toLocalPicture };
+export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, PictureSource, UploadResultDict };
 
 type Picture = {
 	url: string,
@@ -10,9 +10,17 @@ type Picture = {
 
 type GlobalPicture = {
 	url: string,
-	description: string,
-	sourcePaths: string[],
+	sources: PictureSource[],
 };
+
+type PictureSource = {
+	filePath: string,
+	description: string,
+};
+
+function toLocalPicture(global: GlobalPicture): Picture {
+	return { url: global.url, description: global.sources[0]?.description ?? '' };
+}
 
 function shouldExcludePicture(pic: GlobalPicture, excludePaths: string[], alwaysInclude: boolean): boolean {
 	function shouldExcludeByPath(path: string): boolean {
@@ -22,8 +30,11 @@ function shouldExcludePicture(pic: GlobalPicture, excludePaths: string[], always
 	}
 
 	if (alwaysInclude) return false;
-	if (pic.description.startsWith('//')) return true;
-	if (pic.sourcePaths.some(path => shouldExcludeByPath(path))) return true;
+
+	const descriptions = pic.sources.map(src => src.description);
+	const sourcePaths = pic.sources.map(src => src.filePath);
+	if (descriptions.some(description => description.startsWith('//'))) return true;
+	if (sourcePaths.some(path => shouldExcludeByPath(path))) return true;
 	return false;
 }
 
