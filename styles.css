@@ -23,6 +23,7 @@
 .workspace-leaf-content[data-type="psk-view-pics-explorer"] {
     --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 10%) / .8);
     --accent-dim: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) - 5%) / 0.3);
+    --subtle-bright: hsl(0 0% 50% / .8);
     --search-height: 2.5rem;
 }
 
@@ -236,7 +237,8 @@ img.psk-thumbnail {
 }
 
 .Thumbnail {
-    border: 3px solid var(--accent-bright);
+    /* border: 3px solid var(--accent-bright); */
+    border: 5px solid var(--subtle-bright);
     border-radius: 5px;
     overflow: clip;
 }
