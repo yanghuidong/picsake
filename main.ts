@@ -709,6 +709,7 @@ class PicsExplorerView extends ItemView {
 
 	constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
 		super(leaf);
+		this.navigation = true; // if not, pressing Escape key will switch to the previous active file!
 		this.icon = ICON;
 		this.plugin = plugin;
 	}
