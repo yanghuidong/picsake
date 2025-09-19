@@ -239,14 +239,30 @@ export function PicsExplorer(props: {
 			<div class="imageGrid-4">
 				<For each={shownPictures()}>
 					{(pic, idx) => (
-						<img
-							src={pic.url}
-							alt={pic.sources[0]?.description}
+						<div
+							class="parent relative"
 							onClick={() => {
 								props.setGallery(shownPictures().map(toLocalPicture));
 								props.setGalleryFocus(idx());
 							}}
-						/>
+						>
+							<img
+								src={pic.url}
+								alt={pic.sources[0]?.description}
+							/>
+							<div
+								class="HoverButtonGroup showOnParentHover absolute top-0 right-0 row row-spacing-xs"
+							>
+								<IconButton name="notebook-text"
+									class="GoToNoteButton"
+									enabled={() => true}
+									onClick={(evt) => {
+										evt.stopPropagation();
+										console.log('clicked');
+									}}
+								/>
+							</div>
+						</div>
 					)}
 				</For>
 			</div>
