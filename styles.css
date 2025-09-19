@@ -21,6 +21,8 @@
 }
 
 .workspace-leaf-content[data-type="psk-view-pics-explorer"] {
+    --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 10%) / .8);
+    --accent-dim: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) - 5%) / 0.3);
     --search-height: 2.5rem;
 }
 
@@ -197,8 +199,8 @@ img.psk-thumbnail {
     padding-inline: 1.25rem;
     margin-block-end: 1rem;
     border-radius: 1rem;
-    border: 1px solid var(--color-accent);
-    background-color: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) - 5%) / 0.3);
+    border: 1px solid var(--accent-bright);
+    background-color: var(--accent-dim);
 }
 
 .SearchHitsInfo.ZeroHit {
@@ -234,7 +236,7 @@ img.psk-thumbnail {
 }
 
 .Thumbnail {
-    border: 3px solid hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 10%) / .8);
+    border: 3px solid var(--accent-bright);
     border-radius: 5px;
     overflow: clip;
 }
