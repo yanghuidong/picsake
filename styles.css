@@ -233,6 +233,12 @@ img.psk-thumbnail {
     opacity: 1;
 }
 
+.Thumbnail {
+    border: 3px solid hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 10%) / .8);
+    border-radius: 5px;
+    overflow: clip;
+}
+
 /* "components" */
 
 .showOnHover {

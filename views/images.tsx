@@ -241,7 +241,7 @@ export function PicsExplorer(props: {
 				<For each={shownPictures()}>
 					{(pic, idx) => (
 						<div
-							class="gridCell parent relative"
+							class="Thumbnail gridCell parent relative"
 							onClick={() => {
 								props.setGallery(shownPictures().map(toLocalPicture));
 								props.setGalleryFocus(idx());
