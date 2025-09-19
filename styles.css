@@ -282,6 +282,25 @@ img.psk-thumbnail {
     background-size: 8px 8px;
 }
 
+.imageGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.5rem;
+}
+
+.imageGrid > .gridCell {
+    aspect-ratio: 1 / 1;
+    /* Note: the overflow rule is necessary to ensure the cell is a perfect square,
+    o/w we get an extra 4px of height than width! */
+    overflow: hidden;
+}
+
+.imageGrid img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
 .imageGrid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

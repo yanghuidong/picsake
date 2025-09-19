@@ -237,11 +237,11 @@ export function PicsExplorer(props: {
 					</div>
 				}
 			</Show>
-			<div class="imageGrid-4">
+			<div class="imageGrid">
 				<For each={shownPictures()}>
 					{(pic, idx) => (
 						<div
-							class="parent relative"
+							class="gridCell parent relative"
 							onClick={() => {
 								props.setGallery(shownPictures().map(toLocalPicture));
 								props.setGalleryFocus(idx());
