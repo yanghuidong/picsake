@@ -290,9 +290,10 @@ img.psk-thumbnail {
 
 .imageGrid > .gridCell {
     aspect-ratio: 1 / 1;
-    /* Note: the overflow rule is necessary to ensure the cell is a perfect square,
+    /* Note: the min-height or overflow rule is necessary to ensure the cell is a perfect square,
     o/w we get an extra 4px of height than width! */
-    overflow: hidden;
+    /* overflow: hidden; */
+    min-height: 0;
 }
 
 .imageGrid img {
