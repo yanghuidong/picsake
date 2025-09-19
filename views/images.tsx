@@ -1,4 +1,4 @@
-import { TFile } from 'obsidian';
+import { App, TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
@@ -100,6 +100,7 @@ export function PicsExplorer(props: {
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 	fts: (query: string) => Promise<string[]>,
+	app: App,
 }) {
 	const [revealExcluded, setRevealExcluded] = createSignal<boolean>(false);
 
@@ -258,7 +259,16 @@ export function PicsExplorer(props: {
 									enabled={() => true}
 									onClick={(evt) => {
 										evt.stopPropagation();
-										console.log('clicked');
+
+										// TODO 1) handle multi-source case, 2) Cmd+click to open in a new tab (with reuse)
+										const source = pic.sources[0];
+										if (source) {
+											const file = props.app.vault.getFileByPath(source.filePath);
+											if (file) {
+												const currLeaf = props.app.workspace.getLeaf(false);
+												currLeaf.openFile(file);
+											}
+										}
 									}}
 								/>
 							</div>

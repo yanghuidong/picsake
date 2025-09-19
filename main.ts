@@ -733,6 +733,7 @@ class PicsExplorerView extends ItemView {
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 				fts: this.plugin.fts,
+				app: this.plugin.app,
 			});
 		}, contentEl);
 	}
