@@ -5,11 +5,13 @@ export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPic
 
 type Picture = {
 	url: string,
+	localPath: string | null,
 	description: string,
 };
 
 type GlobalPicture = {
 	url: string,
+	localPath: string | null,
 	sources: PictureSource[],
 };
 
@@ -19,7 +21,11 @@ type PictureSource = {
 };
 
 function toLocalPicture(global: GlobalPicture): Picture {
-	return { url: global.url, description: global.sources[0]?.description ?? '' };
+	return {
+		url: global.url,
+		localPath: global.localPath,
+		description: global.sources[0]?.description ?? '',
+	};
 }
 
 function toHaystack(pic: GlobalPicture): string {

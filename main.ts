@@ -558,12 +558,12 @@ export default class MyPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	getAttachmentUrl(linkText: string): string | null {
+	getAttachmentInfo(linkText: string): { url: string, path: string } | null {
 		const linkPath = getLinkpath(linkText);
 		const sourcePath = this.store.activeFile?.path ?? '';
 		const file = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);
 
-		return file ? this.app.vault.getResourcePath(file) : null;
+		return file ? { url: this.app.vault.getResourcePath(file), path: file.path } : null;
 	}
 
 	/**
@@ -593,6 +593,7 @@ export default class MyPlugin extends Plugin {
 					if (description !== undefined && url && isImageLink(url)) {
 						picture = {
 							url,
+							localPath: null,
 							description,
 						};
 					}
@@ -602,10 +603,11 @@ export default class MyPlugin extends Plugin {
 					if (matchesEmbed) {
 						const [, linkText, displayText] = matchesEmbed;
 						if (linkText && isImageLink(linkText)) {
-							const url = this.getAttachmentUrl(linkText);
-							if (url) {
+							const info = this.getAttachmentInfo(linkText);
+							if (info) {
 								picture = {
-									url,
+									url: info.url,
+									localPath: info.path,
 									description: displayText ?? linkText,
 								};
 							}
