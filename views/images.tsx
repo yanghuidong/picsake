@@ -1,4 +1,4 @@
-import { App, TFile } from 'obsidian';
+import { App, Notice, TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
@@ -249,10 +249,22 @@ export function PicsExplorer(props: {
 								alt={pic.sources[0]?.description}
 							/>
 							<div
-								class="HoverButtonGroup showOnParentHover absolute top-0 right-0 row row-spacing-xs"
+								class="HoverButtonGroup showOnParentHover absolute top-0 right-0 row row-spacing-2xs"
 							>
+								<IconButton name="link"
+									class="HoverButton"
+									enabled={() => true}
+									onClick={(evt) => {
+										evt.stopPropagation();
+
+										const copyContent = pic.localPath === null ? pic.url : pic.localPath;
+										navigator.clipboard.writeText(copyContent)
+											.then(() => new Notice(`Copied to clipboard: ${copyContent}`))
+											.catch((err) => new Notice(`Failed to copy to clipboard: ${err}`));
+									}}
+								/>
 								<IconButton name="notebook-text"
-									class="GoToNoteButton"
+									class="HoverButton"
 									enabled={() => true}
 									onClick={(evt) => {
 										evt.stopPropagation();

@@ -9,6 +9,7 @@
 :root {
     --psk-sm: 1rem;
     --psk-xs: 0.5rem;
+    --psk-2xs: 0.25rem;
 }
 
 #psk-gallery {
@@ -223,7 +224,7 @@ img.psk-thumbnail {
     padding: 0.25rem;
 }
 
-.GoToNoteButton {
+.HoverButton {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 0.25rem;
@@ -232,7 +233,7 @@ img.psk-thumbnail {
     transition: opacity 0.2s ease-in;
 }
 
-.GoToNoteButton:hover {
+.HoverButton:hover {
     opacity: 1;
 }
 
@@ -418,6 +419,10 @@ img.psk-thumbnail {
     column-gap: var(--psk-xs);
 }
 
+.row-spacing-2xs {
+    column-gap: var(--psk-2xs);
+}
+
 .column {
     display: flex;
     flex-direction: column;
@@ -429,6 +434,10 @@ img.psk-thumbnail {
 
 .column-spacing-xs {
     row-gap: var(--psk-xs);
+}
+
+.column-spacing-2xs {
+    row-gap: var(--psk-2xs);
 }
 
 .flex-center {
