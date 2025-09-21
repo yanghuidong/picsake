@@ -78,7 +78,6 @@ const DEFAULT_SETTINGS: MySettings = {
 }
 
 type MyStore = {
-	activeFile: TFile | null,
 	pictures: PicturesByPath,
 	uploads: UploadResultDict,
 	annotations: AnnotationsByURL,
@@ -93,6 +92,8 @@ export default class MyPlugin extends Plugin {
 	store!: MyStore;
 	private setStore!: SetStoreFunction<MyStore>;
 	private disposeEffect!: () => void;
+	activeFile!: Accessor<TFile | null>;
+	setActiveFile!: Setter<TFile | null>;
 	gallery!: Accessor<Picture[]>;
 	setGallery!: Setter<Picture[]>;
 	galleryFocus!: Accessor<number | null>;
@@ -133,10 +134,10 @@ export default class MyPlugin extends Plugin {
 	}
 
 	onFileRename = (newFile: TAbstractFile, oldPath: string) => {
-		if (this.store.activeFile?.path === oldPath) {
+		if (this.activeFile()?.path === oldPath) {
 			// Note: newFile is NOT a TFile
 			// Note: alternatively, use `this.app.workspace.getActiveFile()`
-			this.setStore('activeFile', this.app.vault.getFileByPath(newFile.path));
+			this.setActiveFile(this.app.vault.getFileByPath(newFile.path));
 		}
 
 		const oldPictures = this.store.pictures[oldPath];
@@ -163,7 +164,7 @@ export default class MyPlugin extends Plugin {
 
 	onActivateFile = (file: TFile | null) => {
 		// new Notice(`Activated ${file?.name}`);
-		this.setStore('activeFile', file);
+		this.setActiveFile(file);
 
 		// FIXME this doesn't dynamically update the tooltip text;
 		// somehow the Outline core plugin is able to update correctly, what's the API?
@@ -224,7 +225,7 @@ export default class MyPlugin extends Plugin {
 					// We therefore have to use our global state obtained from parsing the Markdown source.
 					// see `extractPicturesFromFile`
 
-					const activeFile = this.store.activeFile;
+					const activeFile = this.activeFile();
 					if (activeFile) {
 						const gallery: Picture[] = this.store.pictures[activeFile.path] ?? [];
 						this.setGallery(gallery);
@@ -306,7 +307,6 @@ export default class MyPlugin extends Plugin {
 		const start = performance.now();
 
 		const [store, setStore] = createStore<MyStore>({
-			activeFile: null,
 			pictures: {},
 			uploads: {},
 			annotations: {},
@@ -314,6 +314,10 @@ export default class MyPlugin extends Plugin {
 		// eslint-disable-next-line solid/reactivity
 		this.store = store;
 		this.setStore = setStore;
+
+		const [activeFile, setActiveFile] = createSignal<TFile | null>(null);
+		this.activeFile = activeFile;
+		this.setActiveFile = setActiveFile;
 
 		const [gallery, setGallery] = createSignal<Picture[]>([]);
 		this.gallery = gallery;
@@ -384,7 +388,7 @@ export default class MyPlugin extends Plugin {
 
 			// 0. States
 
-			this.setStore('activeFile', this.app.workspace.getActiveFile());
+			this.setActiveFile(this.app.workspace.getActiveFile());
 
 			const mdFiles = this.app.vault.getMarkdownFiles();
 			for (const mdFile of mdFiles) {
@@ -487,7 +491,7 @@ export default class MyPlugin extends Plugin {
 				// actually, we already keep track of this in `this.store.activeFile`
 				// const activeFile = this.app.workspace.getActiveFile();
 
-				const canRunCommand = this.store.activeFile !== null;
+				const canRunCommand = this.activeFile() !== null;
 				if (canRunCommand) {
 					// If checking is true, we're simply _checking_ if the command can be run.
 					// If checking is false, then we want to actually perform the operation.
@@ -560,7 +564,7 @@ export default class MyPlugin extends Plugin {
 
 	getAttachmentInfo(linkText: string): { url: string, path: string } | null {
 		const linkPath = getLinkpath(linkText);
-		const sourcePath = this.store.activeFile?.path ?? '';
+		const sourcePath = this.activeFile()?.path ?? '';
 		const file = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);
 
 		return file ? { url: this.app.vault.getResourcePath(file), path: file.path } : null;
@@ -679,17 +683,14 @@ class ActivePicsView extends ItemView {
 	async onOpen() {
 		this.dispose = render(() => {
 			const activePictures = createMemo(() => {
-				const activeFile = this.plugin.store.activeFile;
+				const activeFile = this.plugin.activeFile();
 				return activeFile
 					? this.plugin.store.pictures[activeFile.path] ?? []
 					: []
 			});
-			const activeFile = createMemo(() => {
-				return this.plugin.store.activeFile;
-			});
 			return createComponent(ActivePics, {
 				activePictures,
-				activeFile,
+				activeFile: this.plugin.activeFile,
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 			});
