@@ -238,14 +238,15 @@ img.psk-thumbnail {
 }
 
 .Thumbnail {
-    /* border: 3px solid var(--accent-bright); */
-    border: 5px solid var(--subtle-bright);
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--subtle-bright);
     border-radius: 5px;
     overflow: clip;
 }
 
 .Thumbnail.LocalFile {
-    border: 5px solid var(--accent-bright);
+    border-color: var(--accent-bright);
 }
 
 /* "components" */
