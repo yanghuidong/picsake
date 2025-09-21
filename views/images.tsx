@@ -199,10 +199,9 @@ export function PicsExplorer(props: {
 							}
 						}}
 					/>
-					<IconButton
+					<IconButton name="x"
 						class="ClearSearch absolute right-0 flex-center"
 						classList={{ 'hidden': !showingSearchResults() }}
-						name="x"
 						enabled={showingSearchResults}
 						onClick={() => {
 							setQuery('');
@@ -210,10 +209,8 @@ export function PicsExplorer(props: {
 						}}
 					/>
 				</div>
-				<IconToggle
+				<IconToggle onIcon="eye" offIcon="eye-off"
 					class="RevealToggle"
-					onIcon="eye"
-					offIcon="eye-off"
 					state={revealExcluded}
 					setState={setRevealExcluded}
 				/>
@@ -617,9 +614,8 @@ export function Gallery(props: {
 								>
 									{(props.galleryZoom() * 100).toFixed(0)}%
 								</div>
-								<IconButton
+								<IconButton name="undo-2"
 									class="GalleryIconButton"
-									name="undo-2"
 									enabled={translateOccurred}
 									onClick={() => {
 										props.setTranslateX(0);
