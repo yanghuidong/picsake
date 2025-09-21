@@ -239,6 +239,7 @@ export function PicsExplorer(props: {
 					{(pic, idx) => (
 						<div
 							class="Thumbnail gridCell parent relative"
+							classList={{ 'LocalFile': pic.localPath !== null }}
 							onClick={() => {
 								props.setGallery(shownPictures().map(toLocalPicture));
 								props.setGalleryFocus(idx());
