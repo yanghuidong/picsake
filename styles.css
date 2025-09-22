@@ -179,9 +179,23 @@ img.psk-thumbnail {
     max-height: 400px;
     padding: 1rem;
     border-radius: 0.5rem;
-    font-size: xx-large;
     background-color: hsl(0 0% 0% / 0.3);
     box-shadow: 1px 1px 2px hsl(0 0% 0% / 0.5);
+}
+
+.PicDescription .Brief {
+    font-size: xx-large;
+    line-height: 2;
+}
+
+.PicDescription .Detail {
+    font-size: x-large;
+    color: hsl(0 0% 70%);
+}
+
+.PicDescription .NoDescription {
+    font-size: larger;
+    color: hsl(0 0% 60%);
 }
 
 .SearchBar {

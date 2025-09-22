@@ -1,6 +1,6 @@
 import { UploadResult } from 'services/gjako';
 
-export { imageFormatFromLink, isImageLink, shouldExcludePicture, toHaystack, toLocalPicture };
+export { imageFormatFromLink, isImageLink, parseDescription, shouldExcludePicture, toHaystack, toLocalPicture };
 export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, PictureSource, UploadResultDict };
 
 type Picture = {
@@ -19,6 +19,30 @@ type PictureSource = {
 	filePath: string,
 	description: string,
 };
+
+type StructuredDescription = {
+	brief: string,
+	detail?: string,
+	resize?: string, // e.g. 400x300
+};
+
+function parseDescription(description: string): StructuredDescription | null {
+	const matches = description.trim().match(/^(?:\/\/ *)?([^{]*)(?:{([^}]+)})?(?:\|(\d+x\d+))?$/);
+	if (matches) {
+		const [, brief, detail, resize] = matches;
+		// Note: if brief is empty string, but detail is not empty, then parse still fails;
+		// this makes it possible to add "invisible" annotations for search purposes w/o showing them in the Gallery UI.
+		// e.g. ![{Some keywords}](...)
+		if (brief) {
+			return {
+				brief: brief.trim(),
+				detail: detail?.trim(),
+				resize: resize,
+			};
+		}
+	}
+	return null;
+}
 
 function toLocalPicture(global: GlobalPicture): Picture {
 	return {

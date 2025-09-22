@@ -1,7 +1,7 @@
 import { App, Notice, TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
-import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
+import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, parseDescription, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
 import { IconButton, IconToggle, InlineIcon } from 'views/icons';
 
 export function ImageUpload(props: {
@@ -533,12 +533,28 @@ export function Gallery(props: {
 		}
 
 		function PicDescription() {
+			const parsed = createMemo(() => {
+				const description = myProps.mainPic().description;
+				return parseDescription(description);
+			});
+
 			return (
 				<Show when={props.showPicDescription()}>
 					<div
 						class="PicDescription bg-blur absolute"
 					>
-						{myProps.mainPic().description}
+						<Show when={parsed()} fallback={<div class="NoDescription">No description</div>}>
+							{description => (
+								<>
+									<div class="Brief">{description().brief}</div>
+									<Show when={description().detail}>
+										{detail =>
+											<div class="Detail">{detail()}</div>
+										}
+									</Show>
+								</>
+							)}
+						</Show>
 					</div>
 				</Show>
 			);
