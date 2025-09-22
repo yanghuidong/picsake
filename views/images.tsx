@@ -320,9 +320,15 @@ export function Gallery(props: {
 	// but also serves as a flag similar to a Boolean `isDraggingImage`
 	const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
 
-	const GalleryContent = (myProps: {
+	return (
+		<Show when={pictureInFocus()}>
+			{pic => <GalleryContent mainPic={pic} />}
+		</Show>
+	);
+
+	function GalleryContent(myProps: {
 		mainPic: Accessor<Picture>,
-	}) => {
+	}) {
 		let modalRef!: HTMLDivElement;
 
 		onMount(() => {
@@ -405,266 +411,256 @@ export function Gallery(props: {
 					}
 				}}
 			>
-				<Image mainPic={myProps.mainPic} />
-				<PicDescription mainPic={myProps.mainPic} />
-				<InfoBar mainPic={myProps.mainPic} />
+				<Image />
+				<PicDescription />
+				<InfoBar />
 			</div>
 		);
-	};
 
-	const Image = (myProps: {
-		mainPic: Accessor<Picture>,
-	}) => {
-		const dimensionsByMode = createMemo<CSSDimensions>(() => {
-			const fitMode = props.galleryFit();
-			return {
-				width: fitMode ? '100%' : `${dimensions().width}px`,
-				height: fitMode ? '100%' : `${dimensions().height}px`,
-			};
-		});
+		/// sub-views (children) of GalleryContent
 
-		let imgRef!: HTMLImageElement;
-
-		const dpr = window.devicePixelRatio;
-
-		// Note: no need to do this one-time setup;
-		// the effect below takes care of _reactively_ updating the dimensions signal
-		// per each picture currently in focus
-		// onMount(() => {
-		// 	if (imgRef.complete) {
-		// 		setDimensionsToNatural();
-		// 	} else {
-		// 		imgRef.onload = setDimensionsToNatural;
-		// 	}
-		// });
-
-		// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
-		// we don't want the aspect ratio of the previous image to carry over to the current!
-		createEffect(() => {
-			myProps.mainPic(); // just for tracking, i.e. change of mainPic() should trigger setDimensions
-			// setDimensionsToNatural()
-			setDimensions({
-				width: imgRef.naturalWidth / dpr,
-				height: imgRef.naturalHeight / dpr,
+		function Image() {
+			const dimensionsByMode = createMemo<CSSDimensions>(() => {
+				const fitMode = props.galleryFit();
+				return {
+					width: fitMode ? '100%' : `${dimensions().width}px`,
+					height: fitMode ? '100%' : `${dimensions().height}px`,
+				};
 			});
-		})
 
-		const onPointerMove = (evt: PointerEvent) => {
-			const prevStart = moveStart();
-			if (prevStart !== null) {
-				setMoveStart({ x: evt.clientX, y: evt.clientY });
-				const deltaX = evt.clientX - prevStart.x;
-				const deltaY = evt.clientY - prevStart.y;
-				props.setTranslateX(prev => prev + deltaX);
-				props.setTranslateY(prev => prev + deltaY);
-			}
-		};
+			let imgRef!: HTMLImageElement;
 
-		const onPointerUp = (evt: PointerEvent) => {
-			setMoveStart(null);
+			const dpr = window.devicePixelRatio;
 
-			window.removeEventListener('pointermove', onPointerMove);
-			window.removeEventListener('pointerup', onPointerUp);
-		};
-
-		return (
-			<div
-				// for zebra child positioning, relative would be enough;
-				// but absolute is necessary for zooming, because we need it to expand beyond the confinement of the parent, #psk-gallery
-				class="absolute cursor-grab"
-				classList={{ 'cursor-grabbing': moveStart() !== null }}
-				style={{
-					width: `${dimensionsByMode().width}`,
-					height: `${dimensionsByMode().height}`,
-					transform: `translate(${props.translateX()}px, ${props.translateY()}px) scale(${props.galleryZoom()})`,
-				}}
-				onClick={(evt) => {
-					evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
-				}}
-				onDblClick={(evt) => {
-					evt.stopPropagation();
-					props.setGalleryFocus(null);
-				}}
-				onPointerDown={(evt) => {
-					// Must prevent the browser from changing the cursor to "grabbing" hand, o/w it'd get stuck even after pointer up;
-					// Note however, this issue only manifests because we called preventDefault in the inner img's onDragStart handler!
-					evt.preventDefault();
-					setMoveStart({ x: evt.clientX, y: evt.clientY });
-
-					// Note: when pointer moves fast enough, it can escape the Image region,
-					// but we want the move handler to continue working even if that happens!
-					window.addEventListener('pointermove', onPointerMove);
-					window.addEventListener('pointerup', onPointerUp);
-				}}
-			// onPointerUp={(evt) => {
-			// 	setMoveStart(null);
-			// }}
-			// onPointerMove={(evt) => {
-			// 	const prevStart = moveStart();
-			// 	if (prevStart !== null) {
-			// 		setMoveStart({ x: evt.clientX, y: evt.clientY });
-			// 		const deltaX = evt.clientX - prevStart.x;
-			// 		const deltaY = evt.clientY - prevStart.y;
-			// 		props.setTranslateX(prev => prev + deltaX);
-			// 		props.setTranslateY(prev => prev + deltaY);
+			// Note: no need to do this one-time setup;
+			// the effect below takes care of _reactively_ updating the dimensions signal
+			// per each picture currently in focus
+			// onMount(() => {
+			// 	if (imgRef.complete) {
+			// 		setDimensionsToNatural();
+			// 	} else {
+			// 		imgRef.onload = setDimensionsToNatural;
 			// 	}
-			// }}
-			>
-				{/* zebra has to be absolute to not get in the way of the image,
-				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
-				*/}
-				<div class="bgZebra absolute w-full h-full" />
-				<img ref={imgRef}
-					class="relative w-full h-full object-contain"
-					src={myProps.mainPic().url}
-					alt={myProps.mainPic().description}
-					onDragStart={evt => {
-						// Note: Obsidian has its own handler on this
-						evt.preventDefault();
-					}}
-				/>
-			</div>
-		);
-	};
+			// });
 
-	const PicDescription = (myProps: {
-		mainPic: Accessor<Picture>,
-	}) => {
-		return (
-			<Show when={props.showPicDescription()}>
+			// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
+			// we don't want the aspect ratio of the previous image to carry over to the current!
+			createEffect(() => {
+				myProps.mainPic(); // just for tracking, i.e. change of mainPic() should trigger setDimensions
+				// setDimensionsToNatural()
+				setDimensions({
+					width: imgRef.naturalWidth / dpr,
+					height: imgRef.naturalHeight / dpr,
+				});
+			})
+
+			const onPointerMove = (evt: PointerEvent) => {
+				const prevStart = moveStart();
+				if (prevStart !== null) {
+					setMoveStart({ x: evt.clientX, y: evt.clientY });
+					const deltaX = evt.clientX - prevStart.x;
+					const deltaY = evt.clientY - prevStart.y;
+					props.setTranslateX(prev => prev + deltaX);
+					props.setTranslateY(prev => prev + deltaY);
+				}
+			};
+
+			const onPointerUp = (evt: PointerEvent) => {
+				setMoveStart(null);
+
+				window.removeEventListener('pointermove', onPointerMove);
+				window.removeEventListener('pointerup', onPointerUp);
+			};
+
+			return (
 				<div
-					class="PicDescription bg-blur absolute"
-				>
-					{myProps.mainPic().description}
-				</div>
-			</Show>
-		);
-	};
-
-	const InfoBar = (myProps: {
-		mainPic: Accessor<Picture>,
-	}) => {
-		const [seeking, setSeeking] = createSignal<boolean>(false);
-		const [seekPosition, setSeekPosition] = createSignal<number>(0);
-		const [seekIndex, setSeekIndex] = createSignal<number | null>(null);
-
-		const seekPicture = createMemo(() => {
-			const index = seekIndex();
-			return index !== null
-				? props.gallery().at(index) ?? null
-				: null;
-		});
-
-		// range: [0, 1]
-		const progress = createMemo(() => {
-			const index = props.galleryFocus();
-			const total = props.gallery().length;
-			return index !== null ? (index + 1) / total : 0;
-		});
-
-		const translateOccurred = createMemo(() => {
-			return props.translateX() !== 0 || props.translateY() !== 0;
-		});
-
-		// helper
-		const getOffsetXAndIndex = (rect: DOMRect, clientX: number, total: number) => {
-			// Note: must bound offset between 0 and rect.width (inclusive)
-			const offsetX = Math.max(0, Math.min(clientX - rect.left, rect.width));
-			const fraction = offsetX / rect.width;
-			const index = fraction < 1
-				? Math.floor(total * fraction)
-				: total - 1;
-			return { offsetX, index };
-		};
-
-		return (
-			<div
-				class="InfoBar showOnHover absolute bottom-0 w-full flex-center"
-				classList={{ 'hidden': moveStart() !== null }}
-				onClick={(evt) => {
-					evt.stopPropagation();
-				}}
-			>
-				<div
-					class="ProgressBar relative"
-					classList={{ 'hidden': props.gallery().length < 2 }}
+					// for zebra child positioning, relative would be enough;
+					// but absolute is necessary for zooming, because we need it to expand beyond the confinement of the parent, #psk-gallery
+					class="absolute cursor-grab"
+					classList={{ 'cursor-grabbing': moveStart() !== null }}
 					style={{
-						width: `${props.gallery().length * 50}px`,
+						width: `${dimensionsByMode().width}`,
+						height: `${dimensionsByMode().height}`,
+						transform: `translate(${props.translateX()}px, ${props.translateY()}px) scale(${props.galleryZoom()})`,
 					}}
 					onClick={(evt) => {
-						const rect = evt.currentTarget.getBoundingClientRect();
-						const { index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
-						props.setGalleryFocus(index);
+						evt.stopPropagation(); // no need for stopImmediatePropagation() to prevent GalleryContent onClick
 					}}
-					onMouseEnter={() => {
-						setSeeking(true);
+					onDblClick={(evt) => {
+						evt.stopPropagation();
+						props.setGalleryFocus(null);
 					}}
-					onMouseLeave={() => {
-						setSeeking(false);
+					onPointerDown={(evt) => {
+						// Must prevent the browser from changing the cursor to "grabbing" hand, o/w it'd get stuck even after pointer up;
+						// Note however, this issue only manifests because we called preventDefault in the inner img's onDragStart handler!
+						evt.preventDefault();
+						setMoveStart({ x: evt.clientX, y: evt.clientY });
+
+						// Note: when pointer moves fast enough, it can escape the Image region,
+						// but we want the move handler to continue working even if that happens!
+						window.addEventListener('pointermove', onPointerMove);
+						window.addEventListener('pointerup', onPointerUp);
 					}}
-					onMouseMove={(evt) => {
-						const rect = evt.currentTarget.getBoundingClientRect();
-						const { offsetX, index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
-						setSeekPosition(offsetX);
-						setSeekIndex(index);
-					}}
+				// onPointerUp={(evt) => {
+				// 	setMoveStart(null);
+				// }}
+				// onPointerMove={(evt) => {
+				// 	const prevStart = moveStart();
+				// 	if (prevStart !== null) {
+				// 		setMoveStart({ x: evt.clientX, y: evt.clientY });
+				// 		const deltaX = evt.clientX - prevStart.x;
+				// 		const deltaY = evt.clientY - prevStart.y;
+				// 		props.setTranslateX(prev => prev + deltaX);
+				// 		props.setTranslateY(prev => prev + deltaY);
+				// 	}
+				// }}
 				>
-					<div
-						// because we use transform: scaleX instead of setting width,
-						// the border-radius of ProgressFill will be distorted; so we need masking
-						class="ProgressMask absolute inset-0"
-					>
-						<div
-							class="ProgressFill absolute inset-0"
-							style={{
-								'transform': `scaleX(${progress()})`,
-								'transform-origin': 'left center',
-							}}
-						/>
-					</div>
-					<SeekPreview
-						seeking={seeking}
-						seekPosition={seekPosition}
-						seekIndex={seekIndex}
-						seekPicture={seekPicture}
+					{/* zebra has to be absolute to not get in the way of the image,
+				the image has to be explicitly positioned in order to stay on top of the zebra (relative is the weakest explicitness we can give)
+				*/}
+					<div class="bgZebra absolute w-full h-full" />
+					<img ref={imgRef}
+						class="relative w-full h-full object-contain"
+						src={myProps.mainPic().url}
+						alt={myProps.mainPic().description}
+						onDragStart={evt => {
+							// Note: Obsidian has its own handler on this
+							evt.preventDefault();
+						}}
 					/>
 				</div>
+			);
+		}
+
+		function PicDescription() {
+			return (
+				<Show when={props.showPicDescription()}>
+					<div
+						class="PicDescription bg-blur absolute"
+					>
+						{myProps.mainPic().description}
+					</div>
+				</Show>
+			);
+		}
+
+		function InfoBar() {
+			const [seeking, setSeeking] = createSignal<boolean>(false);
+			const [seekPosition, setSeekPosition] = createSignal<number>(0);
+			const [seekIndex, setSeekIndex] = createSignal<number | null>(null);
+
+			const seekPicture = createMemo(() => {
+				const index = seekIndex();
+				return index !== null
+					? props.gallery().at(index) ?? null
+					: null;
+			});
+
+			// range: [0, 1]
+			const progress = createMemo(() => {
+				const index = props.galleryFocus();
+				const total = props.gallery().length;
+				return index !== null ? (index + 1) / total : 0;
+			});
+
+			const translateOccurred = createMemo(() => {
+				return props.translateX() !== 0 || props.translateY() !== 0;
+			});
+
+			// helper
+			const getOffsetXAndIndex = (rect: DOMRect, clientX: number, total: number) => {
+				// Note: must bound offset between 0 and rect.width (inclusive)
+				const offsetX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+				const fraction = offsetX / rect.width;
+				const index = fraction < 1
+					? Math.floor(total * fraction)
+					: total - 1;
+				return { offsetX, index };
+			};
+
+			return (
 				<div
-					class="ImageInfo absolute bottom-0"
+					class="InfoBar showOnHover absolute bottom-0 w-full flex-center"
+					classList={{ 'hidden': moveStart() !== null }}
+					onClick={(evt) => {
+						evt.stopPropagation();
+					}}
 				>
 					<div
-						class="ImageInfoBasic row row-spacing-sm bg-blur"
+						class="ProgressBar relative"
+						classList={{ 'hidden': props.gallery().length < 2 }}
+						style={{
+							width: `${props.gallery().length * 50}px`,
+						}}
+						onClick={(evt) => {
+							const rect = evt.currentTarget.getBoundingClientRect();
+							const { index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
+							props.setGalleryFocus(index);
+						}}
+						onMouseEnter={() => {
+							setSeeking(true);
+						}}
+						onMouseLeave={() => {
+							setSeeking(false);
+						}}
+						onMouseMove={(evt) => {
+							const rect = evt.currentTarget.getBoundingClientRect();
+							const { offsetX, index } = getOffsetXAndIndex(rect, evt.clientX, props.gallery().length);
+							setSeekPosition(offsetX);
+							setSeekIndex(index);
+						}}
 					>
-						<div class="ImageFormatBadge">{imageFormatFromLink(myProps.mainPic().url)}</div>
-						<div>{dimensions().width} × {dimensions().height}</div>
 						<div
-							class="ImageZoom"
-							classList={{ 'active': props.galleryZoom() !== 1 }}
-							onClick={() => {
-								if (props.galleryZoom() !== 1) props.setGalleryZoom(1);
-							}}
+							// because we use transform: scaleX instead of setting width,
+							// the border-radius of ProgressFill will be distorted; so we need masking
+							class="ProgressMask absolute inset-0"
 						>
-							{(props.galleryZoom() * 100).toFixed(0)}%
+							<div
+								class="ProgressFill absolute inset-0"
+								style={{
+									'transform': `scaleX(${progress()})`,
+									'transform-origin': 'left center',
+								}}
+							/>
 						</div>
-						<IconButton name="undo-2"
-							class="GalleryIconButton"
-							enabled={translateOccurred}
-							onClick={() => {
-								props.setTranslateX(0);
-								props.setTranslateY(0);
-							}}
+						<SeekPreview
+							seeking={seeking}
+							seekPosition={seekPosition}
+							seekIndex={seekIndex}
+							seekPicture={seekPicture}
 						/>
 					</div>
+					<div
+						class="ImageInfo absolute bottom-0"
+					>
+						<div
+							class="ImageInfoBasic row row-spacing-sm bg-blur"
+						>
+							<div class="ImageFormatBadge">{imageFormatFromLink(myProps.mainPic().url)}</div>
+							<div>{dimensions().width} × {dimensions().height}</div>
+							<div
+								class="ImageZoom"
+								classList={{ 'active': props.galleryZoom() !== 1 }}
+								onClick={() => {
+									if (props.galleryZoom() !== 1) props.setGalleryZoom(1);
+								}}
+							>
+								{(props.galleryZoom() * 100).toFixed(0)}%
+							</div>
+							<IconButton name="undo-2"
+								class="GalleryIconButton"
+								enabled={translateOccurred}
+								onClick={() => {
+									props.setTranslateX(0);
+									props.setTranslateY(0);
+								}}
+							/>
+						</div>
+					</div>
 				</div>
-			</div>
-		);
-	};
-
-	return (
-		<Show when={pictureInFocus()}>
-			{pic => <GalleryContent mainPic={pic} />}
-		</Show>
-	);
+			);
+		}
+	}
 }
 
 function SeekPreview(props: {
