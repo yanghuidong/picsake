@@ -320,7 +320,9 @@ export function Gallery(props: {
 	// but also serves as a flag similar to a Boolean `isDraggingImage`
 	const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
 
-	const GalleryContent = () => {
+	const GalleryContent = (myProps: {
+		mainPic: Accessor<Picture>,
+	}) => {
 		let modalRef!: HTMLDivElement;
 
 		onMount(() => {
@@ -403,14 +405,16 @@ export function Gallery(props: {
 					}
 				}}
 			>
-				<Image />
-				<PicDescription />
-				<InfoBar />
+				<Image mainPic={myProps.mainPic} />
+				<PicDescription mainPic={myProps.mainPic} />
+				<InfoBar mainPic={myProps.mainPic} />
 			</div>
 		);
 	};
 
-	const Image = () => {
+	const Image = (myProps: {
+		mainPic: Accessor<Picture>,
+	}) => {
 		const dimensionsByMode = createMemo<CSSDimensions>(() => {
 			const fitMode = props.galleryFit();
 			return {
@@ -437,13 +441,12 @@ export function Gallery(props: {
 		// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
 		// we don't want the aspect ratio of the previous image to carry over to the current!
 		createEffect(() => {
-			if (pictureInFocus()) {
-				// setDimensionsToNatural()
-				setDimensions({
-					width: imgRef.naturalWidth / dpr,
-					height: imgRef.naturalHeight / dpr,
-				});
-			}
+			myProps.mainPic(); // just for tracking, i.e. change of mainPic() should trigger setDimensions
+			// setDimensionsToNatural()
+			setDimensions({
+				width: imgRef.naturalWidth / dpr,
+				height: imgRef.naturalHeight / dpr,
+			});
 		})
 
 		const onPointerMove = (evt: PointerEvent) => {
@@ -513,8 +516,8 @@ export function Gallery(props: {
 				<div class="bgZebra absolute w-full h-full" />
 				<img ref={imgRef}
 					class="relative w-full h-full object-contain"
-					src={pictureInFocus()?.url}
-					alt={pictureInFocus()?.description}
+					src={myProps.mainPic().url}
+					alt={myProps.mainPic().description}
 					onDragStart={evt => {
 						// Note: Obsidian has its own handler on this
 						evt.preventDefault();
@@ -524,19 +527,23 @@ export function Gallery(props: {
 		);
 	};
 
-	const PicDescription = () => {
+	const PicDescription = (myProps: {
+		mainPic: Accessor<Picture>,
+	}) => {
 		return (
 			<Show when={props.showPicDescription()}>
 				<div
 					class="PicDescription bg-blur absolute"
 				>
-					{pictureInFocus()?.description}
+					{myProps.mainPic().description}
 				</div>
 			</Show>
 		);
 	};
 
-	const InfoBar = () => {
+	const InfoBar = (myProps: {
+		mainPic: Accessor<Picture>,
+	}) => {
 		const [seeking, setSeeking] = createSignal<boolean>(false);
 		const [seekPosition, setSeekPosition] = createSignal<number>(0);
 		const [seekIndex, setSeekIndex] = createSignal<number | null>(null);
@@ -622,45 +629,40 @@ export function Gallery(props: {
 						seekPicture={seekPicture}
 					/>
 				</div>
-				<Show when={pictureInFocus()}>
-					{pic => (
+				<div
+					class="ImageInfo absolute bottom-0"
+				>
+					<div
+						class="ImageInfoBasic row row-spacing-sm bg-blur"
+					>
+						<div class="ImageFormatBadge">{imageFormatFromLink(myProps.mainPic().url)}</div>
+						<div>{dimensions().width} × {dimensions().height}</div>
 						<div
-							class="ImageInfo absolute bottom-0"
+							class="ImageZoom"
+							classList={{ 'active': props.galleryZoom() !== 1 }}
+							onClick={() => {
+								if (props.galleryZoom() !== 1) props.setGalleryZoom(1);
+							}}
 						>
-							<div
-								class="ImageInfoBasic row row-spacing-sm bg-blur"
-							>
-								<div class="ImageFormatBadge">{imageFormatFromLink(pic().url)}</div>
-								<div>{dimensions().width} × {dimensions().height}</div>
-								<div
-									class="ImageZoom"
-									classList={{ 'active': props.galleryZoom() !== 1 }}
-									onClick={() => {
-										if (props.galleryZoom() !== 1) props.setGalleryZoom(1);
-									}}
-								>
-									{(props.galleryZoom() * 100).toFixed(0)}%
-								</div>
-								<IconButton name="undo-2"
-									class="GalleryIconButton"
-									enabled={translateOccurred}
-									onClick={() => {
-										props.setTranslateX(0);
-										props.setTranslateY(0);
-									}}
-								/>
-							</div>
-							{/* {pic().description} */}
+							{(props.galleryZoom() * 100).toFixed(0)}%
 						</div>
-					)}
-				</Show>
+						<IconButton name="undo-2"
+							class="GalleryIconButton"
+							enabled={translateOccurred}
+							onClick={() => {
+								props.setTranslateX(0);
+								props.setTranslateY(0);
+							}}
+						/>
+					</div>
+				</div>
 			</div>
 		);
 	};
 
 	return (
-		<Show when={pictureInFocus() !== null}>
-			<GalleryContent />
+		<Show when={pictureInFocus()}>
+			{pic => <GalleryContent mainPic={pic} />}
 		</Show>
 	);
 }
