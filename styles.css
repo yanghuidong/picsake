@@ -179,8 +179,8 @@ img.psk-thumbnail {
     max-height: 400px;
     padding: 1rem;
     border-radius: 0.5rem;
-    background-color: hsl(0 0% 0% / 0.3);
-    box-shadow: 1px 1px 2px hsl(0 0% 0% / 0.5);
+    background-color: hsl(0 0% 0% / 0.4);
+    box-shadow: 1px 1px 2px hsl(0 0% 0% / 0.6);
 }
 
 .PicDescription .Brief {
@@ -190,7 +190,7 @@ img.psk-thumbnail {
 
 .PicDescription .Detail {
     font-size: x-large;
-    color: hsl(0 0% 85%);
+    color: hsl(0 0% 75%);
 }
 
 .PicDescription .NoDescription {
