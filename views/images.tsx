@@ -240,14 +240,15 @@ export function PicsExplorer(props: {
 						<div
 							class="Thumbnail gridCell parent relative"
 							classList={{ 'LocalFile': pic.localPath !== null }}
-							onClick={() => {
-								props.setGallery(shownPictures().map(toLocalPicture));
-								props.setGalleryFocus(idx());
-							}}
 						>
 							<img
 								src={pic.url}
 								alt={pic.sources[0]?.description}
+								// We handle click here instead of on parent so that sibling HoverButtons don't have to stopPropagation. Plus, better semantics.
+								onClick={() => {
+									props.setGallery(shownPictures().map(toLocalPicture));
+									props.setGalleryFocus(idx());
+								}}
 							/>
 							<div
 								class="HoverButtonGroup showOnParentHover absolute top-0 right-0 row row-spacing-2xs"
@@ -256,8 +257,6 @@ export function PicsExplorer(props: {
 									class="HoverButton"
 									enabled={() => true}
 									onClick={(evt) => {
-										evt.stopPropagation();
-
 										const copyContent = pic.localPath === null ? pic.url : pic.localPath;
 										navigator.clipboard.writeText(copyContent)
 											.then(() => new Notice(`Copied to clipboard: ${copyContent}`))
@@ -268,8 +267,6 @@ export function PicsExplorer(props: {
 									class="HoverButton"
 									enabled={() => true}
 									onClick={(evt) => {
-										evt.stopPropagation();
-
 										// TODO 1) handle multi-source case, 2) Cmd+click to open in a new tab (with reuse)
 										const source = pic.sources[0];
 										if (source) {
