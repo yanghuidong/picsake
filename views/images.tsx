@@ -244,7 +244,7 @@ export function PicsExplorer(props: {
 							<img
 								src={pic.url}
 								alt={pic.sources[0]?.description}
-								// We handle click here instead of on parent so that sibling HoverButtons don't have to stopPropagation. Plus, better semantics.
+								// We handle click here instead of on the parent so that sibling HoverButtons don't have to stopPropagation. Plus, better semantics.
 								onClick={() => {
 									props.setGallery(shownPictures().map(toLocalPicture));
 									props.setGalleryFocus(idx());
@@ -422,12 +422,6 @@ export function Gallery(props: {
 		let imgRef!: HTMLImageElement;
 
 		const dpr = window.devicePixelRatio;
-		const setDimensionsToNatural = () => {
-			setDimensions({
-				width: imgRef.naturalWidth / dpr,
-				height: imgRef.naturalHeight / dpr,
-			});
-		};
 
 		// Note: no need to do this one-time setup;
 		// the effect below takes care of _reactively_ updating the dimensions signal
@@ -443,7 +437,13 @@ export function Gallery(props: {
 		// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
 		// we don't want the aspect ratio of the previous image to carry over to the current!
 		createEffect(() => {
-			if (pictureInFocus()) setDimensionsToNatural();
+			if (pictureInFocus()) {
+				// setDimensionsToNatural()
+				setDimensions({
+					width: imgRef.naturalWidth / dpr,
+					height: imgRef.naturalHeight / dpr,
+				});
+			}
 		})
 
 		const onPointerMove = (evt: PointerEvent) => {
