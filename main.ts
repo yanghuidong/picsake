@@ -102,6 +102,8 @@ export default class MyPlugin extends Plugin {
 	setGalleryFit!: Setter<boolean>;
 	galleryZoom!: Accessor<number>;
 	setGalleryZoom!: Setter<number>;
+	showPicDescription!: Accessor<boolean>;
+	setShowPicDescription!: Setter<boolean>;
 	translateX!: Accessor<number>;
 	setTranslateX!: Setter<number>;
 	translateY!: Accessor<number>;
@@ -335,6 +337,10 @@ export default class MyPlugin extends Plugin {
 		this.galleryZoom = galleryZoom;
 		this.setGalleryZoom = setGalleryZoom;
 
+		const [showPicDescription, setShowPicDescription] = createSignal<boolean>(false);
+		this.showPicDescription = showPicDescription;
+		this.setShowPicDescription = setShowPicDescription;
+
 		const [translateX, setTranslateX] = createSignal<number>(0);
 		this.translateX = translateX;
 		this.setTranslateX = setTranslateX;
@@ -428,6 +434,8 @@ export default class MyPlugin extends Plugin {
 					setGalleryFit: this.setGalleryFit,
 					galleryZoom: this.galleryZoom,
 					setGalleryZoom: this.setGalleryZoom,
+					showPicDescription: this.showPicDescription,
+					setShowPicDescription: this.setShowPicDescription,
 					translateX: this.translateX,
 					setTranslateX: this.setTranslateX,
 					translateY: this.translateY,

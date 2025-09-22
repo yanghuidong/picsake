@@ -170,6 +170,16 @@ img.psk-thumbnail {
     color: var(--accent-bright);
 }
 
+.PicDescription {
+    pointer-events: none;
+    top: 40px;
+    left: 40px;
+    width: 250px;
+    height: 400px;
+    font-size: larger;
+    background-color: magenta;
+}
+
 .SearchBar {
     padding-block: 1rem;
 }

@@ -295,6 +295,8 @@ export function Gallery(props: {
 	setGalleryFit: Setter<boolean>,
 	galleryZoom: Accessor<number>,
 	setGalleryZoom: Setter<number>,
+	showPicDescription: Accessor<boolean>,
+	setShowPicDescription: Setter<boolean>,
 	translateX: Accessor<number>,
 	setTranslateX: Setter<number>,
 	translateY: Accessor<number>,
@@ -396,10 +398,13 @@ export function Gallery(props: {
 					} else if (evt.key === 'q') {
 						props.setTranslateX(0);
 						props.setTranslateY(0);
+					} else if (evt.key === 'i') {
+						props.setShowPicDescription(prev => !prev);
 					}
 				}}
 			>
 				<Image />
+				<PicDescription />
 				<InfoBar />
 			</div>
 		);
@@ -516,6 +521,18 @@ export function Gallery(props: {
 					}}
 				/>
 			</div>
+		);
+	};
+
+	const PicDescription = () => {
+		return (
+			<Show when={props.showPicDescription()}>
+				<div
+					class="PicDescription absolute"
+				>
+					{pictureInFocus()?.description}
+				</div>
+			</Show>
 		);
 	};
 
