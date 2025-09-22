@@ -190,12 +190,12 @@ img.psk-thumbnail {
 
 .PicDescription .Detail {
     font-size: x-large;
-    color: hsl(0 0% 70%);
+    color: hsl(0 0% 85%);
 }
 
 .PicDescription .NoDescription {
     font-size: larger;
-    color: hsl(0 0% 60%);
+    color: hsl(0 0% 75%);
 }
 
 .SearchBar {
