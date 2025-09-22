@@ -528,7 +528,7 @@ export function Gallery(props: {
 		return (
 			<Show when={props.showPicDescription()}>
 				<div
-					class="PicDescription absolute"
+					class="PicDescription bg-blur absolute"
 				>
 					{pictureInFocus()?.description}
 				</div>

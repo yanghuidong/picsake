@@ -174,10 +174,14 @@ img.psk-thumbnail {
     pointer-events: none;
     top: 40px;
     left: 40px;
-    width: 250px;
-    height: 400px;
-    font-size: larger;
-    background-color: magenta;
+    width: 300px;
+    min-height: 100px;
+    max-height: 400px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: xx-large;
+    background-color: hsl(0 0% 0% / 0.3);
+    box-shadow: 1px 1px 2px hsl(0 0% 0% / 0.5);
 }
 
 .SearchBar {
