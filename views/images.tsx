@@ -211,6 +211,8 @@ export function PicsExplorer(props: {
 
 									setSearchResults(res);
 								}
+								// Note: must reset page index!
+								setPageIndex(0);
 							}
 						}}
 					/>
@@ -221,6 +223,7 @@ export function PicsExplorer(props: {
 						onClick={() => {
 							setQuery('');
 							setSearchResults(null);
+							setPageIndex(0);
 						}}
 					/>
 				</div>
