@@ -113,6 +113,11 @@ export function PicsExplorer(props: {
 
 	const [pageIndex, setPageIndex] = createSignal<number>(0);
 
+	createEffect(() => {
+		props.pageSize(); // just for tracking; recall this is changed by `setExplorerPageSize` in the Settings UI
+		setPageIndex(0);
+	});
+
 	const sourcesDict = createMemo(() => {
 		const dict: { [key: string]: PictureSource[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
