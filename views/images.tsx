@@ -354,9 +354,9 @@ export function Gallery(props: {
 				onKeyDown={(evt) => {
 					evt.preventDefault();
 					// evt.stopImmediatePropagation();
-					if (evt.key === 'Escape') {
+					if (evt.key === 'Escape' || evt.key === 'q') {
 						props.setGalleryFocus(null);
-					} else if (evt.key === 'ArrowRight') {
+					} else if (evt.key === 'ArrowRight' || evt.key === ' ') {
 						// Note: need to store the snapshot in a variable, else if calling the accessor directly inside the setter, we'll get a warning from solid eslint plugin!
 						const pictureCount = props.gallery().length;
 						props.setGalleryFocus((prev) => {
@@ -371,7 +371,7 @@ export function Gallery(props: {
 								return null;
 							}
 						});
-					} else if (evt.key === 'ArrowLeft') {
+					} else if (evt.key === 'ArrowLeft' || evt.key === 'Backspace') {
 						const pictureCount = props.gallery().length;
 						props.setGalleryFocus((prev) => {
 							if (prev !== null) {
@@ -388,6 +388,9 @@ export function Gallery(props: {
 					} else if (evt.key === 'o' || evt.key === '0' || evt.key === '1') {
 						props.setGalleryFit(false);
 						props.setGalleryZoom(1);
+					} else if (evt.key === '2') {
+						props.setGalleryFit(false);
+						props.setGalleryZoom(2);
 					} else if (evt.key === 'f') {
 						props.setGalleryFit(true);
 						props.setGalleryZoom(1);
@@ -403,7 +406,7 @@ export function Gallery(props: {
 						props.setTranslateX((prev) => prev - PAN_STEP);
 					} else if (evt.key === 'd') {
 						props.setTranslateX((prev) => prev + PAN_STEP);
-					} else if (evt.key === 'q') {
+					} else if (evt.key === 'r') {
 						props.setTranslateX(0);
 						props.setTranslateY(0);
 					} else if (evt.key === 'i') {
