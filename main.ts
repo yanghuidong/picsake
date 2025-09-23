@@ -65,6 +65,7 @@ function getSectionsOfInterest(fileCache: CachedMetadata) {
 // Remember to rename these classes and interfaces!
 
 interface MySettings {
+	explorerPageSize: number | null;
 	excludePaths: string[];
 	// helpers
 	uploadImagesOnPaste: boolean;
@@ -72,6 +73,7 @@ interface MySettings {
 }
 
 const DEFAULT_SETTINGS: MySettings = {
+	explorerPageSize: 20,
 	excludePaths: [],
 	uploadImagesOnPaste: false,
 	gjako: gjako.DEFAULT_CONFIG,
@@ -109,6 +111,8 @@ export default class MyPlugin extends Plugin {
 	translateY!: Accessor<number>;
 	setTranslateY!: Setter<number>;
 	// Make settings reactive!
+	explorerPageSize!: Accessor<number | null>;
+	setExplorerPageSize!: Setter<number | null>;
 	excludePaths!: Accessor<string[]>;
 	setExcludePaths!: Setter<string[]>;
 
@@ -453,6 +457,10 @@ export default class MyPlugin extends Plugin {
 		this.excludePaths = excludePaths;
 		this.setExcludePaths = setExcludePaths;
 
+		const [explorerPageSize, setExplorerPageSize] = createSignal<number | null>(this.settings.explorerPageSize);
+		this.explorerPageSize = explorerPageSize;
+		this.setExplorerPageSize = setExplorerPageSize;
+
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon(ICON, NAME, (evt: MouseEvent) => {
 			if (evt.metaKey) {
@@ -741,6 +749,7 @@ class PicsExplorerView extends ItemView {
 			return createComponent(PicsExplorer, {
 				pictures,
 				excludePaths: this.plugin.excludePaths,
+				pageSize: this.plugin.explorerPageSize,
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 				fts: this.plugin.fts,
@@ -817,6 +826,7 @@ class ImageUploadModal extends Modal {
 				dropdown
 					.addOption('', config.dir)
 					.addOptions(Object.fromEntries(config.subDirs.map(sub => [sub, `${config.dir}/${sub}`])))
+					.setValue(subDir)
 					.onChange(value => {
 						subDir = value;
 					})
@@ -880,6 +890,27 @@ class MyPluginSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty(); // Necessary! o/w we get duplicated settings whenever we navigate back to our tab
+
+		new Setting(containerEl)
+			.setName('Pics explorer')
+			.setHeading();
+
+		new Setting(containerEl)
+			.setName('Page size')
+			.setDesc('Select the number of thumbnails to show at once.')
+			.addDropdown(comp => comp
+				.addOptions({
+					'20': '20',
+					'40': '40',
+					'0': 'Unlimited'
+				})
+				.setValue(settings.explorerPageSize === null ? '0' : String(settings.explorerPageSize))
+				.onChange(async value => {
+					settings.explorerPageSize = value === '0' ? null : Number(value);
+					this.plugin.setExplorerPageSize(settings.explorerPageSize);
+					await this.plugin.saveSettings();
+				})
+			)
 
 		new Setting(containerEl)
 			.setName('Excluded paths')

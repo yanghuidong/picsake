@@ -97,6 +97,7 @@ export function ActivePics(props: {
 export function PicsExplorer(props: {
 	pictures: PicturesByPath,
 	excludePaths: Accessor<string[]>,
+	pageSize: Accessor<number | null>,
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 	fts: (query: string) => Promise<string[]>,
@@ -109,6 +110,8 @@ export function PicsExplorer(props: {
 	const [searchResults, setSearchResults] = createSignal<GlobalPicture[] | null>(null);
 
 	const [ftsMode, setFtsMode] = createSignal<boolean>(false);
+
+	const [pageIndex, setPageIndex] = createSignal<number>(0);
 
 	const sourcesDict = createMemo(() => {
 		const dict: { [key: string]: PictureSource[] } = {};
@@ -143,10 +146,18 @@ export function PicsExplorer(props: {
 	});
 
 	const shownPictures = createMemo(() => {
-		const res = searchResults();
-		return res !== null
-			? res
+		const hits = searchResults();
+		const shownAll = hits !== null
+			? hits
 			: allPictures();
+
+		const pageSize = props.pageSize();
+		if (pageSize === null) return shownAll;
+
+		const start = pageIndex() * pageSize;
+		const end = start + pageSize;
+		const shownPage = shownAll.slice(start, end);
+		return shownPage;
 	});
 
 	const showingSearchResults = createMemo(() => {
