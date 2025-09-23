@@ -110,7 +110,7 @@ export function PicsExplorer(props: {
 
 	const [ftsMode, setFtsMode] = createSignal<boolean>(false);
 
-	const sourcePathsDict = createMemo(() => {
+	const sourcesDict = createMemo(() => {
 		const dict: { [key: string]: PictureSource[] } = {};
 		for (const [path, pictures] of Object.entries(props.pictures)) {
 			for (const pic of pictures) {
@@ -132,7 +132,7 @@ export function PicsExplorer(props: {
 		for (const pictures of Object.values(props.pictures)) {
 			for (const pic of pictures) {
 				if (!urlSet.has(pic.url)) {
-					const sources = sourcePathsDict()[pic.url] ?? [];
+					const sources = sourcesDict()[pic.url] ?? [];
 					const globalPic = { ...pic, sources };
 					list.push(globalPic);
 					urlSet.add(pic.url);
