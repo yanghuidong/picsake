@@ -145,11 +145,15 @@ export function PicsExplorer(props: {
 		return list.filter(pic => !shouldExcludePicture(pic, props.excludePaths(), revealExcluded()));
 	});
 
-	const shownPictures = createMemo(() => {
+	const shownAllPictures = createMemo(() => {
 		const hits = searchResults();
-		const shownAll = hits !== null
+		return hits !== null
 			? hits
 			: allPictures();
+	});
+
+	const shownPictures = createMemo(() => {
+		const shownAll = shownAllPictures();
 
 		const pageSize = props.pageSize();
 		if (pageSize === null) return shownAll;
@@ -257,8 +261,8 @@ export function PicsExplorer(props: {
 								alt={pic.sources[0]?.description}
 								// We handle click here instead of on the parent so that sibling HoverButtons don't have to stopPropagation. Plus, better semantics.
 								onClick={() => {
-									props.setGallery(shownPictures().map(toLocalPicture));
-									props.setGalleryFocus(idx());
+									props.setGallery(shownAllPictures().map(toLocalPicture));
+									props.setGalleryFocus(idx() + (props.pageSize() ?? 0) * pageIndex());
 								}}
 							/>
 							<div
