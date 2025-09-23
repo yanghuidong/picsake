@@ -928,8 +928,8 @@ class MyPluginSettingTab extends PluginSettingTab {
 			)
 
 		new Setting(containerEl)
-			.setName('Helpers')
-			.setDesc('Optional utilities that assist the workflow.')
+			.setName('Image uploading helper')
+			.setDesc('Gjako is a local server that compresses uploaded images and sends them to S3-compatible cloud storage services.')
 			.setHeading();
 
 		new Setting(containerEl)
@@ -946,7 +946,7 @@ class MyPluginSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('Gjako server URL prefix')
+			.setName('Server URL prefix')
 			.addText(comp => comp
 				.setValue(settings.gjako.urlPrefix)
 				.onChange(async value => {
@@ -957,7 +957,7 @@ class MyPluginSettingTab extends PluginSettingTab {
 			.setDisabled(!settings.uploadImagesOnPaste);
 
 		new Setting(containerEl)
-			.setName('Gjako API key')
+			.setName('API key')
 			.addText(comp => comp
 				.setValue(settings.gjako.apiKey)
 				.onChange(async value => {
@@ -968,7 +968,7 @@ class MyPluginSettingTab extends PluginSettingTab {
 			.setDisabled(!settings.uploadImagesOnPaste);
 
 		new Setting(containerEl)
-			.setName('Gjako upload directory')
+			.setName('Upload directory')
 			.addText(comp => comp
 				.setValue(settings.gjako.dir)
 				.onChange(async value => {
@@ -979,7 +979,7 @@ class MyPluginSettingTab extends PluginSettingTab {
 			.setDisabled(!settings.uploadImagesOnPaste);
 
 		new Setting(containerEl)
-			.setName('Gjako upload subdirectories')
+			.setName('Upload subdirectories')
 			.setDesc('Add one directory name per line.')
 			.addTextArea(comp => comp
 				.setValue(settings.gjako.subDirs.join('\n'))
