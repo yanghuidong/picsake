@@ -298,8 +298,46 @@ export function PicsExplorer(props: {
 					)}
 				</For>
 			</div>
+			<Paginator />
 		</>
 	);
+
+	function Paginator() {
+		const pageCount = createMemo(() => {
+			const total = shownAllPictures().length;
+			const pageSize = props.pageSize();
+
+			if (pageSize === null) return null; // 0 (falsy) would work as well, but confusing
+
+			return Math.ceil(total / pageSize);
+		});
+
+		return (
+			<Show when={pageCount()}>
+				{count =>
+					<div
+						class="Paginator row row-spacing-sm"
+					>
+						<div
+							onClick={() => {
+								if (pageIndex() > 0) {
+									setPageIndex(prev => prev - 1);
+								}
+							}}
+						>{'<'}</div>
+						<div>{`${pageIndex() + 1} / ${count()}`}</div>
+						<div
+							onClick={() => {
+								if (pageIndex() < count() - 1) {
+									setPageIndex(prev => prev + 1);
+								}
+							}}
+						>{'>'}</div>
+					</div>
+				}
+			</Show>
+		);
+	}
 }
 
 export function Gallery(props: {
