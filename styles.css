@@ -242,6 +242,10 @@ img.psk-thumbnail {
     margin-inline-start: 0.5rem;
 }
 
+.Paginator {
+    padding-block: 1rem;
+}
+
 .RevealToggle {
     width: var(--search-height);
     height: var(--search-height);
@@ -299,10 +303,12 @@ img.psk-thumbnail {
 
 .iconButton {
     cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .iconButton.enabled {
     cursor: pointer;
+    opacity: 1;
 }
 
 .iconToggle {

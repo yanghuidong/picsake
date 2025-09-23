@@ -319,23 +319,21 @@ export function PicsExplorer(props: {
 			<Show when={pageCount()}>
 				{count =>
 					<div
-						class="Paginator row row-spacing-sm"
+						class="Paginator row row-spacing-sm flex-center"
 					>
-						<div
+						<IconButton name="chevron-left"
+							enabled={() => pageIndex() > 0}
 							onClick={() => {
-								if (pageIndex() > 0) {
-									setPageIndex(prev => prev - 1);
-								}
+								setPageIndex(prev => prev - 1);
 							}}
-						>{'<'}</div>
+						/>
 						<div>{`${pageIndex() + 1} / ${count()}`}</div>
-						<div
+						<IconButton name="chevron-right"
+							enabled={() => pageIndex() < count() - 1}
 							onClick={() => {
-								if (pageIndex() < count() - 1) {
-									setPageIndex(prev => prev + 1);
-								}
+								setPageIndex(prev => prev + 1);
 							}}
-						>{'>'}</div>
+						/>
 					</div>
 				}
 			</Show>

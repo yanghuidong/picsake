@@ -4,7 +4,7 @@ import { Accessor, createEffect, onMount, Setter } from 'solid-js';
 export { IconButton, IconToggle, InlineIcon };
 
 function IconButton(props: {
-	name: 'info' | 'link' | 'notebook-text' | 'undo-2' | 'x'
+	name: 'chevron-left' | 'chevron-right' | 'info' | 'link' | 'notebook-text' | 'undo-2' | 'x'
 	enabled: Accessor<boolean>
 	onClick: (evt: MouseEvent) => void
 	class?: string
