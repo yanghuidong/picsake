@@ -671,6 +671,13 @@ export function Gallery(props: {
 									props.setTranslateY(0);
 								}}
 							/>
+							<IconButton name="info"
+								class="GalleryIconButton"
+								enabled={() => true}
+								onClick={() => {
+									props.setShowPicDescription(prev => !prev);
+								}}
+							/>
 						</div>
 					</div>
 				</div>
