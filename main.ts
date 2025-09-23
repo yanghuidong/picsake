@@ -12,6 +12,8 @@ const ICON = 'images';
 
 const GALLERY_ID = 'psk-gallery-container';
 
+const NIL = 'nil';
+
 
 // function getSectionsOfType(type: 'code' | 'paragraph', fileCache: CachedMetadata): SectionCache[] {
 // 	if (!fileCache.sections) return [];
@@ -902,11 +904,11 @@ class MyPluginSettingTab extends PluginSettingTab {
 				.addOptions({
 					'20': '20',
 					'40': '40',
-					'0': 'Unlimited'
+					NIL: 'Unlimited'
 				})
-				.setValue(settings.explorerPageSize === null ? '0' : String(settings.explorerPageSize))
+				.setValue(settings.explorerPageSize === null ? NIL : String(settings.explorerPageSize))
 				.onChange(async value => {
-					settings.explorerPageSize = value === '0' ? null : Number(value);
+					settings.explorerPageSize = value === NIL ? null : Number(value);
 					this.plugin.setExplorerPageSize(settings.explorerPageSize);
 					await this.plugin.saveSettings();
 				})
