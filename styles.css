@@ -174,9 +174,10 @@ img.psk-thumbnail {
     pointer-events: none;
     top: 40px;
     left: 40px;
-    width: 300px;
-    min-height: 100px;
-    max-height: 400px;
+    min-width: 300px;
+    max-width: 40vw;
+    min-height: 80px;
+    max-height: 60vh;
     padding: 1rem;
     border-radius: 0.5rem;
     background-color: hsl(0 0% 0% / 0.4);
@@ -185,10 +186,10 @@ img.psk-thumbnail {
 
 .PicDescription .Brief {
     font-size: xx-large;
-    line-height: 2;
 }
 
 .PicDescription .Detail {
+    margin-block-start: 1rem;
     font-size: x-large;
     color: hsl(0 0% 75%);
 }
