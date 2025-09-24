@@ -25,6 +25,7 @@
     --accent-bright: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) + 10%) / 0.8);
     --accent-dim: hsl(var(--accent-h) var(--accent-s) calc(var(--accent-l) - 5%) / 0.3);
     --subtle-bright: hsl(0 0% 50% / 0.8);
+    --subtle-dim: hsl(0 0% 40% / 0.3);
     --search-height: 2.5rem;
 }
 
@@ -282,6 +283,7 @@ img.psk-thumbnail {
     border-color: var(--subtle-bright);
     border-radius: 5px;
     overflow: clip;
+    background-color: var(--subtle-dim);
 }
 
 .Thumbnail.LocalFile {
