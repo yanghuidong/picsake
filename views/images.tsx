@@ -73,24 +73,28 @@ export function ActivePics(props: {
 	setGalleryFocus: Setter<number | null>,
 }) {
 	return (
-		<>
-			{/* <h4>{props.activeFile()?.name}</h4> */}
-			<div class="my-xs">{props.activePictures().length} pictures</div>
-			<div class="imageGrid-2">
-				<For each={props.activePictures()}>
-					{(pic, idx) => (
-						<img
-							src={pic.url}
-							alt={pic.description}
-							onClick={() => {
-								props.setGallery(props.activePictures());
-								props.setGalleryFocus(idx());
-							}}
-						/>
-					)}
-				</For>
-			</div>
-		</>
+		<Show when={props.activeFile()}>
+			{activeFile =>
+				<>
+					{/* <h4>{activeFile().name}</h4> */}
+					<div class="my-xs">{props.activePictures().length} pictures</div>
+					<div class="imageGrid-2">
+						<For each={props.activePictures()}>
+							{(pic, idx) => (
+								<img
+									src={pic.url}
+									alt={pic.description}
+									onClick={() => {
+										props.setGallery(props.activePictures());
+										props.setGalleryFocus(idx());
+									}}
+								/>
+							)}
+						</For>
+					</div>
+				</>
+			}
+		</Show>
 	);
 }
 
