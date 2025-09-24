@@ -177,7 +177,8 @@ img.psk-thumbnail {
     min-width: 300px;
     max-width: 40vw;
     min-height: 80px;
-    max-height: 60vh;
+    max-height: 80vh;
+    overflow: auto;
     padding: 1rem;
     border-radius: 0.5rem;
     background-color: hsl(0 0% 0% / 0.4);
