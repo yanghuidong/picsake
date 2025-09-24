@@ -1,4 +1,4 @@
-import { setIcon } from 'obsidian';
+import { setIcon, setTooltip } from 'obsidian';
 import { Accessor, createEffect, onMount, Setter } from 'solid-js';
 
 export { IconButton, IconToggle, InlineIcon };
@@ -7,6 +7,7 @@ function IconButton(props: {
 	name: 'chevron-left' | 'chevron-right' | 'info' | 'link' | 'notebook-text' | 'undo-2' | 'x'
 	enabled: Accessor<boolean>
 	onClick: (evt: MouseEvent) => void
+	tooltip?: string
 	class?: string
 	classList?: { [key: string]: boolean }
 }) {
@@ -14,6 +15,7 @@ function IconButton(props: {
 
 	onMount(() => {
 		setIcon(iconRef, props.name);
+		if (props.tooltip) setTooltip(iconRef, props.tooltip, { placement: 'top', delay: 200 });
 	});
 
 	const defaultClass = 'iconButton flex-center'
