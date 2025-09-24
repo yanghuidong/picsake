@@ -237,7 +237,9 @@ export function PicsExplorer(props: {
 					/>
 				</div>
 				<IconToggle onIcon="eye" offIcon="eye-off"
-					class="RevealToggle"
+					class="RevealExcludedToggle"
+					onTooltip="Currently showing excluded paths; click to hide"
+					offTooltip="Currently hiding excluded paths; click to show"
 					state={revealExcluded}
 					setState={setRevealExcluded}
 				/>

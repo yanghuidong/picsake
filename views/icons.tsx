@@ -36,6 +36,8 @@ function IconButton(props: {
 function IconToggle(props: {
 	onIcon: 'eye',
 	offIcon: 'eye-off',
+	onTooltip: string,
+	offTooltip: string,
 	state: Accessor<boolean>,
 	setState: Setter<boolean>,
 	class?: string,
@@ -45,8 +47,10 @@ function IconToggle(props: {
 	createEffect(() => {
 		if (props.state()) {
 			setIcon(iconRef, props.onIcon);
+			setTooltip(iconRef, props.onTooltip, { placement: 'top', delay: 200 });
 		} else {
 			setIcon(iconRef, props.offIcon);
+			setTooltip(iconRef, props.offTooltip, { placement: 'top', delay: 200 });
 		}
 	});
 

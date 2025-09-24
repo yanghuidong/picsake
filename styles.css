@@ -246,9 +246,14 @@ img.psk-thumbnail {
     padding-block: 1rem;
 }
 
-.RevealToggle {
+.RevealExcludedToggle {
     width: var(--search-height);
     height: var(--search-height);
+    border-radius: 0.25rem;
+}
+
+.RevealExcludedToggle:hover {
+    background-color: hsl(0 0% 30% / 0.3);
 }
 
 .HoverButtonGroup {
