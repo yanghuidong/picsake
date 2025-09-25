@@ -615,7 +615,7 @@ export default class MyPlugin extends Plugin {
 
 			for (const line of sectionLines) {
 				let picture: Picture | null = null;
-				const matches = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)/); // Note: possible trailing block ID
+				const matches = line.trimStart().match(/^!\[([^\]]*)\]\(([^)]+)\)/); // Note: possible trailing block ID
 				if (matches) {
 					const [, description, url] = matches;
 					// Note: description is allowed to be an empty string here!
@@ -629,7 +629,7 @@ export default class MyPlugin extends Plugin {
 					}
 				} else {
 					// maybe it's an embedded local image?
-					const matchesEmbed = line.trim().match(/^!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
+					const matchesEmbed = line.trimStart().match(/^!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/);
 					if (matchesEmbed) {
 						const [, linkText, displayText] = matchesEmbed;
 						if (linkText && isImageLink(linkText)) {
