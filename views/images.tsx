@@ -733,7 +733,7 @@ export function Gallery(props: {
 							</div>
 							<IconButton name="undo-2"
 								class="GalleryIconButton"
-								tooltip="Reset panning / move"
+								tooltip={'Reset panning / move\nHotkey: r'}
 								enabled={translateOccurred}
 								onClick={() => {
 									props.setTranslateX(0);
@@ -742,7 +742,7 @@ export function Gallery(props: {
 							/>
 							<IconButton name="info"
 								class="GalleryIconButton"
-								tooltip="Toggle display of picture description"
+								tooltip={'Toggle display of picture description\nHotkey: i'}
 								enabled={() => true}
 								onClick={() => {
 									props.setShowPicDescription(prev => !prev);
