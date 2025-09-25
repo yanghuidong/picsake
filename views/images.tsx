@@ -406,7 +406,7 @@ export function Gallery(props: {
 				class="fixed inset-0 flex-center"
 				tabindex="-1"
 				onClick={(evt) => {
-					evt.stopImmediatePropagation(); // stopPropagation() won't prevent `MyPlugin.onClickDocument`
+					evt.stopImmediatePropagation(); // stopPropagation() won't prevent `Plugin.onClickDocument`
 					// Note: if image dragging (pointer move) is fast enough, it can escape the Image div and land here on the parent,
 					// and on pointer up, this click event on the parent will fire! (Browser idiosyncrasy)
 					if (moveStart() !== null) {

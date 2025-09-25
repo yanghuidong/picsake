@@ -87,7 +87,7 @@ type Store = {
 	annotations: AnnotationsByURL,
 };
 
-export default class MyPlugin extends Plugin {
+export default class PskPlugin extends Plugin {
 	// 0. States
 
 	settings!: Settings;
@@ -532,7 +532,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new MyPluginSettingTab(this.app, this));
+		this.addSettingTab(new PskPluginSettingTab(this.app, this));
 
 		const finish = performance.now();
 		console.log(`[${NAME}] onload: ${(finish - start).toFixed(1)} ms`);
@@ -684,12 +684,12 @@ export default class MyPlugin extends Plugin {
 const VIEW_TYPE_ACTIVE_PICS = 'psk-view-active-pics';
 
 class ActivePicsView extends ItemView {
-	plugin: MyPlugin;
+	plugin: PskPlugin;
 
 	// Solid stuff
 	private dispose!: () => void;
 
-	constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
+	constructor(leaf: WorkspaceLeaf, plugin: PskPlugin) {
 		super(leaf);
 		this.icon = ICON;
 		this.plugin = plugin;
@@ -731,12 +731,12 @@ class ActivePicsView extends ItemView {
 const VIEW_TYPE_PICS_EXPLORER = 'psk-view-pics-explorer';
 
 class PicsExplorerView extends ItemView {
-	plugin: MyPlugin;
+	plugin: PskPlugin;
 
 	// Solid stuff
 	private dispose!: () => void;
 
-	constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
+	constructor(leaf: WorkspaceLeaf, plugin: PskPlugin) {
 		super(leaf);
 		this.navigation = true; // if not, pressing Escape key will switch to the previous active file!
 		this.icon = ICON;
@@ -868,9 +868,9 @@ class ImageUploadModal extends Modal {
 }
 
 class OverviewModal extends Modal {
-	plugin: MyPlugin;
+	plugin: PskPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: PskPlugin) {
 		super(app);
 		this.plugin = plugin;
 	}
@@ -886,10 +886,10 @@ class OverviewModal extends Modal {
 	}
 }
 
-class MyPluginSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class PskPluginSettingTab extends PluginSettingTab {
+	plugin: PskPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: PskPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
