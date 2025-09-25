@@ -1,4 +1,4 @@
-import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, prepareSimpleSearch, SectionCache, Setting, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
+import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, prepareSimpleSearch, SectionCache, Setting, setTooltip, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
@@ -481,12 +481,14 @@ export default class MyPlugin extends Plugin {
 
 			const picsCount = createMemo(() => {
 				const urlSet = new Set<string>();
+				const localSet = new Set<string>();
 				for (const pictures of Object.values(this.store.pictures)) {
 					for (const pic of pictures) {
 						urlSet.add(pic.url);
+						if (pic.localPath) localSet.add(pic.localPath);
 					}
 				}
-				return urlSet.size;
+				return { total: urlSet.size, local: localSet.size };
 			});
 
 			const uploadCount = createMemo(() => {
@@ -494,7 +496,13 @@ export default class MyPlugin extends Plugin {
 			});
 
 			createEffect(() => {
-				statusBarItemEl.setText(`${picsCount()} (${uploadCount()}) pics`);
+				const { total, local } = picsCount();
+				statusBarItemEl.setText(`${total} pics`);
+
+				const uploads = uploadCount();
+				const uploadsTooltip = uploads > 0 ? `\n${uploads} uploaded` : '';
+
+				setTooltip(statusBarItemEl, `${local} local, ${total - local} remote${uploadsTooltip}`, { placement: 'top', delay: 200 });
 			});
 		});
 
