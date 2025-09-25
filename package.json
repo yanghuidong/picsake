@@ -1,7 +1,7 @@
 {
 	"name": "picsake",
 	"version": "0.3.0",
-	"description": "Helps to work with pictures.",
+	"description": "Gather and search pictures throughout notes, and view them in a modal gallery.",
 	"keywords": [
 		"obsidian"
 	],
