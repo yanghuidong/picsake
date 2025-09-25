@@ -1,6 +1,7 @@
 import builtins from "builtin-modules";
 import esbuild from "esbuild";
 import { solidPlugin } from "esbuild-plugin-solid";
+import { copyFileSync } from "fs";
 import process from "process";
 
 const banner = `
@@ -57,6 +58,13 @@ const context = await esbuild.context({
 
 if (isProd) {
 	await context.rebuild();
+	await esbuild.build({
+		entryPoints: ["styles.css"],
+		outfile: "dist/styles.css",
+		bundle: true,
+		minify: true,
+	});
+	copyFileSync("manifest.json", "dist/manifest.json");
 	process.exit(0);
 } else {
 	await context.watch();
