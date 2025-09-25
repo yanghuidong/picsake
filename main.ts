@@ -64,12 +64,9 @@ function getSectionsOfInterest(fileCache: CachedMetadata) {
 // 	return new Promise(resolve => setTimeout(resolve, ms));
 // }
 
-// Remember to rename these classes and interfaces!
-
 interface Settings {
 	explorerPageSize: number | null;
 	excludePaths: string[];
-	// helpers
 	uploadImagesOnPaste: boolean;
 	gjako: GjakoConfig;
 }
