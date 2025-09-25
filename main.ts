@@ -66,7 +66,7 @@ function getSectionsOfInterest(fileCache: CachedMetadata) {
 
 // Remember to rename these classes and interfaces!
 
-interface MySettings {
+interface Settings {
 	explorerPageSize: number | null;
 	excludePaths: string[];
 	// helpers
@@ -74,14 +74,14 @@ interface MySettings {
 	gjako: GjakoConfig;
 }
 
-const DEFAULT_SETTINGS: MySettings = {
+const DEFAULT_SETTINGS: Settings = {
 	explorerPageSize: 20,
 	excludePaths: [],
 	uploadImagesOnPaste: false,
 	gjako: gjako.DEFAULT_CONFIG,
 }
 
-type MyStore = {
+type Store = {
 	pictures: PicturesByPath,
 	uploads: UploadResultDict,
 	annotations: AnnotationsByURL,
@@ -90,11 +90,11 @@ type MyStore = {
 export default class MyPlugin extends Plugin {
 	// 0. States
 
-	settings!: MySettings;
+	settings!: Settings;
 
 	// Solid stuff
-	store!: MyStore;
-	private setStore!: SetStoreFunction<MyStore>;
+	store!: Store;
+	private setStore!: SetStoreFunction<Store>;
 	private disposeEffect!: () => void;
 	activeFile!: Accessor<TFile | null>;
 	setActiveFile!: Setter<TFile | null>;
@@ -314,7 +314,7 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		const start = performance.now();
 
-		const [store, setStore] = createStore<MyStore>({
+		const [store, setStore] = createStore<Store>({
 			pictures: {},
 			uploads: {},
 			annotations: {},
@@ -774,7 +774,7 @@ class PicsExplorerView extends ItemView {
 }
 
 class ImageUploadModal extends Modal {
-	settings: MySettings;
+	settings: Settings;
 	images: File[];
 	onConfirm: (selected: Set<File>, isPhoto: boolean, subDir: string) => void;
 	onCancel: () => void;
@@ -785,7 +785,7 @@ class ImageUploadModal extends Modal {
 	private dispose!: () => void;
 	private disposeEffect!: () => void;
 
-	constructor(app: App, settings: MySettings, images: File[], handlers: { onConfirm: (selected: Set<File>, isPhoto: boolean, subDir: string) => void, onCancel: () => void }) {
+	constructor(app: App, settings: Settings, images: File[], handlers: { onConfirm: (selected: Set<File>, isPhoto: boolean, subDir: string) => void, onCancel: () => void }) {
 		super(app);
 		this.settings = settings;
 		this.images = images;
