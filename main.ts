@@ -508,7 +508,7 @@ export default class MyPlugin extends Plugin {
 
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
 		this.addCommand({
-			id: 'psk-open-active-pics-view',
+			id: 'open-active-pics-view',
 			name: 'Open active pics view',
 			checkCallback: (checking: boolean) => {
 				// The currently active view could be in the sidebar, but what we care about is the most recently active file!
