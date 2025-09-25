@@ -6,7 +6,7 @@
 		"obsidian"
 	],
 	"author": "Huidong Yang",
-	"license": "UNLICENSED",
+	"license": "GPL-2.0-only",
 	"main": "main.js",
 	"scripts": {
 		"dev": "bun esbuild.config.mjs",
