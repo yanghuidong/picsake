@@ -64,12 +64,12 @@ function getSectionsOfInterest(fileCache: CachedMetadata) {
 // 	return new Promise(resolve => setTimeout(resolve, ms));
 // }
 
-interface Settings {
-	explorerPageSize: number | null;
-	excludePaths: string[];
-	uploadImagesOnPaste: boolean;
-	gjako: GjakoConfig;
-}
+type Settings = {
+	explorerPageSize: number | null,
+	excludePaths: string[],
+	uploadImagesOnPaste: boolean,
+	gjako: GjakoConfig,
+};
 
 const DEFAULT_SETTINGS: Settings = {
 	explorerPageSize: 20,
