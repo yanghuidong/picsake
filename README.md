@@ -2,32 +2,32 @@
 
 ## Features
 
-- Gathers images from Markdown notes
-  - 🔎 **PicsExplorer**: displays and searches all images in a grid layout
+- Gathers images from Markdown notes.
+  - 🔎 **PicsExplorer**: displays and searches all images in a grid layout.
     - Two search modes:
-      - Quick mode: searches the image description (`alt` attribute) and the note's file path
-      - Full-text mode: searches in addition the contents of the entire vault. Activated by `Shift+Enter`
-    - Exclude certain images from the view
-      - Exclude by path prefix in the Settings, or by adding a leading `//` in the description of a specific image, e.g. `![// Won't find me](...)`
-      - Excluded images can be revealed manually using the "Eye" icon button next to the search box
-    - Go to note: hover on an image thumbnail and click the "Note" icon button to jump to the note in which the image is referenced
-  - **ActivePics**: displays pictures from the active file in the sidebar
-  - Detects both remote and local image references
-    - Status bar count (details in the tooltip)
-- Modal gallery view
-  - Activate by clicking on an image in a Markdown note, as well as in ActivePics and PicsExplorer
+      - Quick mode: searches the image description (`alt` attribute) and the note's file path;
+      - Full-text mode: searches in addition the contents of the entire vault. Activated by `Shift+Enter`.
+    - Exclude certain images from the view:
+      - Exclude by path prefix in the Settings, or by adding a leading `//` in the description of a specific image, e.g. `![// Won't find me](...)`.
+      - Excluded images can be revealed manually using the "Eye" icon button next to the search box.
+    - Go to note: hover on an image thumbnail and click the "Note" icon button to jump to the note in which the image is referenced.
+  - **ActivePics**: displays pictures from the active file in the sidebar.
+  - Detects both remote and local image references.
+    - Status bar shows a total count, with detailed tallies in the tooltip.
+- Modal gallery view:
+  - Activate by clicking on an image in a Markdown note, as well as in ActivePics and PicsExplorer.
   - 🔮 **SeekPreview**: hover on the bottom progress bar to show a pop-out thumbnail preview of the image at the corresponding position; click on the preview to jump to the full image. With this design, inspired by modern video players, the gallery view provides a refreshing alternative to the conventional "scrolling filmstrip" UI.
   - Navigation & inspection:
-    - Go to previous / next image by Left / Right arrow keys, or Backspace / Space keys
+    - Go to previous / next image by Left / Right arrow keys, or Backspace / Space keys.
     - Pan & Zoom:
-      - Zoom in / out: "=" / "-" keys
-      - Original size (device pixel-density aware): "O", number "0" or "1"
-      - Fit to window size: "F"
-      - Pan: Drag to pan, or use "W", "A", "S", "D" keys; use "R" to reset
-    - Exit gallery: Escape key, "Q" key, or double-click
+      - Zoom in / out: "=" / "-" keys;
+      - Original size (device pixel-density aware): "O", number "0" or "1";
+      - Fit to window size: "F";
+      - Pan: Drag to pan, or use "W", "A", "S", "D" keys; use "R" to reset;
+    - Exit gallery: Escape key, "Q" key, or double-click.
   - Image description:
-    - Toggle the description pane using the "I" key, or the icon button in the bottom bar
-    - The description can be displayed in two parts using a simple syntax: `![Brief words {Then in great detail that goes on and on}](...)`
+    - Toggle the description pane using the "I" key, or the icon button in the bottom bar.
+    - The description can be displayed in two parts using a simple syntax: `![Brief words {Then in great detail that goes on and on}](...)`.
       - To hide the description entirely, put all the text inside the curly braces, this can be useful if the description is primarily meant for search rather than presentation.
 
 ## Limitations
