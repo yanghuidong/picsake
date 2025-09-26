@@ -1,5 +1,7 @@
 # Picsake for Obsidian
 
+This is a simple plugin that helps Obsidian users to work with pictures in their notes, made by a fellow daily Obsidian user. It uses [SolidJS](https://github.com/solidjs/solid) for reactive UI, and tries to leverage Obsidian's metadata and content caches as much as possible. This is foremost a learning project, has been a lot of fun, and the output so far is already quite useful to user #0. I hope it will be useful to even more Obsidian users likewise.
+
 ## Features
 
 - Gathers images from Markdown notes.
