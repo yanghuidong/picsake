@@ -1,4 +1,13 @@
 
+## Limitations
+
+- Images are detected via Markdown source matching, with the assumption that each line starts with an image, and contains only one image. Leading whitespaces are tolerated, so are any contents after the image (e.g. auto-generated block ID).
+- Visual layouts and styles are currently developed only in the following setting:
+  - Obsidian Desktop >= 1.9.10,
+  - Obsidian's "Default" theme, **Dark** mode.
+
+## Dev notes
+
 First-time dev setup:
 
 ```bash
@@ -20,7 +29,7 @@ Production build:
 bun run build
 ```
 
-Upgrading Obsidian API:
+### Upgrading Obsidian API:
 
 - Modify "esbuild.config.mjs" to set the build target based on the [Electron version](https://www.electronjs.org/docs/latest/tutorial/electron-timelines), e.g. `target: ["chrome132", "node20.18"]`
   - Even better, find out the actual versions in Obsidian from the dev console by entering `process.versions`
