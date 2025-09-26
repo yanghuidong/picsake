@@ -3,7 +3,7 @@
 ## Features
 
 - Gathers images from Markdown notes
-  - **PicsExplorer**: displays and searches all images in a grid layout
+  - 🔎 **PicsExplorer**: displays and searches all images in a grid layout
     - Two search modes:
       - Quick mode: searches the image description (`alt` attribute) and the note's file path
       - Full-text mode: searches in addition the contents of the entire vault. Activated by `Shift+Enter`
@@ -16,7 +16,7 @@
     - Status bar count (details in the tooltip)
 - Modal gallery view
   - Activate by clicking on an image in a Markdown note, as well as in ActivePics and PicsExplorer
-  - **SeekPreview**: hover on the bottom progress bar to show a pop-out thumbnail preview of the image at the corresponding position; click on the preview to jump to the full image. With this design, inspired by modern video players, the gallery view provides a refreshing alternative to the conventional "scrolling filmstrip" UI.
+  - 🔮 **SeekPreview**: hover on the bottom progress bar to show a pop-out thumbnail preview of the image at the corresponding position; click on the preview to jump to the full image. With this design, inspired by modern video players, the gallery view provides a refreshing alternative to the conventional "scrolling filmstrip" UI.
   - Navigation & inspection:
     - Go to previous / next image by Left / Right arrow keys, or Backspace / Space keys
     - Pan & Zoom:
