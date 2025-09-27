@@ -42,11 +42,19 @@ This is a simple plugin that helps Obsidian users to work with pictures in their
 
 ## Dev notes
 
-First-time dev setup:
+First-time setup:
 
 ```bash
 bun install
+```
+
+Build:
+
+```bash
+# Dev build (Watch mode)
 bun run dev
+# Production build
+bun run build
 ```
 
 Manage version:
@@ -57,13 +65,7 @@ Manage version:
 bun run version
 ```
 
-Production build:
-
-```bash
-bun run build
-```
-
-### Upgrading Obsidian API:
+Manage Electron upgrade:
 
 - Modify "esbuild.config.mjs" to set the build target based on the [Electron version](https://www.electronjs.org/docs/latest/tutorial/electron-timelines), e.g. `target: ["chrome132", "node20.18"]`
   - Even better, find out the actual versions in Obsidian from the dev console by entering `process.versions`
