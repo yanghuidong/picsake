@@ -805,9 +805,7 @@ class ImageUploadModal extends Modal {
 
 		const { contentEl } = this;
 
-		const mainDiv = contentEl.createDiv();
-		mainDiv.style.maxHeight = '60vh';
-		mainDiv.style.overflowY = 'auto';
+		const mainDiv = contentEl.createDiv({ cls: 'ImageUploadContainer' });
 
 		this.dispose = render(() =>
 			createComponent(ImageUpload, {

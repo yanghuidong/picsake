@@ -41,6 +41,11 @@
     margin-block-end: 0;
 }
 
+.ImageUploadContainer {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
 img.psk-thumbnail {
     height: 120px;
     aspect-ratio: 3 / 2;
