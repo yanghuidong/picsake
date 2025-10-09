@@ -63,6 +63,8 @@ Manage version:
 # First, update `minAppVersion` manually in manifest.json, if necessary;
 # Next, update `version` manually in package.json; and then
 bun run version
+# Automatic version bump commit (use .npmrc for customization)
+npm version patch -m "[0.3.1]"
 ```
 
 Manage Electron upgrade:
