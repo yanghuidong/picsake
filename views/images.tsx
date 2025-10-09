@@ -284,6 +284,7 @@ export function PicsExplorer(props: {
 							>
 								<IconButton name="link"
 									class="HoverButton"
+									tooltip="Copy image link"
 									enabled={() => true}
 									onClick={(evt) => {
 										const copyContent = pic.localPath === null ? pic.url : pic.localPath;
@@ -294,6 +295,7 @@ export function PicsExplorer(props: {
 								/>
 								<IconButton name="notebook-text"
 									class="HoverButton"
+									tooltip="Go to note"
 									enabled={() => true}
 									onClick={(evt) => {
 										// TODO 1) handle multi-source case, 2) Cmd+click to open in a new tab (with reuse)
