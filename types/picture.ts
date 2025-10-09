@@ -54,7 +54,9 @@ function toLocalPicture(global: GlobalPicture): Picture {
 
 function toHaystack(pic: GlobalPicture): string {
 	const SEP = '\t';
-	const haystack = pic.sources.map(src => `${src.filePath}${SEP}${src.description}`);
+	const link = pic.localPath ?? pic.url;
+	const sources = pic.sources.map(src => `${src.filePath}${SEP}${src.description}`);
+	const haystack = [link, ...sources];
 	return haystack.join(SEP).toLowerCase();
 }
 
