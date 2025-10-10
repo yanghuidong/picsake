@@ -457,7 +457,6 @@ export default class PskPlugin extends Plugin {
 			}
 
 			// cache thumbnails in IDB
-			// TODO!! run this also when the setting is enabled!
 			if (this.settings.cacheThumbnails) {
 				this.generateThumbnailCache(); // Don't await!
 			}
@@ -1035,6 +1034,7 @@ class PskPluginSettingTab extends PluginSettingTab {
 					this.plugin.setCacheThumbnails(settings.cacheThumbnails);
 					await this.plugin.saveSettings();
 					this.display();
+					if (settings.cacheThumbnails) this.plugin.generateThumbnailCache();
 				})
 			);
 
