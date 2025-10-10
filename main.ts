@@ -5,6 +5,7 @@ import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } 
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
 import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, Thumbnail, UploadResultDict } from 'types/picture';
+import { debugLog } from 'utils/debug';
 import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
 export type { PskDBSchema };
@@ -433,8 +434,6 @@ export default class PskPlugin extends Plugin {
 
 			this.setActiveFile(this.app.workspace.getActiveFile());
 
-			const remoteURLSet = new Set<string>(); // for checking cached thumbnails
-
 			const mdFiles = this.app.vault.getMarkdownFiles();
 			for (const mdFile of mdFiles) {
 				const fileCache = this.app.metadataCache.getFileCache(mdFile);
@@ -449,10 +448,6 @@ export default class PskPlugin extends Plugin {
 				if (pictures.length === 0) continue;
 				this.setStore('pictures', mdFile.path, pictures);
 
-				pictures.forEach(pic => {
-					if (!pic.localPath) remoteURLSet.add(pic.url);
-				});
-
 				// Note: we assume that the metadata are bound to the pictures present in the file;
 				// if no pictures are found in the file, we skip, ignoring any metadata (regarding them as broken references)
 				const { uploads } = this.extractPictureMetadataFromFile(mdFile, fileContent, codeblocks);
@@ -464,16 +459,7 @@ export default class PskPlugin extends Plugin {
 			// cache thumbnails in IDB
 			// TODO!! run this also when the setting is enabled!
 			if (this.settings.cacheThumbnails) {
-				const cached = await this.db.getAllKeys('thumbnails');
-				console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteURLSet.size}`);
-				const cachedSet = new Set<string>(cached);
-				const misses = [...remoteURLSet].filter(url => !cachedSet.has(url));
-				Promise.all(misses.map(async url => {
-					const thumb = await gjako.makeThumbnail(url);
-					return this.db.put('thumbnails', thumb);
-				})).then(res => {
-					console.log(`${res.length} thumbnails added to cache.`);
-				})
+				this.generateThumbnailCache(); // Don't await!
 			}
 
 			// 1. DOM
@@ -641,6 +627,33 @@ export default class PskPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async generateThumbnailCache() {
+		const remoteURLSet = new Set<string>();
+		for (const pictures of Object.values(this.store.pictures)) {
+			for (const pic of pictures) {
+				if (!pic.localPath) remoteURLSet.add(pic.url);
+			}
+		}
+		const cached = await this.db.getAllKeys('thumbnails');
+		console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteURLSet.size}`);
+		const cachedSet = new Set<string>(cached);
+
+		const misses = [...remoteURLSet].filter(url => !cachedSet.has(url));
+		const results = await Promise.allSettled(misses.map(async url => {
+			const thumb = await gjako.makeThumbnail(url);
+			return this.db.put('thumbnails', thumb);
+		}));
+		console.log(`Attempted to cache ${misses.length} thumbnails`);
+
+		const failed: { url: string | undefined, reason: unknown }[] = [];
+		results.forEach((result, i) => {
+			if (result.status === 'rejected') {
+				failed.push({ url: misses[i], reason: result.reason });
+			}
+		});
+		if (failed.length > 0) debugLog({ failed });
 	}
 
 	getAttachmentInfo(linkText: string): { url: string, path: string } | null {
