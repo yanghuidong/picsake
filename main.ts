@@ -145,6 +145,7 @@ export default class PskPlugin extends Plugin {
 		const pictures = this.extractPicturesFromFile(file, newContent, paragraphs);
 		if (pictures.length > 0) {
 			this.setStore('pictures', file.path, pictures);
+			this.generateThumbnailCache(pictures);
 		} else {
 			this.setStore('pictures', produce(pictures => {
 				delete pictures[file.path];
@@ -628,11 +629,17 @@ export default class PskPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async generateThumbnailCache() {
+	async generateThumbnailCache(pictures?: Picture[]) {
 		const remoteURLSet = new Set<string>();
-		for (const pictures of Object.values(this.store.pictures)) {
+		if (pictures) {
 			for (const pic of pictures) {
 				if (!pic.localPath) remoteURLSet.add(pic.url);
+			}
+		} else {
+			for (const pictures of Object.values(this.store.pictures)) {
+				for (const pic of pictures) {
+					if (!pic.localPath) remoteURLSet.add(pic.url);
+				}
 			}
 		}
 		const cached = await this.db.getAllKeys('thumbnails');
