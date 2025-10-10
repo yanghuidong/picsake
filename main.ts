@@ -629,19 +629,17 @@ export default class PskPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	/**
+	 * Currently, local images (attachments) are NOT cached!
+	 * @param pictures If undefined, all pictures in the vault will be checked for caching.
+	 */
 	async generateThumbnailCache(pictures?: Picture[]) {
 		const remoteURLSet = new Set<string>();
-		if (pictures) {
-			for (const pic of pictures) {
-				if (!pic.localPath) remoteURLSet.add(pic.url);
-			}
-		} else {
-			for (const pictures of Object.values(this.store.pictures)) {
-				for (const pic of pictures) {
-					if (!pic.localPath) remoteURLSet.add(pic.url);
-				}
-			}
+		const picsToCheck: Picture[] = pictures ?? Object.values(this.store.pictures).flat();
+		for (const pic of picsToCheck) {
+			if (!pic.localPath) remoteURLSet.add(pic.url);
 		}
+
 		const cached = await this.db.getAllKeys('thumbnails');
 		console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteURLSet.size}`);
 		const cachedSet = new Set<string>(cached);
