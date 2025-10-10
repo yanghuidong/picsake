@@ -1,6 +1,8 @@
+import { IDBPDatabase } from 'idb';
+import { PskDBSchema } from 'main';
 import { App, Notice, TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
-import { Accessor, createEffect, createMemo, createSignal, For, onMount, Setter, Show } from 'solid-js';
+import { Accessor, createEffect, createMemo, createResource, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, parseDescription, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
 import { IconButton, IconToggle, InlineIcon } from 'views/icons';
 
@@ -105,6 +107,7 @@ export function PicsExplorer(props: {
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 	fts: (query: string) => Promise<string[]>,
+	db: IDBPDatabase<PskDBSchema>,
 	app: App,
 }) {
 	const [revealExcluded, setRevealExcluded] = createSignal<boolean>(false);
@@ -270,9 +273,8 @@ export function PicsExplorer(props: {
 							class="Thumbnail gridCell parent relative"
 							classList={{ 'LocalFile': pic.localPath !== null }}
 						>
-							<img
-								src={pic.url}
-								alt={pic.sources[0]?.description}
+							<Thumbnail
+								pic={pic}
 								// We handle click here instead of on the parent so that sibling HoverButtons don't have to stopPropagation. Plus, better semantics.
 								onClick={() => {
 									props.setGallery(shownAllPictures().map(toLocalPicture));
@@ -317,6 +319,29 @@ export function PicsExplorer(props: {
 			<Paginator />
 		</>
 	);
+
+	async function getThumbnail(url: string): Promise<string | undefined> {
+		const thumb = await props.db.get('thumbnails', url);
+		return thumb?.data;
+	}
+
+	function Thumbnail(myProps: {
+		pic: GlobalPicture,
+		onClick: (evt: MouseEvent) => void,
+	}) {
+		const [thumbURL] = createResource(
+			() => myProps.pic.url,
+			getThumbnail,
+		);
+
+		return (
+			<img
+				src={thumbURL() ?? myProps.pic.url}
+				alt={myProps.pic.sources[0]?.description}
+				onClick={(evt) => myProps.onClick(evt)}
+			/>
+		);
+	}
 
 	function Paginator() {
 		const pageCount = createMemo(() => {

@@ -1,3 +1,4 @@
+import { Thumbnail } from 'types/picture';
 
 export type UploadResult = {
 	name: string,
@@ -36,6 +37,12 @@ async function uploadImages(files: Iterable<File>, isPhoto: boolean, subDir: str
 	}
 }
 
+async function makeThumbnail(url: string): Promise<Thumbnail> {
+	// TODO!
+	const DATA_URL = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath d="M21 15c0 3.313-2.687 6-6 6H9c-3.313 0-6-2.687-6-6V9c0-3.313 2.687-6 6-6h6c3.313 0 6 2.687 6 6v6zM7 9h10v6H7V9z" fill="gray"/%3E%3C/svg%3E';
+	return { id: url, data: DATA_URL };
+}
+
 export type GjakoConfig = {
 	urlPrefix: string,
 	apiKey: string,
@@ -50,5 +57,5 @@ const DEFAULT_CONFIG: GjakoConfig = {
 	subDirs: [],
 }
 
-export { uploadImages };
-export default { uploadImages, DEFAULT_CONFIG };
+export { makeThumbnail, uploadImages };
+export default { uploadImages, makeThumbnail, DEFAULT_CONFIG };

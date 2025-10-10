@@ -7,6 +7,8 @@ import { createComponent, render } from 'solid-js/web';
 import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, Thumbnail, UploadResultDict } from 'types/picture';
 import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
+export type { PskDBSchema };
+
 const NAME = 'Picsake';
 const LANG = 'psk';
 const ICON = 'images';
@@ -444,6 +446,16 @@ export default class PskPlugin extends Plugin {
 			// load thumbnails from IDB
 			const thumbnails = await this.db.getAll('thumbnails');
 			console.log(`Cached thumbnails: ${thumbnails.length}; Remote images: ${remoteURLSet.size}`);
+			const hits = new Set<string>(thumbnails.map(thumb => thumb.id));
+			// const misses = remoteURLSet.difference(hits);
+			const misses = [...remoteURLSet].filter(url => !hits.has(url));
+			Promise.all(misses.map(async url => {
+				const thumb = await gjako.makeThumbnail(url);
+				return this.db.put('thumbnails', thumb);
+			}))
+				.then(res => {
+					console.log(`${res.length} thumbnails cached.\n${res.join('\n')}`);
+				})
 
 			// 1. DOM
 
@@ -795,6 +807,7 @@ class PicsExplorerView extends ItemView {
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 				fts: this.plugin.fts,
+				db: this.plugin.db,
 				app: this.plugin.app,
 			});
 		}, contentEl);
