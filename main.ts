@@ -640,7 +640,10 @@ export default class PskPlugin extends Plugin {
 		console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteURLSet.size}`);
 		const cachedSet = new Set<string>(cached);
 
-		const misses = [...remoteURLSet].filter(url => !cachedSet.has(url));
+		const misses = cachedSet.size > 0
+			? [...remoteURLSet].filter(url => !cachedSet.has(url))
+			: Array.from(remoteURLSet);
+
 		const results = await Promise.allSettled(misses.map(async url => {
 			const thumb = await gjako.makeThumbnail(url);
 			return this.db.put('thumbnails', thumb);
