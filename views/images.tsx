@@ -527,26 +527,32 @@ export function Gallery(props: {
 
 			const dpr = window.devicePixelRatio;
 
-			// Note: no need to do this one-time setup;
-			// the effect below takes care of _reactively_ updating the dimensions signal
-			// per each picture currently in focus
-			// onMount(() => {
-			// 	if (imgRef.complete) {
-			// 		setDimensionsToNatural();
-			// 	} else {
-			// 		imgRef.onload = setDimensionsToNatural;
-			// 	}
-			// });
+			const setDimensionsToNatural = () => setDimensions({
+				width: imgRef.naturalWidth / dpr,
+				height: imgRef.naturalHeight / dpr,
+			});
+
+			// Note: ~~no~~ YES need to do this one-time setup;
+			// the Effect below takes care of _reactively_ updating the dimensions signal
+			// per each picture currently in focus;
+			// BUT, when IDB-cached thumbnails are enabled for rendering the image grid of PicsExplorer,
+			// the full image won't be instantly available upon entering modal Gallery,
+			// and thus the following initialization becomes necessary;
+			// o/w clicking a thumbnail will display a zero-sized image forever,
+			// and navigating to another image will leave the dimensions stale (i.e. the dimensions of the previous image will linger).
+			onMount(() => {
+				if (imgRef.complete) {
+					setDimensionsToNatural();
+				} else {
+					imgRef.onload = setDimensionsToNatural;
+				}
+			});
 
 			// Note: this is necessary to ensure every image gets its natural dimensions as we navigate / switch from one to another;
 			// we don't want the aspect ratio of the previous image to carry over to the current!
 			createEffect(() => {
 				myProps.mainPic(); // just for tracking, i.e. change of mainPic() should trigger setDimensions
-				// setDimensionsToNatural()
-				setDimensions({
-					width: imgRef.naturalWidth / dpr,
-					height: imgRef.naturalHeight / dpr,
-				});
+				setDimensionsToNatural();
 			})
 
 			const onPointerMove = (evt: PointerEvent) => {
