@@ -591,6 +591,8 @@ export default class PskPlugin extends Plugin {
 
 		this.disposeEffect();
 
+		this.db.close();
+
 		// delete modal UI
 		document.getElementById(GALLERY_ID)?.remove();
 
