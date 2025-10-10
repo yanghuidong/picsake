@@ -1,7 +1,7 @@
 import { UploadResult } from 'services/gjako';
 
 export { imageFormatFromLink, isImageLink, parseDescription, shouldExcludePicture, toHaystack, toLocalPicture };
-export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, PictureSource, UploadResultDict };
+export type { Annotation, AnnotationsByURL, CSSDimensions, Dimensions, GlobalPicture, Picture, PicturesByPath, PictureSource, Thumbnail, UploadResultDict };
 
 type Picture = {
 	url: string,
@@ -24,6 +24,11 @@ type StructuredDescription = {
 	brief: string,
 	detail?: string,
 	resize?: string, // e.g. 400x300
+};
+
+type Thumbnail = {
+	id: string // localPath ?? url
+	data: string // img.src
 };
 
 function parseDescription(description: string): StructuredDescription | null {

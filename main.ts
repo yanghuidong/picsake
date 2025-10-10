@@ -1,9 +1,10 @@
+import { DBSchema, IDBPDatabase, openDB } from 'idb';
 import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, prepareSimpleSearch, SectionCache, Setting, setTooltip, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
-import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, UploadResultDict } from 'types/picture';
+import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, Thumbnail, UploadResultDict } from 'types/picture';
 import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
 const NAME = 'Picsake';
@@ -78,6 +79,15 @@ const DEFAULT_SETTINGS: Settings = {
 	gjako: gjako.DEFAULT_CONFIG,
 }
 
+const DB_VERSION = 1;
+
+interface PskDBSchema extends DBSchema {
+	thumbnails: {
+		key: string,
+		value: Thumbnail,
+	}
+}
+
 type Store = {
 	pictures: PicturesByPath,
 	uploads: UploadResultDict,
@@ -88,6 +98,8 @@ export default class PskPlugin extends Plugin {
 	// 0. States
 
 	settings!: Settings;
+
+	db!: IDBPDatabase<PskDBSchema>;
 
 	// Solid stuff
 	store!: Store;
@@ -389,6 +401,8 @@ export default class PskPlugin extends Plugin {
 			}
 		});
 
+		await this.setupDB(); // this.db must be ready before calling `getAll` onLayoutReady
+
 		// Important: this is where we do stuff on startup, w/o slowing down Obsidian startup
 		this.app.workspace.onLayoutReady(async () => {
 			const start = performance.now();
@@ -398,6 +412,8 @@ export default class PskPlugin extends Plugin {
 			// 0. States
 
 			this.setActiveFile(this.app.workspace.getActiveFile());
+
+			const remoteURLSet = new Set<string>(); // for checking cached thumbnails
 
 			const mdFiles = this.app.vault.getMarkdownFiles();
 			for (const mdFile of mdFiles) {
@@ -413,6 +429,10 @@ export default class PskPlugin extends Plugin {
 				if (pictures.length === 0) continue;
 				this.setStore('pictures', mdFile.path, pictures);
 
+				pictures.forEach(pic => {
+					if (!pic.localPath) remoteURLSet.add(pic.url);
+				});
+
 				// Note: we assume that the metadata are bound to the pictures present in the file;
 				// if no pictures are found in the file, we skip, ignoring any metadata (regarding them as broken references)
 				const { uploads } = this.extractPictureMetadataFromFile(mdFile, fileContent, codeblocks);
@@ -420,6 +440,10 @@ export default class PskPlugin extends Plugin {
 					this.setStore('uploads', upload.url, upload);
 				});
 			}
+
+			// load thumbnails from IDB
+			const thumbnails = await this.db.getAll('thumbnails');
+			console.log(`Cached thumbnails: ${thumbnails.length}; Remote images: ${remoteURLSet.size}`);
 
 			// 1. DOM
 
@@ -565,6 +589,17 @@ export default class PskPlugin extends Plugin {
 	}
 
 	// 3. My own class methods (utilities)
+
+	async setupDB() {
+		const DB_NAME = `${NAME.toLowerCase()}-${this.app.appId}`;
+		this.db = await openDB<PskDBSchema>(DB_NAME, DB_VERSION, {
+			upgrade(database) {
+				database.createObjectStore('thumbnails', {
+					keyPath: 'id',
+				});
+			}
+		});
+	}
 
 	async loadSettings() {
 		// Assert: this.settings === undefined
