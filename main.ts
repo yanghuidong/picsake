@@ -71,6 +71,7 @@ type Settings = {
 	explorerPageSize: number | null,
 	excludePaths: string[],
 	uploadImagesOnPaste: boolean,
+	cacheThumbnails: boolean,
 	gjako: GjakoConfig,
 };
 
@@ -78,6 +79,7 @@ const DEFAULT_SETTINGS: Settings = {
 	explorerPageSize: 20,
 	excludePaths: [],
 	uploadImagesOnPaste: false,
+	cacheThumbnails: false,
 	gjako: gjako.DEFAULT_CONFIG,
 }
 
@@ -405,6 +407,8 @@ export default class PskPlugin extends Plugin {
 
 		await this.setupDB(); // this.db must be ready before calling `getAll` onLayoutReady
 
+		await this.loadSettings();
+
 		// Important: this is where we do stuff on startup, w/o slowing down Obsidian startup
 		this.app.workspace.onLayoutReady(async () => {
 			const start = performance.now();
@@ -443,19 +447,20 @@ export default class PskPlugin extends Plugin {
 				});
 			}
 
-			// load thumbnails from IDB
-			const thumbnails = await this.db.getAll('thumbnails');
-			console.log(`Cached thumbnails: ${thumbnails.length}; Remote images: ${remoteURLSet.size}`);
-			const hits = new Set<string>(thumbnails.map(thumb => thumb.id));
-			// const misses = remoteURLSet.difference(hits);
-			const misses = [...remoteURLSet].filter(url => !hits.has(url));
-			Promise.all(misses.map(async url => {
-				const thumb = await gjako.makeThumbnail(url);
-				return this.db.put('thumbnails', thumb);
-			}))
-				.then(res => {
-					console.log(`${res.length} thumbnails cached.\n${res.join('\n')}`);
+			// cache thumbnails in IDB
+			// TODO!! run this also when the setting is enabled!
+			if (this.settings.cacheThumbnails) {
+				const cached = await this.db.getAllKeys('thumbnails');
+				console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteURLSet.size}`);
+				const cachedSet = new Set<string>(cached);
+				const misses = [...remoteURLSet].filter(url => !cachedSet.has(url));
+				Promise.all(misses.map(async url => {
+					const thumb = await gjako.makeThumbnail(url);
+					return this.db.put('thumbnails', thumb);
+				})).then(res => {
+					console.log(`${res.length} thumbnails added to cache.`);
 				})
+			}
 
 			// 1. DOM
 
@@ -485,8 +490,6 @@ export default class PskPlugin extends Plugin {
 			const finish = performance.now();
 			console.log(`[${NAME}] onLayoutReady: ${(finish - start).toFixed(1)} ms`);
 		});
-
-		await this.loadSettings();
 
 		const [excludePaths, setExcludePaths] = createSignal<string[]>(this.settings.excludePaths);
 		this.excludePaths = excludePaths;
@@ -944,6 +947,8 @@ class PskPluginSettingTab extends PluginSettingTab {
 
 		containerEl.empty(); // Necessary! o/w we get duplicated settings whenever we navigate back to our tab
 
+		const gjakoConfigEnabled = settings.uploadImagesOnPaste || settings.cacheThumbnails;
+
 		new Setting(containerEl)
 			.setName('Pics explorer')
 			.setHeading();
@@ -997,6 +1002,17 @@ class PskPluginSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
+			.setName('Cache thumbnails')
+			.addToggle(toggle => toggle
+				.setValue(settings.cacheThumbnails)
+				.onChange(async value => {
+					settings.cacheThumbnails = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
 			.setName('Server URL prefix')
 			.addText(comp => comp
 				.setValue(settings.gjako.urlPrefix)
@@ -1005,7 +1021,7 @@ class PskPluginSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
-			.setDisabled(!settings.uploadImagesOnPaste);
+			.setDisabled(!gjakoConfigEnabled);
 
 		new Setting(containerEl)
 			.setName('API key')
@@ -1016,7 +1032,7 @@ class PskPluginSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
-			.setDisabled(!settings.uploadImagesOnPaste);
+			.setDisabled(!gjakoConfigEnabled);
 
 		new Setting(containerEl)
 			.setName('Upload directory')
@@ -1027,7 +1043,7 @@ class PskPluginSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
-			.setDisabled(!settings.uploadImagesOnPaste);
+			.setDisabled(!gjakoConfigEnabled);
 
 		new Setting(containerEl)
 			.setName('Upload subdirectories')
@@ -1039,6 +1055,6 @@ class PskPluginSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
-			.setDisabled(!settings.uploadImagesOnPaste);
+			.setDisabled(!gjakoConfigEnabled);
 	}
 }
