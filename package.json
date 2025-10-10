@@ -14,6 +14,7 @@
 		"version": "bun version-bump.mjs && git add manifest.json versions.json"
 	},
 	"dependencies": {
+		"idb": "8.0.3",
 		"solid-js": "1.9.9"
 	},
 	"devDependencies": {
