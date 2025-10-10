@@ -104,6 +104,7 @@ export function PicsExplorer(props: {
 	pictures: PicturesByPath,
 	excludePaths: Accessor<string[]>,
 	pageSize: Accessor<number | null>,
+	useThumbnailCache: Accessor<boolean>,
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 	fts: (query: string) => Promise<string[]>,
@@ -336,7 +337,7 @@ export function PicsExplorer(props: {
 
 		return (
 			<img
-				src={thumbURL() ?? myProps.pic.url}
+				src={props.useThumbnailCache() ? thumbURL() ?? myProps.pic.url : myProps.pic.url}
 				alt={myProps.pic.sources[0]?.description}
 				onClick={(evt) => myProps.onClick(evt)}
 			/>

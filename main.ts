@@ -130,6 +130,8 @@ export default class PskPlugin extends Plugin {
 	setExplorerPageSize!: Setter<number | null>;
 	excludePaths!: Accessor<string[]>;
 	setExcludePaths!: Setter<string[]>;
+	cacheThumbnails!: Accessor<boolean>;
+	setCacheThumbnails!: Setter<boolean>;
 
 	// 1. Class fields as arrow functions
 	// Advantage over using class methods: `this` always refers to the class instance!
@@ -409,6 +411,18 @@ export default class PskPlugin extends Plugin {
 
 		await this.loadSettings();
 
+		const [excludePaths, setExcludePaths] = createSignal<string[]>(this.settings.excludePaths);
+		this.excludePaths = excludePaths;
+		this.setExcludePaths = setExcludePaths;
+
+		const [explorerPageSize, setExplorerPageSize] = createSignal<number | null>(this.settings.explorerPageSize);
+		this.explorerPageSize = explorerPageSize;
+		this.setExplorerPageSize = setExplorerPageSize;
+
+		const [cacheThumbnails, setCacheThumbnails] = createSignal<boolean>(this.settings.cacheThumbnails);
+		this.cacheThumbnails = cacheThumbnails;
+		this.setCacheThumbnails = setCacheThumbnails;
+
 		// Important: this is where we do stuff on startup, w/o slowing down Obsidian startup
 		this.app.workspace.onLayoutReady(async () => {
 			const start = performance.now();
@@ -490,14 +504,6 @@ export default class PskPlugin extends Plugin {
 			const finish = performance.now();
 			console.log(`[${NAME}] onLayoutReady: ${(finish - start).toFixed(1)} ms`);
 		});
-
-		const [excludePaths, setExcludePaths] = createSignal<string[]>(this.settings.excludePaths);
-		this.excludePaths = excludePaths;
-		this.setExcludePaths = setExcludePaths;
-
-		const [explorerPageSize, setExplorerPageSize] = createSignal<number | null>(this.settings.explorerPageSize);
-		this.explorerPageSize = explorerPageSize;
-		this.setExplorerPageSize = setExplorerPageSize;
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon(ICON, NAME, (evt: MouseEvent) => {
@@ -809,6 +815,7 @@ class PicsExplorerView extends ItemView {
 				pictures,
 				excludePaths: this.plugin.excludePaths,
 				pageSize: this.plugin.explorerPageSize,
+				useThumbnailCache: this.plugin.cacheThumbnails,
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 				fts: this.plugin.fts,
@@ -1009,6 +1016,7 @@ class PskPluginSettingTab extends PluginSettingTab {
 				.setValue(settings.cacheThumbnails)
 				.onChange(async value => {
 					settings.cacheThumbnails = value;
+					this.plugin.setCacheThumbnails(settings.cacheThumbnails);
 					await this.plugin.saveSettings();
 					this.display();
 				})
