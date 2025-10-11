@@ -108,6 +108,7 @@ export function PicsExplorer(props: {
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 	fts: (query: string) => Promise<string[]>,
+	cacheOneThumb: (url: string) => Promise<string>,
 	db: IDBPDatabase<PskDBSchema>,
 	app: App,
 }) {
@@ -285,6 +286,14 @@ export function PicsExplorer(props: {
 							<div
 								class="HoverButtonGroup showOnParentHover absolute top-0 right-0 row row-spacing-2xs"
 							>
+								<IconButton name="dollar-sign"
+									class="HoverButton"
+									tooltip="Cache thumbnail"
+									enabled={() => pic.localPath === null}
+									onClick={(evt) => {
+										props.cacheOneThumb(pic.url).then(thumbID => new Notice(`Cached ${thumbID}`));
+									}}
+								/>
 								<IconButton name="link"
 									class="HoverButton"
 									tooltip="Copy image link"

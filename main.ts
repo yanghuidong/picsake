@@ -326,6 +326,12 @@ export default class PskPlugin extends Plugin {
 		return matchedPaths;
 	}
 
+	// Just for testing, used in onClick
+	cacheOneThumb = async (url: string): Promise<string> => {
+		const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
+		return this.db.put('thumbnails', thumb);
+	}
+
 	// 2. Overriding inherited class methods
 
 	async onload() {
@@ -649,7 +655,7 @@ export default class PskPlugin extends Plugin {
 			: Array.from(remoteURLSet);
 
 		const results = await Promise.allSettled(misses.map(async url => {
-			const thumb = await gjako.makeThumbnail(url);
+			const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
 			return this.db.put('thumbnails', thumb);
 		}));
 		console.log(`Attempted to cache ${misses.length} thumbnails`);
@@ -839,6 +845,7 @@ class PicsExplorerView extends ItemView {
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 				fts: this.plugin.fts,
+				cacheOneThumb: this.plugin.cacheOneThumb,
 				db: this.plugin.db,
 				app: this.plugin.app,
 			});

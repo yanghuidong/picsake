@@ -37,10 +37,40 @@ async function uploadImages(files: Iterable<File>, isPhoto: boolean, subDir: str
 	}
 }
 
-async function makeThumbnail(url: string): Promise<Thumbnail> {
-	// TODO!
-	const DATA_URL = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath d="M21 15c0 3.313-2.687 6-6 6H9c-3.313 0-6-2.687-6-6V9c0-3.313 2.687-6 6-6h6c3.313 0 6 2.687 6 6v6zM7 9h10v6H7V9z" fill="gray"/%3E%3C/svg%3E';
-	return { id: url, data: DATA_URL };
+type ResizeRequest = {
+	url: string,
+	width: number,
+	height: number,
+	fit: 'cover' | 'contain',
+};
+
+async function makeThumbnail(url: string, config: GjakoConfig): Promise<Thumbnail> {
+	const req: ResizeRequest = {
+		url,
+		width: 500,
+		height: 500,
+		fit: 'cover',
+	};
+
+	const apiEndpoint = `${config.urlPrefix.replace(/\/+$/, '')}/resize`;
+	const res = await fetch(apiEndpoint, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-API-Key': config.apiKey,
+		},
+		body: JSON.stringify(req),
+	});
+	if (res.ok) {
+		const blob = await res.blob();
+		const thumb: Thumbnail = {
+			id: url,
+			data: URL.createObjectURL(blob),
+		};
+		return thumb;
+	} else {
+		throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+	}
 }
 
 export type GjakoConfig = {
