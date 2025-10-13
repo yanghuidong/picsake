@@ -4,7 +4,7 @@ import { App, Notice, TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createResource, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, parseDescription, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
-import { IconButton, IconToggle, InlineIcon } from 'views/icons';
+import { IconButton, IconToggle, IMAGE_ICON_URL, InlineIcon } from 'views/icons';
 
 export function ImageUpload(props: {
 	images: File[],
@@ -344,9 +344,18 @@ export function PicsExplorer(props: {
 			getThumbnail,
 		);
 
+		const url = createMemo(() => {
+			const origURL = myProps.pic.url;
+			return myProps.pic.localPath === null
+				? props.useThumbnailCache()
+					? thumbURL() ?? IMAGE_ICON_URL
+					: origURL
+				: origURL;
+		});
+
 		return (
 			<img
-				src={props.useThumbnailCache() ? thumbURL() ?? myProps.pic.url : myProps.pic.url}
+				src={url()}
 				alt={myProps.pic.sources[0]?.description}
 				onClick={(evt) => myProps.onClick(evt)}
 			/>

@@ -1,7 +1,7 @@
 import { setIcon, setTooltip } from 'obsidian';
 import { Accessor, createEffect, onMount, Setter } from 'solid-js';
 
-export { IconButton, IconToggle, InlineIcon };
+export { IconButton, IconToggle, IMAGE_ICON_URL, InlineIcon };
 
 function IconButton(props: {
 	name: 'chevron-left' | 'chevron-right' | 'dollar-sign' | 'info' | 'link' | 'notebook-text' | 'undo-2' | 'x'
@@ -85,3 +85,5 @@ function InlineIcon(props: {
 		/>
 	);
 }
+
+const IMAGE_ICON_URL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWltYWdlLWljb24gbHVjaWRlLWltYWdlIj48cmVjdCB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHg9IjMiIHk9IjMiIHJ4PSIyIiByeT0iMiIvPjxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSIyIi8+PHBhdGggZD0ibTIxIDE1LTMuMDg2LTMuMDg2YTIgMiAwIDAgMC0yLjgyOCAwTDYgMjEiLz48L3N2Zz4='
