@@ -1,4 +1,3 @@
-import { Thumbnail } from 'types/picture';
 
 export type UploadResult = {
 	name: string,
@@ -44,7 +43,7 @@ type ResizeRequest = {
 	fit: 'cover' | 'contain',
 };
 
-async function makeThumbnail(url: string, config: GjakoConfig): Promise<Thumbnail> {
+async function makeThumbnail(url: string, config: GjakoConfig): Promise<Blob> {
 	const req: ResizeRequest = {
 		url,
 		width: 500,
@@ -63,11 +62,7 @@ async function makeThumbnail(url: string, config: GjakoConfig): Promise<Thumbnai
 	});
 	if (res.ok) {
 		const blob = await res.blob();
-		const thumb: Thumbnail = {
-			id: url,
-			data: URL.createObjectURL(blob),
-		};
-		return thumb;
+		return blob;
 	} else {
 		throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 	}

@@ -4,7 +4,7 @@ import gjako, { GjakoConfig, UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
-import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, Thumbnail, UploadResultDict } from 'types/picture';
+import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, UploadResultDict } from 'types/picture';
 import { debugLog } from 'utils/debug';
 import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
@@ -89,7 +89,7 @@ const DB_VERSION = 1;
 interface PskDBSchema extends DBSchema {
 	thumbnails: {
 		key: string,
-		value: Thumbnail,
+		value: Blob,
 	}
 }
 
@@ -329,7 +329,7 @@ export default class PskPlugin extends Plugin {
 	// Just for testing, used in onClick
 	cacheOneThumb = async (url: string): Promise<string> => {
 		const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
-		return this.db.put('thumbnails', thumb);
+		return this.db.put('thumbnails', thumb, url);
 	}
 
 	// 2. Overriding inherited class methods
@@ -609,9 +609,7 @@ export default class PskPlugin extends Plugin {
 		const DB_NAME = `${NAME.toLowerCase()}-${this.app.appId}`;
 		this.db = await openDB<PskDBSchema>(DB_NAME, DB_VERSION, {
 			upgrade(database) {
-				database.createObjectStore('thumbnails', {
-					keyPath: 'id',
-				});
+				database.createObjectStore('thumbnails');
 			}
 		});
 	}
@@ -656,7 +654,7 @@ export default class PskPlugin extends Plugin {
 
 		const results = await Promise.allSettled(misses.map(async url => {
 			const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
-			return this.db.put('thumbnails', thumb);
+			return this.db.put('thumbnails', thumb, url);
 		}));
 		console.log(`Attempted to cache ${misses.length} thumbnails`);
 

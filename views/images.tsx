@@ -332,7 +332,7 @@ export function PicsExplorer(props: {
 
 	async function getThumbnail(url: string): Promise<string | undefined> {
 		const thumb = await props.db.get('thumbnails', url);
-		return thumb?.data;
+		if (thumb) return URL.createObjectURL(thumb);
 	}
 
 	function Thumbnail(myProps: {
