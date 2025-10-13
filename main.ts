@@ -652,10 +652,9 @@ export default class PskPlugin extends Plugin {
 			? [...remoteURLSet].filter(url => !cachedSet.has(url))
 			: Array.from(remoteURLSet);
 
-		const results = await Promise.allSettled(misses.map(async url => {
-			const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
-			return this.db.put('thumbnails', thumb, url);
-		}));
+		const results = await Promise.allSettled(
+			misses.map(url => this.cacheOneThumb(url))
+		);
 		console.log(`Attempted to cache ${misses.length} thumbnails`);
 
 		// result.reason seems to be always empty?
