@@ -490,6 +490,8 @@ export default class PskPlugin extends Plugin {
 					setTranslateX: this.setTranslateX,
 					translateY: this.translateY,
 					setTranslateY: this.setTranslateY,
+					useThumbnailCache: this.cacheThumbnails,
+					db: this.db,
 				}), galleryContainer);
 			}
 
@@ -847,7 +849,7 @@ class PicsExplorerView extends ItemView {
 				setGallery: this.plugin.setGallery,
 				setGalleryFocus: this.plugin.setGalleryFocus,
 				fts: this.plugin.fts,
-				cacheOneThumb: this.plugin.cacheOneThumb,
+				// cacheOneThumb: this.plugin.cacheOneThumb,
 				db: this.plugin.db,
 				app: this.plugin.app,
 			});

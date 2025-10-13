@@ -108,7 +108,7 @@ export function PicsExplorer(props: {
 	setGallery: Setter<Picture[]>,
 	setGalleryFocus: Setter<number | null>,
 	fts: (query: string) => Promise<string[]>,
-	cacheOneThumb: (url: string) => Promise<string>,
+	// cacheOneThumb: (url: string) => Promise<string>,
 	db: IDBPDatabase<PskDBSchema>,
 	app: App,
 }) {
@@ -412,6 +412,8 @@ export function Gallery(props: {
 	setTranslateX: Setter<number>,
 	translateY: Accessor<number>,
 	setTranslateY: Setter<number>,
+	useThumbnailCache: Accessor<boolean>,
+	db: IDBPDatabase<PskDBSchema>,
 }) {
 	const PAN_STEP: number = 40; // px
 	const ZOOM_STEP: number = 0.05; // fraction
@@ -430,6 +432,12 @@ export function Gallery(props: {
 	// Note: the semantics of `moveStart` not only tracks the coordinates,
 	// but also serves as a flag similar to a Boolean `isDraggingImage`
 	const [moveStart, setMoveStart] = createSignal<{ x: number, y: number } | null>(null);
+
+	// TODO DRY against PicsExplorer, also for thumbURL resource
+	async function getThumbnail(url: string): Promise<string | undefined> {
+		const thumb = await props.db.get('thumbnails', url);
+		if (thumb) return URL.createObjectURL(thumb);
+	}
 
 	return (
 		<Show when={pictureInFocus()}>
@@ -806,58 +814,66 @@ export function Gallery(props: {
 			);
 		}
 	}
-}
 
-function SeekPreview(props: {
-	seeking: Accessor<boolean>,
-	seekPosition: Accessor<number>,
-	seekIndex: Accessor<number | null>,
-	seekPicture: Accessor<Picture | null>,
-}) {
-	// one-based index: string
-	const seekNumber = createMemo(() => {
-		const index = props.seekIndex();
-		return index !== null
-			? String(index + 1)
-			: '';
-	});
+	function SeekPreview(myProps: {
+		seeking: Accessor<boolean>,
+		seekPosition: Accessor<number>,
+		seekIndex: Accessor<number | null>,
+		seekPicture: Accessor<Picture | null>,
+	}) {
+		// one-based index: string
+		const seekNumber = createMemo(() => {
+			const index = myProps.seekIndex();
+			return index !== null
+				? String(index + 1)
+				: '';
+		});
 
-	return (
-		<div
-			class="SeekPreview absolute bottom-0 column column-spacing-xs"
-			classList={{ 'hidden': !props.seeking() }}
-			style={{
-				transform: `translateX(${props.seekPosition()}px)`
-			}}
-		>
-			<Show when={props.seekPicture()}>
-				{pic => (
-					// The purpose of PreviewPicturePlaceholder is such that even when the pointer enters
-					// the _gap_ between the SeekBall and the PreviewPicture, the latter still stays in place,
-					// because it has this nice wrapper that's "holding its place"!
-					<div
-						class="PreviewPicturePlaceholder absolute"
-					>
-						<div
-							class="PreviewPicture absolute flex-center"
-						>
-							<img
-								class="w-full h-full object-cover"
-								src={pic().url}
-								alt={pic().description}
-							/>
-							<div
-								class="NumberBadge absolute flex-center"
-							>
-								{seekNumber()}
-							</div>
-						</div>
-					</div>
-				)}
-			</Show>
+		return (
 			<div
-				class="SeekBall"
-			/>
-		</div>
-	);
-};
+				class="SeekPreview absolute bottom-0 column column-spacing-xs"
+				classList={{ 'hidden': !myProps.seeking() }}
+				style={{
+					transform: `translateX(${myProps.seekPosition()}px)`
+				}}
+			>
+				<Show when={myProps.seekPicture()}>
+					{pic => {
+						const [thumbURL] = createResource(
+							() => pic().url,
+							getThumbnail,
+						);
+
+						const url = createMemo(() => {
+							const origURL = pic().url;
+							return pic().localPath === null
+								? props.useThumbnailCache()
+									? thumbURL() ?? IMAGE_ICON_URL
+									: origURL
+								: origURL;
+						});
+
+						return (
+							// The purpose of PreviewPicturePlaceholder is such that even when the pointer enters
+							// the _gap_ between the SeekBall and the PreviewPicture, the latter still stays in place,
+							// because it has this nice wrapper that's "holding its place"!
+							<div class="PreviewPicturePlaceholder absolute">
+								<div class="PreviewPicture absolute flex-center">
+									<img
+										class="w-full h-full object-cover"
+										src={url()}
+										alt={pic().description}
+									/>
+									<div class="NumberBadge absolute flex-center">
+										{seekNumber()}
+									</div>
+								</div>
+							</div>
+						);
+					}}
+				</Show>
+				<div class="SeekBall" />
+			</div>
+		);
+	}
+}
