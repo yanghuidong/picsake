@@ -286,14 +286,14 @@ export function PicsExplorer(props: {
 							<div
 								class="HoverButtonGroup showOnParentHover absolute top-0 right-0 row row-spacing-2xs"
 							>
-								<IconButton name="dollar-sign"
+								{/* <IconButton name="dollar-sign"
 									class="HoverButton"
 									tooltip="Cache thumbnail"
 									enabled={() => pic.localPath === null}
 									onClick={(evt) => {
 										props.cacheOneThumb(pic.url).then(thumbID => new Notice(`Cached ${thumbID}`));
 									}}
-								/>
+								/> */}
 								<IconButton name="link"
 									class="HoverButton"
 									tooltip="Copy image link"
