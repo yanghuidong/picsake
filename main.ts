@@ -660,13 +660,18 @@ export default class PskPlugin extends Plugin {
 		}));
 		console.log(`Attempted to cache ${misses.length} thumbnails`);
 
-		const failed: { url: string | undefined, reason: unknown }[] = [];
+		// result.reason seems to be always empty?
+		// const failed: { url: string | undefined, reason: unknown }[] = [];
+		const failed: string[] = [];
 		results.forEach((result, i) => {
 			if (result.status === 'rejected') {
-				failed.push({ url: misses[i], reason: result.reason });
+				failed.push(misses[i]!);
 			}
 		});
-		if (failed.length > 0) debugLog({ failed });
+		if (failed.length > 0) {
+			console.log(`Failed to cache ${failed.length} thumbnails`);
+			debugLog({ failed })
+		};
 	}
 
 	getAttachmentInfo(linkText: string): { url: string, path: string } | null {
