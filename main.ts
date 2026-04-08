@@ -1,10 +1,12 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import ThumbnailCacheWorker from 'inline-worker:./workers/thumbnail-cache.worker.ts';
 import { App, CachedMetadata, Editor, getLinkpath, ItemView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, prepareSimpleSearch, SectionCache, Setting, setTooltip, TAbstractFile, TFile, WorkspaceLeaf } from 'obsidian';
 import gjako, { GjakoConfig, UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } from 'solid-js';
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
 import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, UploadResultDict } from 'types/picture';
+import type { ThumbnailWorkerDone, ThumbnailWorkerRequest, ThumbnailWorkerResponse } from 'types/thumbnail-worker';
 import { thumbnailCacheKey } from 'utils/cache-key';
 import { debugLog } from 'utils/debug';
 import { isRemoteHttpURL } from 'utils/url';
@@ -17,6 +19,7 @@ const LANG = 'psk';
 const ICON = 'images';
 
 const GALLERY_ID = 'psk-gallery-container';
+const THUMBNAIL_WORKER_CONCURRENCY = 8;
 
 const NIL = 'nil';
 
@@ -135,6 +138,8 @@ export default class PskPlugin extends Plugin {
 	setExcludePaths!: Setter<string[]>;
 	cacheThumbnails!: Accessor<boolean>;
 	setCacheThumbnails!: Setter<boolean>;
+	private thumbnailCacheInFlight = false;
+	private pendingThumbnailURLs = new Set<string>();
 
 	// 1. Class fields as arrow functions
 	// Advantage over using class methods: `this` always refers to the class instance!
@@ -336,6 +341,136 @@ export default class PskPlugin extends Plugin {
 		const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
 		const key = thumbnailCacheKey(url);
 		return this.db.put('thumbnails', thumb, key);
+	}
+
+	private getThumbnailDBName(): string {
+		return `${NAME.toLowerCase()}-${this.app.appId}`;
+	}
+
+	private collectRemoteThumbnailURLs(pictures?: Picture[]): string[] {
+		const picsToCheck: Picture[] = pictures ?? Object.values(this.store.pictures).flat();
+		const urls = new Set<string>();
+		for (const pic of picsToCheck) {
+			if (!pic.localPath && isRemoteHttpURL(pic.url)) {
+				urls.add(pic.url);
+			}
+		}
+		return Array.from(urls);
+	}
+
+	private async runThumbnailCacheWorker(urls: string[]): Promise<ThumbnailWorkerDone['payload']> {
+		const msg: ThumbnailWorkerRequest = {
+			type: 'start',
+			payload: {
+				dbName: this.getThumbnailDBName(),
+				dbVersion: DB_VERSION,
+				urls,
+				gjako: {
+					urlPrefix: this.settings.gjako.urlPrefix,
+					apiKey: this.settings.gjako.apiKey,
+				},
+				concurrency: THUMBNAIL_WORKER_CONCURRENCY,
+			},
+		};
+
+		return new Promise((resolve, reject) => {
+			const worker = new ThumbnailCacheWorker({ name: `${NAME} Thumbnail Cache` });
+			const cleanup = () => {
+				worker.onmessage = null;
+				worker.onerror = null;
+				worker.terminate();
+			};
+			worker.onmessage = (event: MessageEvent<ThumbnailWorkerResponse>) => {
+				cleanup();
+				const data = event.data;
+				if (data.type === 'done') {
+					resolve(data.payload);
+				} else {
+					reject(new Error(data.payload.error));
+				}
+			};
+			worker.onerror = (event: ErrorEvent) => {
+				cleanup();
+				reject(new Error(event.message || 'Thumbnail worker crashed.'));
+			};
+			worker.postMessage(msg);
+		});
+	}
+
+	private async runThumbnailCacheOnMainThread(urls: string[]) {
+		const remoteKeyToURL = new Map<string, string>();
+		for (const url of urls) {
+			if (!isRemoteHttpURL(url)) continue;
+			const key = thumbnailCacheKey(url);
+			if (!remoteKeyToURL.has(key)) {
+				remoteKeyToURL.set(key, url);
+			}
+		}
+
+		const cached = await this.db.getAllKeys('thumbnails');
+		const cachedSet = new Set<string>(cached.map(key => String(key)));
+		const misses = cachedSet.size > 0
+			? [...remoteKeyToURL.keys()].filter(key => !cachedSet.has(key))
+			: Array.from(remoteKeyToURL.keys());
+
+		const results = await Promise.allSettled(
+			misses.map(key => this.cacheOneThumb(remoteKeyToURL.get(key)!))
+		);
+		const failed: string[] = [];
+		results.forEach((result, i) => {
+			if (result.status === 'rejected') {
+				const failedKey = misses[i];
+				const failedURL = failedKey ? remoteKeyToURL.get(failedKey) : undefined;
+				if (failedURL) failed.push(failedURL);
+			}
+		});
+
+		return {
+			cachedCount: cachedSet.size,
+			remoteCount: remoteKeyToURL.size,
+			attempted: misses.length,
+			failed,
+		};
+	}
+
+	private queueThumbnailCache(urls: string[]) {
+		for (const url of urls) {
+			this.pendingThumbnailURLs.add(url);
+		}
+		if (this.thumbnailCacheInFlight) return;
+
+		void this.flushThumbnailCacheQueue();
+	}
+
+	private async flushThumbnailCacheQueue() {
+		if (this.thumbnailCacheInFlight) return;
+		this.thumbnailCacheInFlight = true;
+		try {
+			while (this.pendingThumbnailURLs.size > 0) {
+				const urls = Array.from(this.pendingThumbnailURLs);
+				this.pendingThumbnailURLs.clear();
+				try {
+					const result = await this.runThumbnailCacheWorker(urls);
+					console.log(`Cached thumbnails: ${result.cachedCount}; Remote images: ${result.remoteCount}`);
+					console.log(`Attempted to cache ${result.attempted} thumbnails`);
+					if (result.failed.length > 0) {
+						console.log(`Failed to cache ${result.failed.length} thumbnails`);
+						debugLog({ failed: result.failed });
+					}
+				} catch (error) {
+					console.warn(`[${NAME}] Thumbnail worker failed; falling back to main thread.`, error);
+					const result = await this.runThumbnailCacheOnMainThread(urls);
+					console.log(`Cached thumbnails: ${result.cachedCount}; Remote images: ${result.remoteCount}`);
+					console.log(`Attempted to cache ${result.attempted} thumbnails`);
+					if (result.failed.length > 0) {
+						console.log(`Failed to cache ${result.failed.length} thumbnails`);
+						debugLog({ failed: result.failed });
+					}
+				}
+			}
+		} finally {
+			this.thumbnailCacheInFlight = false;
+		}
 	}
 
 	// 2. Overriding inherited class methods
@@ -614,8 +749,7 @@ export default class PskPlugin extends Plugin {
 	// 3. My own class methods (utilities)
 
 	async setupDB() {
-		const DB_NAME = `${NAME.toLowerCase()}-${this.app.appId}`;
-		this.db = await openDB<PskDBSchema>(DB_NAME, DB_VERSION, {
+		this.db = await openDB<PskDBSchema>(this.getThumbnailDBName(), DB_VERSION, {
 			upgrade(database, oldVersion) {
 				if (oldVersion < 2) {
 					if (database.objectStoreNames.contains('thumbnails')) {
@@ -650,45 +784,10 @@ export default class PskPlugin extends Plugin {
 	 * Currently, local images (attachments) are NOT cached!
 	 * @param pictures If undefined, all pictures in the vault will be checked for caching.
 	 */
-	async generateThumbnailCache(pictures?: Picture[]) {
-		const remoteKeyToURL = new Map<string, string>();
-		const picsToCheck: Picture[] = pictures ?? Object.values(this.store.pictures).flat();
-		for (const pic of picsToCheck) {
-			if (!pic.localPath && isRemoteHttpURL(pic.url)) {
-				const key = thumbnailCacheKey(pic.url);
-				if (!remoteKeyToURL.has(key)) {
-					remoteKeyToURL.set(key, pic.url);
-				}
-			}
-		}
-
-		const cached = await this.db.getAllKeys('thumbnails');
-		console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteKeyToURL.size}`);
-		const cachedSet = new Set<string>(cached);
-
-		const misses = cachedSet.size > 0
-			? [...remoteKeyToURL.keys()].filter(key => !cachedSet.has(key))
-			: Array.from(remoteKeyToURL.keys());
-
-		const results = await Promise.allSettled(
-			misses.map(key => this.cacheOneThumb(remoteKeyToURL.get(key)!))
-		);
-		console.log(`Attempted to cache ${misses.length} thumbnails`);
-
-		// result.reason seems to be always empty?
-		// const failed: { url: string | undefined, reason: unknown }[] = [];
-		const failed: string[] = [];
-		results.forEach((result, i) => {
-			if (result.status === 'rejected') {
-				const failedKey = misses[i];
-				const failedURL = failedKey ? remoteKeyToURL.get(failedKey) : undefined;
-				if (failedURL) failed.push(failedURL);
-			}
-		});
-		if (failed.length > 0) {
-			console.log(`Failed to cache ${failed.length} thumbnails`);
-			debugLog({ failed })
-		};
+	generateThumbnailCache(pictures?: Picture[]) {
+		const urls = this.collectRemoteThumbnailURLs(pictures);
+		if (urls.length === 0) return;
+		this.queueThumbnailCache(urls);
 	}
 
 	getAttachmentInfo(linkText: string): { url: string, path: string } | null {

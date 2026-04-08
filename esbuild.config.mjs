@@ -2,6 +2,7 @@ import builtins from "builtin-modules";
 import esbuild from "esbuild";
 import { solidPlugin } from "esbuild-plugin-solid";
 import { copyFileSync } from "fs";
+import path from "path";
 import process from "process";
 
 const banner = `
@@ -15,14 +16,76 @@ const isProd = (process.argv[2] === "production");
 
 const nodeEnv = process.env.NODE_ENV || (isProd ? "production" : "development");
 
+function inlineWorkerPlugin({ minify = false, target = ["chrome138"] } = {}) {
+	const PREFIX = "inline-worker:";
+
+	return {
+		name: "inline-worker",
+		setup(build) {
+			build.onResolve({ filter: /^inline-worker:/ }, (args) => {
+				const relPath = args.path.slice(PREFIX.length);
+				return {
+					path: relPath,
+					namespace: "inline-worker",
+					pluginData: {
+						resolveDir: args.resolveDir,
+					},
+				};
+			});
+
+			build.onLoad({ filter: /.*/, namespace: "inline-worker" }, async (args) => {
+				const resolveDir = args.pluginData.resolveDir;
+				const absPath = path.resolve(resolveDir, args.path);
+
+				const workerBundle = await esbuild.build({
+					entryPoints: [absPath],
+					bundle: true,
+					write: false,
+					format: "iife",
+					platform: "browser",
+					target,
+					minify,
+					logLevel: "silent",
+					sourcemap: false,
+				});
+
+				const code = workerBundle.outputFiles[0]?.text;
+				if (!code) {
+					throw new Error(`Failed to bundle inline worker: ${absPath}`);
+				}
+
+				const contents = `
+const __WORKER_SOURCE__ = ${JSON.stringify(code)};
+
+export default class InlineWorker extends Worker {
+	constructor(options) {
+		const blob = new Blob([__WORKER_SOURCE__], { type: 'text/javascript' });
+		const url = URL.createObjectURL(blob);
+		super(url, options);
+		queueMicrotask(() => URL.revokeObjectURL(url));
+	}
+}
+`;
+
+				return { contents, loader: "js" };
+			});
+		},
+	};
+}
+
 const context = await esbuild.context({
-	entryPoints: ["main.ts"],
-	outfile: isProd ? "dist/main.js" : "main.js",
+	// Generic options
 	bundle: true,
 	treeShaking: true,
 	minify: isProd,
 	sourcemap: isProd ? false : "inline",
 	logLevel: isProd ? "warning" : "info",
+	banner: {
+		js: banner,
+	},
+	// Specific to main.js
+	entryPoints: ["main.ts"],
+	outfile: isProd ? "dist/main.js" : "main.js",
 	format: "cjs",
 	target: ["chrome138", "node22.16"], // Electron 37
 	external: [
@@ -41,11 +104,9 @@ const context = await esbuild.context({
 		"@lezer/lr",
 		...builtins
 	],
-	banner: {
-		js: banner,
-	},
 	plugins: [
 		solidPlugin(),
+		inlineWorkerPlugin({ minify: isProd, target: ["chrome138"] }),
 	],
 	// https://github.com/amoutonbrady/esbuild-plugin-solid/blob/main/README.md
 	// Solid uses conditional exports to provide different builds for development and production environments.
