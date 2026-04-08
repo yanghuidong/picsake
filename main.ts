@@ -152,7 +152,9 @@ export default class PskPlugin extends Plugin {
 		const pictures = this.extractPicturesFromFile(file, newContent, paragraphs);
 		if (pictures.length > 0) {
 			this.setStore('pictures', file.path, pictures);
-			this.generateThumbnailCache(pictures);
+			if (this.settings.cacheThumbnails) {
+				this.generateThumbnailCache(pictures);
+			}
 		} else {
 			this.setStore('pictures', produce(pictures => {
 				delete pictures[file.path];
@@ -785,6 +787,7 @@ export default class PskPlugin extends Plugin {
 	 * @param pictures If undefined, all pictures in the vault will be checked for caching.
 	 */
 	generateThumbnailCache(pictures?: Picture[]) {
+		if (!this.settings.cacheThumbnails) return;
 		const urls = this.collectRemoteThumbnailURLs(pictures);
 		if (urls.length === 0) return;
 		this.queueThumbnailCache(urls);
