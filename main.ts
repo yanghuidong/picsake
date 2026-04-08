@@ -138,6 +138,8 @@ export default class PskPlugin extends Plugin {
 	setExcludePaths!: Setter<string[]>;
 	cacheThumbnails!: Accessor<boolean>;
 	setCacheThumbnails!: Setter<boolean>;
+
+	// Thumbnail caching job control
 	private thumbnailCacheInFlight = false;
 	private pendingThumbnailURLs = new Set<string>();
 
@@ -435,6 +437,20 @@ export default class PskPlugin extends Plugin {
 		};
 	}
 
+	private logThumbnailWarmupResult(source: 'worker' | 'main-thread', durationMs: number, result: {
+		cachedCount: number,
+		remoteCount: number,
+		attempted: number,
+		failed: string[],
+	}) {
+		console.log(
+			`[${NAME}] thumbnail warmup (${source}): remote=${result.remoteCount} cached=${result.cachedCount} attempted=${result.attempted} failed=${result.failed.length} in ${durationMs.toFixed(1)} ms`
+		);
+		if (result.failed.length > 0) {
+			debugLog({ failed: result.failed });
+		}
+	}
+
 	private queueThumbnailCache(urls: string[]) {
 		for (const url of urls) {
 			this.pendingThumbnailURLs.add(url);
@@ -451,23 +467,18 @@ export default class PskPlugin extends Plugin {
 			while (this.pendingThumbnailURLs.size > 0) {
 				const urls = Array.from(this.pendingThumbnailURLs);
 				this.pendingThumbnailURLs.clear();
+				console.log(`[${NAME}] thumbnail warmup queued: ${urls.length} urls`);
 				try {
+					const startedAt = performance.now();
 					const result = await this.runThumbnailCacheWorker(urls);
-					console.log(`Cached thumbnails: ${result.cachedCount}; Remote images: ${result.remoteCount}`);
-					console.log(`Attempted to cache ${result.attempted} thumbnails`);
-					if (result.failed.length > 0) {
-						console.log(`Failed to cache ${result.failed.length} thumbnails`);
-						debugLog({ failed: result.failed });
-					}
+					const durationMs = performance.now() - startedAt;
+					this.logThumbnailWarmupResult('worker', durationMs, result);
 				} catch (error) {
 					console.warn(`[${NAME}] Thumbnail worker failed; falling back to main thread.`, error);
+					const startedAt = performance.now();
 					const result = await this.runThumbnailCacheOnMainThread(urls);
-					console.log(`Cached thumbnails: ${result.cachedCount}; Remote images: ${result.remoteCount}`);
-					console.log(`Attempted to cache ${result.attempted} thumbnails`);
-					if (result.failed.length > 0) {
-						console.log(`Failed to cache ${result.failed.length} thumbnails`);
-						debugLog({ failed: result.failed });
-					}
+					const durationMs = performance.now() - startedAt;
+					this.logThumbnailWarmupResult('main-thread', durationMs, result);
 				}
 			}
 		} finally {
