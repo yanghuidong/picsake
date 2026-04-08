@@ -4,6 +4,7 @@ import { App, Notice, TFile } from 'obsidian';
 import { UploadResult } from 'services/gjako';
 import { Accessor, createEffect, createMemo, createResource, createSignal, For, onMount, Setter, Show } from 'solid-js';
 import { CSSDimensions, Dimensions, GlobalPicture, imageFormatFromLink, parseDescription, Picture, PicturesByPath, PictureSource, shouldExcludePicture, toHaystack, toLocalPicture } from 'types/picture';
+import { thumbnailCacheKey } from 'utils/cache-key';
 import { IconButton, IconToggle, IMAGE_ICON_URL, InlineIcon } from 'views/icons';
 
 export function ImageUpload(props: {
@@ -331,7 +332,7 @@ export function PicsExplorer(props: {
 	);
 
 	async function getThumbnail(url: string): Promise<string | undefined> {
-		const thumb = await props.db.get('thumbnails', url);
+		const thumb = await props.db.get('thumbnails', thumbnailCacheKey(url));
 		if (thumb) return URL.createObjectURL(thumb);
 	}
 
@@ -435,7 +436,7 @@ export function Gallery(props: {
 
 	// TODO DRY against PicsExplorer, also for thumbURL resource
 	async function getThumbnail(url: string): Promise<string | undefined> {
-		const thumb = await props.db.get('thumbnails', url);
+		const thumb = await props.db.get('thumbnails', thumbnailCacheKey(url));
 		if (thumb) return URL.createObjectURL(thumb);
 	}
 

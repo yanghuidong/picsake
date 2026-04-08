@@ -5,6 +5,7 @@ import { Accessor, createEffect, createMemo, createRoot, createSignal, Setter } 
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { createComponent, render } from 'solid-js/web';
 import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, UploadResultDict } from 'types/picture';
+import { thumbnailCacheKey } from 'utils/cache-key';
 import { debugLog } from 'utils/debug';
 import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
@@ -84,7 +85,7 @@ const DEFAULT_SETTINGS: Settings = {
 	gjako: gjako.DEFAULT_CONFIG,
 }
 
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface PskDBSchema extends DBSchema {
 	thumbnails: {
@@ -329,7 +330,8 @@ export default class PskPlugin extends Plugin {
 	// Just for testing, used in onClick
 	cacheOneThumb = async (url: string): Promise<string> => {
 		const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
-		return this.db.put('thumbnails', thumb, url);
+		const key = thumbnailCacheKey(url);
+		return this.db.put('thumbnails', thumb, key);
 	}
 
 	// 2. Overriding inherited class methods
@@ -610,8 +612,13 @@ export default class PskPlugin extends Plugin {
 	async setupDB() {
 		const DB_NAME = `${NAME.toLowerCase()}-${this.app.appId}`;
 		this.db = await openDB<PskDBSchema>(DB_NAME, DB_VERSION, {
-			upgrade(database) {
-				database.createObjectStore('thumbnails');
+			upgrade(database, oldVersion) {
+				if (oldVersion < 2) {
+					if (database.objectStoreNames.contains('thumbnails')) {
+						database.deleteObjectStore('thumbnails');
+					}
+					database.createObjectStore('thumbnails');
+				}
 			}
 		});
 	}
@@ -640,22 +647,27 @@ export default class PskPlugin extends Plugin {
 	 * @param pictures If undefined, all pictures in the vault will be checked for caching.
 	 */
 	async generateThumbnailCache(pictures?: Picture[]) {
-		const remoteURLSet = new Set<string>();
+		const remoteKeyToURL = new Map<string, string>();
 		const picsToCheck: Picture[] = pictures ?? Object.values(this.store.pictures).flat();
 		for (const pic of picsToCheck) {
-			if (!pic.localPath) remoteURLSet.add(pic.url);
+			if (!pic.localPath) {
+				const key = thumbnailCacheKey(pic.url);
+				if (!remoteKeyToURL.has(key)) {
+					remoteKeyToURL.set(key, pic.url);
+				}
+			}
 		}
 
 		const cached = await this.db.getAllKeys('thumbnails');
-		console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteURLSet.size}`);
+		console.log(`Cached thumbnails: ${cached.length}; Remote images: ${remoteKeyToURL.size}`);
 		const cachedSet = new Set<string>(cached);
 
 		const misses = cachedSet.size > 0
-			? [...remoteURLSet].filter(url => !cachedSet.has(url))
-			: Array.from(remoteURLSet);
+			? [...remoteKeyToURL.keys()].filter(key => !cachedSet.has(key))
+			: Array.from(remoteKeyToURL.keys());
 
 		const results = await Promise.allSettled(
-			misses.map(url => this.cacheOneThumb(url))
+			misses.map(key => this.cacheOneThumb(remoteKeyToURL.get(key)!))
 		);
 		console.log(`Attempted to cache ${misses.length} thumbnails`);
 
@@ -664,7 +676,9 @@ export default class PskPlugin extends Plugin {
 		const failed: string[] = [];
 		results.forEach((result, i) => {
 			if (result.status === 'rejected') {
-				failed.push(misses[i]!);
+				const failedKey = misses[i];
+				const failedURL = failedKey ? remoteKeyToURL.get(failedKey) : undefined;
+				if (failedURL) failed.push(failedURL);
 			}
 		});
 		if (failed.length > 0) {
