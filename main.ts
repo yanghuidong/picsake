@@ -7,6 +7,7 @@ import { createComponent, render } from 'solid-js/web';
 import { Annotation, AnnotationsByURL, isImageLink, Picture, PicturesByPath, UploadResultDict } from 'types/picture';
 import { thumbnailCacheKey } from 'utils/cache-key';
 import { debugLog } from 'utils/debug';
+import { isRemoteHttpURL } from 'utils/url';
 import { ActivePics, Gallery, ImageUpload, PicsExplorer, UploadResultSummary } from 'views/images';
 
 export type { PskDBSchema };
@@ -327,8 +328,11 @@ export default class PskPlugin extends Plugin {
 		return matchedPaths;
 	}
 
-	// Just for testing, used in onClick
+	// Used in `generateThumbnailCache`
 	cacheOneThumb = async (url: string): Promise<string> => {
+		if (!isRemoteHttpURL(url)) {
+			throw new Error(`Thumbnail caching only supports http/https URLs: ${url}`);
+		}
 		const thumb = await gjako.makeThumbnail(url, this.settings.gjako);
 		const key = thumbnailCacheKey(url);
 		return this.db.put('thumbnails', thumb, key);
@@ -650,7 +654,7 @@ export default class PskPlugin extends Plugin {
 		const remoteKeyToURL = new Map<string, string>();
 		const picsToCheck: Picture[] = pictures ?? Object.values(this.store.pictures).flat();
 		for (const pic of picsToCheck) {
-			if (!pic.localPath) {
+			if (!pic.localPath && isRemoteHttpURL(pic.url)) {
 				const key = thumbnailCacheKey(pic.url);
 				if (!remoteKeyToURL.has(key)) {
 					remoteKeyToURL.set(key, pic.url);

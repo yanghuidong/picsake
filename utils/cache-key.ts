@@ -1,16 +1,7 @@
+import { normalizeURLForKey } from 'utils/url';
+
 // Crockford Base32 uppercase alphabet; excludes I, L, O, U.
 const ULID_REGEX = /^[0-9A-HJKMNP-TV-Z]{26}$/;
-
-function normalizeURL(rawURL: string): string {
-	const parsed = new URL(rawURL);
-	parsed.hash = '';
-	parsed.protocol = parsed.protocol.toLowerCase();
-	parsed.hostname = parsed.hostname.toLowerCase();
-	if ((parsed.protocol === 'https:' && parsed.port === '443') || (parsed.protocol === 'http:' && parsed.port === '80')) {
-		parsed.port = '';
-	}
-	return parsed.toString();
-}
 
 function ulidKeyFromURL(rawURL: string): string | null {
 	try {
@@ -37,7 +28,7 @@ export function thumbnailCacheKey(rawURL: string): string {
 	if (ulidKey !== null) return ulidKey;
 
 	try {
-		return `url:${normalizeURL(rawURL)}`;
+		return `url:${normalizeURLForKey(rawURL)}`;
 	} catch {
 		return `url:${rawURL}`;
 	}
