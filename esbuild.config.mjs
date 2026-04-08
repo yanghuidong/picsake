@@ -14,6 +14,7 @@ if you want to view the source, please visit the github repository of this plugi
 
 const isProd = (process.argv[2] === "production");
 
+// this is for esbuild-plugin-solid, see below
 const nodeEnv = process.env.NODE_ENV || (isProd ? "production" : "development");
 
 function inlineWorkerPlugin({ minify = false, target = ["chrome138"] } = {}) {
